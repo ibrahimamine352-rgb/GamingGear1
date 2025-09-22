@@ -1,99 +1,45 @@
-import dynamic from 'next/dynamic';
-import { SetStateAction, useMemo, useRef, useState } from 'react';
-import BlotFormatter from 'quill-blot-formatter' 
-import ReactQuill, { Quill } from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
-import ImageResize from 'quill-image-resize-module-react';
-import ImageUploader from 'quill-image-uploader';
-import axios from 'axios';
-const QuillWrapper = dynamic(
-  async () => {
-    const { default: RQ } = await import('react-quill');
-    // eslint-disable-next-line react/display-name
-    return ({ ...props }) => <RQ  {...props} />;
-  },
-  {
-    ssr: false,
-  }
-) as typeof ReactQuill;
+"use client";
 
+import dynamic from "next/dynamic";
+import { useMemo } from "react";
 
-interface Props{
-  value:string;
-  OnUpdate: (value:String)=> void
-}
-export default function TextEditor({
-OnUpdate,
-value
-}:Props) {
- 
+// CSS is imported in globals.css (not here)
 
+const ReactQuill = dynamic(() => import("react-quill").then(m => m.default), {
+  ssr: false,
+});
 
-Quill.register('modules/imageResize', ImageResize);
-Quill.register('modules/imageUploader', ImageUploader);
+type Props = {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  readOnly?: boolean;
+};
 
-  const [content, setContent] = useState('');
-
-
-  const quillRef = useRef();
-  const modules = useMemo(() => ({
-
-    toolbar: [
-      [{ header: '1' }, { header: '2' }, { font: [] }],
-      [{ size: [] }],
-      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-      [{ align: [] }],
-      [
-        { list: 'ordered' },
-        { list: 'bullet' },
-        { indent: '-1' },
-        { indent: '+1' },
+export default function EditorWithUseQuill({ value, onChange, placeholder, readOnly }: Props) {
+  const modules = useMemo(
+    () => ({
+      toolbar: [
+        [{ header: [1, 2, 3, false] }],
+        ["bold", "italic", "underline", "strike"],
+        [{ list: "ordered" }, { list: "bullet" }],
+        ["link", "image"],
+        ["clean"],
       ],
-      ['link', 'image', 'video'],
-      ['clean'],
-    ],
-    clipboard: {
-      // toggle to add extra line breaks when pasting HTML:
-      matchVisual: false,
-    },
-    imageResize: {
-      parchment: Quill.import('parchment'),
-      modules: ['Resize', 'DisplaySize', 'Toolbar'],
-  
-    },
-    imageUploader:  {
-      upload:async (file: any) =>{
- // Upload the image to Cloudinary 
- const formData = new FormData();
- formData.append('file', file);
- formData.append('upload_preset', 'eqq0aekw');
-
- try {
- 
-  const response = await axios.post(
-    'https://api.cloudinary.com/v1_1/dzbb5kktn/image/upload',
-    formData
+    }),
+    []
   );
-    const imageUrl = response.data.secure_url; 
-    return new Promise((resolve) => {
-      resolve(imageUrl);
-    });
-
-} catch (error) { 
-  console.error('Error uploading image to Cloudinary:', error); }
-         
-      }
-      
-  }
-
-  }), [])
 
   return (
- <>
-     
-      <QuillWrapper  modules={modules} placeholder='zazze' value={value} onChange={OnUpdate} theme="snow" />
-
-  
-    </>
-  )
+    <div className="w-full">
+      <ReactQuill
+        theme="snow"
+        value={value}
+        onChange={onChange}
+        modules={modules}
+        placeholder={placeholder}
+        readOnly={readOnly}
+      />
+    </div>
+  );
 }

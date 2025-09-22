@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import 'react-quill/dist/quill.snow.css';
 
 /* ===== THEME TOKENS (Sky–Slate palette, +promo) ===== */
 @layer base {
