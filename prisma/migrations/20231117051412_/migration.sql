@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "CompatibiltyProfile" ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

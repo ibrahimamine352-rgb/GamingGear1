@@ -1,0 +1,9 @@
+.tt{
+    border-color: rgb(194, 194, 194);
+}
+.tt tr{
+    border-color: rgb(173, 173, 173);
+}
+.tt th{
+    border-color: rgb(173, 173, 173);
+}

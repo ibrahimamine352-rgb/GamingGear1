@@ -1,0 +1,5 @@
+.price-filter-container {
+    display: flex;
+    flex-direction: column-reverse; /* Reverse the direction of the column to place label below the slider */
+    align-items: flex-start; /* Align the label to the start of the container */
+  }

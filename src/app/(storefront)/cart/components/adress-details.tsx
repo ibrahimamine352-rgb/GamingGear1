@@ -1,0 +1,233 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import useCart, { CartItem } from '@/hooks/use-cart';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
+import toast from 'react-hot-toast';
+import Loading from '../../loading';
+
+const CheckoutDialog = ({ data ,totalPrice}: { data: CartItem[],totalPrice:number }) => {
+
+  const cart=useCart()
+  const [nom, setNom] = useState('');
+  const [prenom, setNomUtilisateur] = useState('');
+  const [rue, setRue] = useState('');
+  const [ville, setVille] = useState('');
+  const [codePostal, setCodePostal] = useState('');
+  const [moyenPaiement, setMoyenPaiement] = useState('');
+  const [email, setemail] = useState('');
+  const [telephone, settelephone] = useState('');
+  const [isLoading, setisLoading] = useState(false);
+  const [isDone, setisDone] = useState(false);
+  const validateForm = () => {
+    // Add your validation logic here
+    return nom.trim() !== '' && prenom.trim() !== '' && rue.trim() !== '' && ville.trim() !== '' && codePostal.trim() !== '' && moyenPaiement.trim() !== '';
+  };
+
+  const handleSubmit = async () => {
+    try {
+   
+      // Validate the form before submitting
+      if (!validateForm()) {
+        console.error('Veuillez remplir tous les champs obligatoires.');
+        toast.error('Veuillez remplir tous les champs obligatoires.')
+        return;
+      }
+      setisLoading(true)
+      // Envoyer les données au serveur ou effectuer d'autres actions
+      const response = await axios.post('/api/checkout', {
+        nom,
+        prenom,
+        rue,
+        ville,
+        codePostal,
+        moyenPaiement,
+        email,
+        telephone,
+        totalPrice,
+        data,
+        articlesPanier: data.filter((e)=>'id'in e&& !('packId' in e)),
+        pcOrder: data.filter((e)=>'idd'in e&&!('packId' in e)),
+      });
+        
+      console.log('Validation de la commande réussie :', response.data);
+      setisLoading(false)
+      setisDone(true)
+      cart.removeAll()
+      // Fermer la boîte de dialogue ou naviguer vers l'étape suivante
+    } catch (error) {
+      setisLoading(false)
+      console.error('Échec de la validation de la commande :', error);
+    }
+  };
+
+  return (
+    <div>
+      <Dialog onOpenChange={()=>{setisDone(false)}}>
+        <DialogTrigger asChild >
+          <Button disabled={data.length === 0} className="w-full mt-6 bg-gradient-to-r from-[#38BDF8] to-[#0EA5E9] text-black font-semibold hover:shadow-[0_0_20px_rgba(56,189,248,0.35)] text-lg">Checkout</Button>
+        </DialogTrigger>
+        <DialogContent className="relative top-0 lg:min-w-[80%] h-[100vh] overflow-y-scroll sm:h-4/6 sm:overflow-y-hidden min-w-[100%] bg-card border border-border">
+          <div className='h-[120vh] sm:h-full '>
+            {
+              isDone ? <>
+                <div className='w-full h-full flex align-middle justify-center items-center'>
+                  <div className='font-extrabold flex flex-col text-[#00e0ff] text-3xl align-middle justify-center items-center'>
+                    <img src="/images/Done1.gif" alt="Your GIF" />
+                    Your order is complete!
+                  </div>
+                </div>
+              </> : <>
+                {
+                  !isLoading ? <>
+                    <div>
+                      <DialogHeader>
+                        <DialogTitle className="text-foreground">Order Validation</DialogTitle>
+                        <DialogDescription className="text-foreground/70">
+                          Enter your details to validate your order. Click Save when you&apos;re done.
+                        </DialogDescription>
+                      </DialogHeader>
+
+                      <div className='grid grid-cols-1 sm:grid-cols-2 items-start gap-6'>
+                        <div>
+                          <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="nom" className="text-right text-foreground">
+                                First Name*
+                              </Label>
+                              <Input
+                                id="nom"
+                                value={nom}
+                                onChange={(e) => setNom(e.target.value)}
+                                className="col-span-3 border border-border bg-card/10 text-foreground placeholder:text-muted-foreground focus:border-accent focus:ring-2 focus:ring-ring focus:outline-none rounded-xl"
+                              />
+                            </div>
+                          </div>
+                          <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="prenom" className="text-right text-foreground">
+                                Last Name*
+                              </Label>
+                              <Input
+                                id="prenom"
+                                value={prenom}
+                                onChange={(e) => setNomUtilisateur(e.target.value)}
+                                className="col-span-3 border border-border bg-card/10 text-foreground placeholder:text-muted-foreground focus:border-accent focus:ring-2 focus:ring-ring focus:outline-none rounded-xl"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="email" className="text-right text-foreground">
+                                Email*
+                              </Label>
+                              <Input
+                                type='email'
+                                id="email"
+                                value={email}
+                                onChange={(e) => setemail(e.target.value)}
+                                className="col-span-3 border border-border bg-card/10 text-foreground placeholder:text-muted-foreground focus:border-accent focus:ring-2 focus:ring-ring focus:outline-none rounded-xl"
+                              />
+                            </div>
+                          </div>
+                          <div className="grid gap-4 py-4">
+                            <Label htmlFor="telephone" className="text-right text-foreground">
+                              Phone Number*
+                            </Label>
+                            <Input
+                              id="telephone"
+                              value={telephone}
+                              onChange={(e) => settelephone(e.target.value)}
+                              className="col-span-3 border-border bg-card/70 text-foreground placeholder:text-muted-foreground focus:border-[hsl(var(--accent))]"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid gap-4 py-4">
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="rue" className="text-right text-foreground">
+                              Street*
+                            </Label>
+                            <Input
+                              id="rue"
+                              value={rue}
+                              onChange={(e) => setRue(e.target.value)}
+                              className="col-span-3 border-border bg-card/70 text-foreground placeholder:text-muted-foreground focus:border-[hsl(var(--accent))]"
+                            />
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="ville" className="text-right text-foreground">
+                              City*
+                            </Label>
+                            <Input
+                              id="ville"
+                              value={ville}
+                              onChange={(e) => setVille(e.target.value)}
+                              className="col-span-3 border-border bg-card/70 text-foreground placeholder:text-muted-foreground focus:border-[hsl(var(--accent))]"
+                            />
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="codePostal" className="text-right text-foreground">
+                              Postal Code*
+                            </Label>
+                            <Input
+                              id="codePostal"
+                              value={codePostal}
+                              onChange={(e) => setCodePostal(e.target.value)}
+                              className="col-span-3 border-border bg-card/70 text-foreground placeholder:text-muted-foreground focus:border-[hsl(var(--accent))]"
+                            />
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="moyenPaiement" className="text-right text-foreground">
+                              Payment Method*
+                            </Label>
+                            <Select onValueChange={setMoyenPaiement}>
+                              <SelectTrigger className="col-span-3 border-border bg-card/70 text-foreground">
+                                <SelectValue placeholder="Select payment method" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-[#12141b] border border-border">
+                                <SelectItem value="cash" className="text-foreground hover:bg-white/10">Cash on Delivery</SelectItem>
+                                <SelectItem value="card" className="text-foreground hover:bg-white/10">Credit Card</SelectItem>
+                                <SelectItem value="transfer" className="text-foreground hover:bg-white/10">Bank Transfer</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </div>
+
+          <DialogFooter>
+            <Button type="submit" onClick={handleSubmit}>
+              Valider
+            </Button>
+          </DialogFooter>
+            </div></>:<>
+            <Loading/>
+            
+            </>
+}
+              </>
+            }
+
+       
+
+       
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default CheckoutDialog;

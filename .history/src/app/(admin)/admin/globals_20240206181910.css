@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+:root {
+  height: 100%;
+}
+ 
+@layer base {
+  .dark {
+    --background: 271 14% 10%; /* Dark Purple */
+    --foreground: 0 0% 90%; /* Light Grey */
+    --muted: 271 14% 20%; /* Dark Purple with a bit more lightness */
+    --muted-foreground: 0 0% 70%; /* Light Grey with a bit more darkness */
+    --popover: 271 14% 10%; /* Dark Purple */
+    --popover-foreground: 0 0% 90%; /* Light Grey */
+    --card: 271 14% 10%; /* Dark Purple */
+    --card-foreground: 0 0% 90%; /* Light Grey */
+    --border: 271 14% 20%; /* Dark Purple with a bit more lightness */
+    --input: 271 14% 20%; /* Dark Purple with a bit more lightness */
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 1.2%;
+
+    --secondary: 222.2 47.4% 11.2%;
+    --secondary-foreground: 210 40% 98%;
+
+    --accent: 216 34% 17%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --ring: 216 34% 17%;
+
+    --radius: 0.5rem;
+  }
+  
+  /* Light Theme with Purple Touches */
+  :root {
+    --background: 271 14% 90%; /* Light Purple */
+    --foreground: 0 0% 10%; /* Black */
+    --muted: 271 14% 80%; /* Light Purple with a bit more lightness */
+    --muted-foreground: 0 0% 30%; /* Dark Grey */
+    --popover: 271 14% 90%; /* Light Purple */
+    --popover-foreground: 0 0% 10%; /* Black */
+    --card: 271 14% 90%; /* Light Purple */
+    --card-foreground: 0 0% 10%; /* Black */
+    --border: 271 14% 80%; /* Light Purple with a bit more lightness */
+    --input: 271 14% 80%; /* Light Purple with a bit more lightness */
+    --primary: 230 60% 10%; /* Dark Purple */
+    --primary-foreground: 271 14% 90%; /* Light Purple */
+    --secondary: 271 14% 80%; /* Light Purple with a bit more lightness */
+    --secondary-foreground: 0 0% 10%; /* Black */
+    --accent: 271 14% 80%; /* Light Purple with a bit more lightness */
+    --accent-foreground: ; /* No specific accent foreground color */
+    --destructive: 320 70% 50%; /* Red */
+    --destructive-foreground: 0 0% 10%; /* Black */
+    --ring: 271 14% 80%; /* Light Purple with a bit more lightness */
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

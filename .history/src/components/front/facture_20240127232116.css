@@ -1,0 +1,18 @@
+.tt{
+    border-color: rgba(194, 194, 194, 0.219);
+}
+.tt tr{
+    border-color: rgb(173, 173, 173);
+}
+.tt th{
+    border-color: rgb(173, 173, 173);
+}
+.dark .tt{
+    border-color: rgba(54, 54, 54, 0.226);
+}
+.dark .tt tr{
+    border-color: rgb(39, 39, 39);
+}
+.dark .tt th{
+    border-color: rgb(48, 48, 48);
+}

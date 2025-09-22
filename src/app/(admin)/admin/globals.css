@@ -1,0 +1,8 @@
+/* Admin-specific styles ONLY — no Tailwind directives, no @layer base */
+@layer components {
+  .admin-card { @apply rounded-xl border border-border bg-card/70; }
+}
+
+@layer utilities {
+  .admin-muted { @apply text-muted-foreground; }
+}

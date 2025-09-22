@@ -1,0 +1,125 @@
+
+
+/* Build PC Section Container */
+.build-container {
+  @apply bg-card border border-border rounded-2xl transition-all duration-200;
+  box-shadow: 0 6px 24px hsl(var(--background) / 0.25), inset 0 1px 0 hsl(var(--foreground) / 0.04);
+}
+.build-container:hover {
+  @apply border-accent;
+  box-shadow: 0 12px 40px hsl(var(--accent) / 0.16);
+}
+
+/* Build PC Selector Button */
+.build-selector { @apply bg-card border border-border text-foreground transition-all duration-200; }
+.build-selector:hover { @apply border-accent; box-shadow: 0 0 0 3px hsl(var(--accent) / 0.18); }
+
+/* Product Cards in Popups */
+.product-card { @apply bg-card border border-border rounded-xl p-3 space-y-1 transition-all duration-200; }
+.product-card.compatible { border-color: hsl(var(--accent)); }
+.product-card.incompatible { @apply border-red-400; }
+
+/* Primary / Secondary button helpers (only if raw <button> is used) */
+.btn-primary-blue {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  transition: background-color .2s ease, box-shadow .2s ease;
+  box-shadow: 0 8px 20px hsl(var(--accent) / 0.25);
+}
+.btn-primary-blue:hover { background-color: hsl(var(--ring)); }
+
+.btn-secondary-blue {
+  background: transparent; border: 1px solid hsl(var(--accent)); color: hsl(var(--accent));
+  transition: all .2s ease;
+}
+.btn-secondary-blue:hover { background: hsl(var(--accent)); color: hsl(var(--accent-foreground)); }
+
+/* Cards */
+.card-gaming { @apply bg-card border border-border rounded-lg shadow-lg; box-shadow: 0 10px 24px hsl(var(--background) / 0.35); transition: all .3s ease; }
+.card-gaming:hover { box-shadow: 0 18px 48px hsl(var(--accent) / 0.18); transform: translateY(-2px); }
+
+/* “Neon” helper */
+.btn-neon {
+  background: hsl(var(--accent)); color: hsl(var(--accent-foreground));
+  padding: .5rem 1rem; border-radius: .375rem; font-weight: 600;
+  box-shadow: 0 0 10px hsl(var(--accent) / 0.3); transition: all .3s ease;
+}
+.btn-neon:hover { box-shadow: 0 0 20px hsl(var(--accent) / 0.5); transform: translateY(-1px); }
+
+/* Nav item hover */
+.nav-item-gaming { @apply px-4 py-2 rounded-md transition-all duration-200; position: relative; }
+.nav-item-gaming:hover { @apply bg-accent/10 text-accent; box-shadow: 0 0 15px hsl(var(--accent) / 0.2); }
+
+/* Search */
+.search-gaming { @apply bg-input border border-border rounded-md px-4 py-2; box-shadow: inset 0 2px 4px hsl(var(--background) / 0.1); }
+.search-gaming:focus { @apply border-accent ring-2 ring-accent/20; box-shadow: 0 0 15px hsl(var(--accent) / 0.2); }
+
+/* Enhanced Title & Links */
+.title-gaming { @apply font-bold text-foreground; text-shadow: 0 0 10px hsl(var(--accent) / 0.3); }
+.link-gaming { @apply text-foreground hover:text-accent transition-all duration-200; position: relative; }
+.link-gaming:hover { text-shadow: 0 0 8px hsl(var(--accent) / 0.4); }
+
+/* Social icons */
+.social-icon { @apply transition-all duration-200; }
+.social-icon:hover { transform: scale(1.1); filter: drop-shadow(0 0 8px hsl(var(--accent) / 0.6)); }
+
+/* Grids */
+.grid-auto-fit { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+.grid-responsive { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+.grid-featured { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.grid-bundles { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); }
+.grid-compare { display: grid; gap: 0.75rem; grid-template-columns: repeat(4, 1fr); }
+
+/* Container */
+.container-gaming { @apply mx-auto w-full max-w-[1200px] px-4 sm:px-6 lg:px-8; }
+
+/* New cards */
+.card-gaming-new { @apply rounded-2xl border border-border/10 bg-card/5 backdrop-blur-sm; box-shadow: 0 0 0 1px hsl(var(--foreground) / 0.02); transition: all 0.3s ease; }
+.card-gaming-new:hover { box-shadow: 0 0 30px hsl(var(--accent) / 0.15); transform: translateY(-2px); }
+
+/* New buttons */
+.btn-gaming-new { @apply inline-flex items-center gap-2 rounded-2xl px-4 py-2 font-medium transition; }
+.btn-gaming-new:hover { transform: translateY(-1px); }
+.btn-gaming-new:active { transform: translateY(0); }
+
+/* Badges */
+.badge-gaming { @apply inline-flex items-center rounded-full border border-border/10 bg-card/5 px-3 py-1 text-xs text-muted-foreground; }
+
+/* Glow helpers */
+.glow-cyan { box-shadow: 0 0 20px hsl(var(--accent) / 0.3); }
+
+/* Checkbox tokens */
+input[type="checkbox"] { -webkit-appearance: none; appearance: none; color: hsl(var(--accent)); outline: 0; }
+input[type="checkbox"]:focus,
+input[type="checkbox"]:focus-visible { outline: 0; }
+[type='checkbox']:focus,
+[type='radio']:focus {
+  outline: 0px solid transparent; outline-offset: 2px;
+  --tw-ring-offset-width: 2px; --tw-ring-offset-color: hsl(var(--background));
+  --tw-ring-color: hsl(var(--accent));
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow);
+}
+
+/* Strikethrough helper */
+.strikethrough { position: relative; }
+.strikethrough:before,
+.strikethrough::after {
+  position: absolute; content: ""; left: 0; top: 50%; right: 0; border-color: inherit;
+  -webkit-transform: rotate(5deg); transform: rotate(5deg);
+}
+.strikethrough:before { border-top: 2px solid !important; -webkit-transform: rotate(-5deg); transform: rotate(-5deg); }
+.strikethrough::after  { border-top: 3px solid !important; }
+
+/* Favicons rounded */
+link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"] { border-radius: 6px; }
+.favicon, .icon-favicon { border-radius: 6px; overflow: hidden; background-color: #0b0c10 !important; padding: 2px !important; display: inline-block !important; }
+link[rel="icon"][sizes="32x32"] { background-color: #0b0c10; border-radius: 4px; }
+/* Mobile title clamp */
+.line-clamp-2{
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}

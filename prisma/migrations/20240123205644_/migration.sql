@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Slide" ADD COLUMN     "bgUrl" TEXT NOT NULL DEFAULT '',
+ADD COLUMN     "mobilebgURl" TEXT NOT NULL DEFAULT '';

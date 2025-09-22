@@ -1,0 +1,18 @@
+.rdw-image-alignment {
+    display: inline !important;
+    }
+    
+    .rdw-image-center {
+    display: flex !important;
+    justify-content: center;
+    }
+    
+    .rdw-image-right {
+    float: right !important;
+    }
+    
+    .rdw-image-left {
+    float: left !important;
+    }
+    
+    

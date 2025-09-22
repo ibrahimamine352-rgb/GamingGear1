@@ -1,0 +1,261 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== THEME TOKENS (Sky–Slate palette, +promo) ===== */
+@layer base {
+  /* (Optional) Light fallback — your site runs in .dark by default. */
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --muted: 214 32% 96%;
+    --muted-foreground: 215 15% 45%;
+
+    --primary: 193 100% 50%;          /* #00C2FF */
+    --primary-foreground: 210 40% 2%;
+
+    --secondary: 193 100% 50%;
+    --secondary-foreground: 210 40% 2%;
+
+    --accent: 193 100% 50%;
+    --accent-foreground: 210 40% 2%;
+
+    --promo: 22 100% 59%;             /* #FF7A29 */
+    --promo-foreground: 24 100% 12%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --ring: 193 100% 50%;
+    --radius: 0.75rem;
+
+    /* Brand gradient stops (light) */
+    --brand-start: 193 100% 55%;  /* brighter cyan */
+    --brand-end:   210 90% 45%;   /* deep blue edge */
+  }
+
+  /* 🎯 Gaming Gear TN (dark baseline) */
+  .dark {
+    /* Background & text */
+    --background: 220 46% 7%;          /* ≈ #0B1120 (deep navy) */
+    --foreground: 0 0% 95%;            /* ≈ #F1F1F1 (soft white) */
+
+    /* Surfaces */
+    --card: 220 38% 10%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 220 38% 10%;
+    --popover-foreground: 0 0% 95%;
+
+    /* Lines & form chrome */
+    --border: 220 20% 20%;
+    --input: 220 24% 16%;
+
+    /* Muted text / subtle fills */
+    --muted: 220 25% 12%;
+    --muted-foreground: 215 14% 64%;   /* ≈ #9CA3AF */
+
+    /* Brand accents */
+    --primary: 193 100% 50%;           /* CYAN  #00C2FF */
+    --primary-foreground: 210 40% 2%;
+
+    --secondary: 193 100% 50%;
+    --secondary-foreground: 210 40% 2%;
+
+    --accent: 193 100% 50%;
+    --accent-foreground: 210 40% 2%;
+
+    /* Promo / deals / urgency */
+    --promo: 22 100% 59%;              /* ORANGE #FF7A29 */
+    --promo-foreground: 24 100% 12%;
+
+    /* Status colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* Focus ring */
+    --ring: 193 100% 50%;
+    --radius: 0.75rem;
+
+    /* Brand gradient stops (dark) */
+    --brand-start: 193 100% 55%;  /* cyan #19D1FF approx */
+    --brand-end:   205 100% 40%;  /* blue-cyan #0086D9 approx */
+  }
+}
+
+@layer base {
+  /* keep borders everywhere */
+  * { @apply border-border; }
+
+  /* ensure text color stays from tokens */
+  body { @apply text-foreground; }
+
+  html, body, #__next, body > div#__next { min-height: 100%; }
+
+  /* Glows on top, base gradient underneath */
+  body {
+    background-color: #0B1120; /* fallback */
+
+    background-image:
+      /* Cyan glow (left/top) */
+      radial-gradient(1100px 520px at 18% 22%, rgba(0, 194, 255, 0.12), transparent 55%),
+      /* Orange glow (bottom) */
+      radial-gradient(1300px 520px at 50% 100%, rgba(255, 122, 41, 0.12), transparent 64%),
+      /* Base vertical gradient: navy → darker near-black */
+      linear-gradient(180deg, #0A0F1E 0%, #0B1120 45%, #070B15 100%);
+
+    /* sizes align with the 3 layers above (same order) */
+    background-size: cover, cover, 100% 200vh;
+    background-repeat: no-repeat, no-repeat, no-repeat;
+    background-attachment: fixed, fixed, fixed;
+    background-position: top left, bottom center, top left;
+  }
+}
+  
+
+@media (min-width: 1024px) {
+  :root { --header-h: 144px; } /* 80 (top bar) + 64 (nav) */
+}
+
+/* ===== SHARED UTILITIES (structure-safe, single copy) ===== */
+@layer components {
+  input[type="search"] {
+    @apply rounded-xl bg-transparent text-foreground
+           border border-[hsl(var(--promo))]
+           placeholder:text-foreground/60
+           outline-none transition;
+  }
+  /* Accent for every “+” or plus icon */
+  .plus-accent { color: hsl(var(--accent)); }
+
+  /* Raw <button> fallbacks (if used outside shadcn Button) */
+  .btn-solid {
+    @apply inline-flex items-center justify-center h-10 px-4 rounded-xl font-semibold;
+    background: linear-gradient(45deg, hsl(var(--brand-start)), hsl(var(--brand-end)));
+    color: #0b1220;
+    transition: box-shadow .2s ease;
+  }
+  .btn-solid:hover { box-shadow: 0 0 20px rgba(56,189,248,.25); }
+
+  /* OUTLINE BUTTONS → ORANGE (used for things like “Sign Out”) */
+  .btn-line  {
+    @apply inline-flex items-center justify-center h-10 px-4 rounded-xl font-semibold border bg-transparent;
+    border-color: hsl(var(--promo));          /* was border */
+    color: hsl(var(--foreground));
+    transition: all .2s ease;
+  }
+  .btn-line:hover {
+    border-color: hsl(var(--promo));
+    color: hsl(var(--promo));                 /* hover text to orange */
+    box-shadow: 0 0 0 1px hsl(var(--promo)/.25), 0 0 20px hsl(var(--promo)/.12);
+  }
+
+  /* CHIPS / PILLS → ORANGE OUTLINE (e.g., “Custom Builds, Tuned for Tunisia”, “Featured Build”) */
+  .pill {
+    @apply rounded-full border bg-transparent; /* removed bg-card/60 to avoid wash */
+    border-color: hsl(var(--promo));           /* was border-border */
+    color: hsl(var(--promo));
+    box-shadow: 0 0 0 1px hsl(var(--promo)/.22), 0 0 14px hsl(var(--promo)/.12);
+  }
+
+  /* Pagination button colors unchanged */
+  .pagination-btn {
+    @apply w-9 h-9 grid place-items-center rounded-lg border bg-card text-foreground transition;
+    border-color: hsl(var(--border));
+  }
+  .pagination-btn:hover {
+    color: hsl(var(--accent));
+    border-color: hsl(var(--accent));
+  }
+
+  /* Gradient helpers (cyan brand) */
+  .brand-gradient-bg { background: linear-gradient(45deg, hsl(var(--brand-start)), hsl(var(--brand-end))); }
+  .gradient-text {
+    background: linear-gradient(45deg, hsl(var(--brand-start)), hsl(var(--brand-end)));
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  /* Decorative overlays must not block clicks */
+  .decor-overlay { pointer-events: none; z-index: 0; }
+
+  /* Subtle logo glow (cyan) */
+  .logo-glow {
+    position: relative; border-radius: 9999px; padding: .25rem;
+    background: linear-gradient(45deg, hsl(var(--accent)/.06), hsl(var(--primary)/.06));
+    box-shadow: 0 0 12px hsl(var(--accent)/.16);
+    transition: box-shadow .2s ease, transform .2s ease;
+  }
+  .logo-glow:hover { box-shadow: 0 0 18px hsl(var(--accent)/.24); transform: translateY(-1px); }
+
+  /* Header dropdown panel → keep surfaces but tint separators to orange */
+  .dropdown-panel {
+    @apply rounded-2xl border bg-card/95 shadow-xl;
+    border-color: hsl(var(--promo));           /* was border-border */
+    backdrop-filter: blur(10px);
+    width: min(92vw, 980px);
+  }
+  .dropdown-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 16px; }
+  @media (max-width: 1024px) { .dropdown-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+
+  /* Divider inside dropdown → orange */
+  .dropdown-sep { height: 1px; background: linear-gradient(90deg, transparent, hsl(var(--promo)), transparent); }
+
+  .gg-icon * { vector-effect: non-scaling-stroke; }
+
+  /* ——— EXTRA: search input outline to orange (color only, no structure) ——— */
+  input[type="search"] {
+    border-color: hsl(var(--promo)) !important;
+  }
+  input[type="search"]:focus {
+    @apply border-[hsl(var(--promo))];
+    box-shadow: 0 0 0 2px hsl(var(--promo)/0.35); /* orange focus ring */
+  }
+}
+
+
+/* ===== KILL SECTION-LEVEL BRIGHTNESS (no fades, no haze, no inset lines) ===== */
+main,
+main > section,
+.page,
+.page > section {
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+main > section::before,
+main > section::after,
+.page > section::before,
+.page > section::after {
+  content: none !important;
+  background: none !important;
+  box-shadow: none !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+  opacity: 0 !important;
+}
+
+:is(main, .page) :is([class*="bg-gradient-to-"], [class*="from-white"], [class*="via-white"], [class*="to-white"]) {
+  background-image: none !important;
+  background-color: transparent !important;
+}
+
+:is(main, .page) :is([class*="backdrop-blur"], [class*="shadow-[inset"], [class*="ring-white"]) {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  --tw-ring-color: transparent !important;
+}
+
+:is(main, .page) :is([class*="bg-white/"]) {
+  background-color: transparent !important;
+}

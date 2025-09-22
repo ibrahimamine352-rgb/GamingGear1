@@ -1,0 +1,35 @@
+/* Cyber helpers — now token driven */
+
+.bg-main { background: hsl(var(--background)); }
+
+/* glass look that respects tokens */
+.glass-card {
+  background: hsl(var(--card) / 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 0 20px hsl(var(--accent) / 0.10);
+}
+
+/* soft glow (uses accent) */
+.cyber-glow {
+  box-shadow:
+    0 0 20px hsl(var(--accent) / 0.30),
+    0 0 40px hsl(var(--accent) / 0.10),
+    inset 0 0 20px hsl(var(--accent) / 0.05);
+}
+
+/* Decorative overlays should never catch clicks */
+.decor-overlay { pointer-events: none; z-index: 0; }
+#site-header { pointer-events: auto; }
+#site-header * { pointer-events: auto; }
+
+/* gradient text using brand tokens */
+.gradient-text {
+  background: linear-gradient(45deg, hsl(var(--brand-start)), hsl(var(--brand-end)));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+/* handy gradient bg utility (use in buttons/hero chips) */
+.brand-gradient-bg {
+  background: linear-gradient(45deg, hsl(var(--brand-start)), hsl(var(--brand-end)));
+}

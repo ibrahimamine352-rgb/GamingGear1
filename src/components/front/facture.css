@@ -1,0 +1,8 @@
+.tt{ border-color: hsl(var(--border)); }
+.tt tr{ border-color: hsl(var(--border)); }
+.tt th{ border-color: hsl(var(--border)); }
+
+/* dark is already on <html>; keep parity but use same token */
+.dark .tt{ border-color: hsl(var(--border)); }
+.dark .tt tr{ border-color: hsl(var(--border)); }
+.dark .tt th{ border-color: hsl(var(--border)); }

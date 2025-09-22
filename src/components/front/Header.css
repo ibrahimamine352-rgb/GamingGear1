@@ -1,0 +1,229 @@
+.block1 {
+  position: relative;
+  border-radius: 50%;
+  padding: 10px;
+  background: transparent;
+}
+
+
+
+
+.dark .block1 {
+  position: relative;
+  border-radius: 50%;
+  padding: 10px;
+  background: transparent;
+}
+
+
+.block2 {
+  position: relative;
+  border-radius: 5px;
+}
+
+/* Category chip on the left side */
+.cat {
+  border-radius: 5px 0 0 5px;
+}
+
+/* Steam / shimmer keyframes (can be used for gradients) */
+@keyframes steam {
+  0%   { background-position: 0 0; }
+  50%  { background-position: 400% 0; }
+  100% { background-position: 0 0; }
+}
+
+/* Soft gold background utility */
+.bg-gold { background-color: #fff9e6; }
+
+/* Legacy black background utility (kept for compatibility) */
+.blackbg { background-color: #222222; }
+
+/* Mobile menu open/close transitions */
+.menu-closed {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+}
+
+.menu-open {
+  max-height: 500px; /* adjust if your menu is taller */
+  overflow: visible;
+  transition: max-height 0.3s ease-in-out;
+}
+
+/* Title weight utility (kept as-is) */
+.title { font-weight: bold; }
+
+.image-container { margin: auto; }
+
+/* =========================
+   WAVE BUTTON / RIPPLE
+   ========================= */
+.wave {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* shadows + colors */
+  --shadowShift: 6px;
+  --shadowBlur: 15px;
+  --circleColor: rgb(241, 243, 246);
+}
+
+.wave__btn {
+  z-index: 100;
+  width: 80px;
+  height: 80px;
+  border-radius: 100%;
+  border: none;
+  background-color: #ffffff;
+  transition: transform 0.2s ease-out, box-shadow .2s ease-out;
+
+  box-shadow:
+    var(--shadowShift) 0 var(--shadowBlur) rgba(55, 84, 170, 0.2),
+    calc(var(--shadowShift) * -1) 0 var(--shadowBlur) rgba(255, 255, 255, 1);
+}
+
+.wave__btn:hover { cursor: pointer; }
+.wave__btn:focus { outline: none; }
+.wave__btn:focus-visible { box-shadow: 0 0 0 3px rgba(56,189,248,.45); }
+.wave__btn:active { opacity: 0.85; transform: scale(0.98); }
+
+.wave__btn::before {
+  color: #31373f;
+  font-weight: bold;
+  font-size: 12px;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+  /* Set content via JS if you use it; left empty intentionally */
+  content: "";
+}
+
+.wave__container {
+  position: absolute;
+  inset: 0;
+}
+
+.wave__circle {
+  position: absolute;
+  background-color: transparent;
+  border: 10px solid var(--circleColor);
+  border-radius: 50%;
+  box-shadow:
+    inset var(--shadowShift) var(--shadowShift) var(--shadowBlur) rgba(55, 84, 170, 0.2),
+    var(--shadowShift) var(--shadowShift) var(--shadowBlur) rgba(55, 84, 170, 0.2),
+    inset calc(var(--shadowShift) * -1) calc(var(--shadowShift) * -1) var(--shadowBlur) rgb(167, 167, 167),
+    calc(var(--shadowShift) * -1) calc(var(--shadowShift) * -1) var(--shadowBlur) rgb(167, 167, 167);
+  filter: blur(3px);
+
+  animation-name: ripple;
+  animation-duration: 3s;
+  animation-timing-function: cubic-bezier(0, 0.2, 0.8, 1);
+  animation-iteration-count: infinite;
+}
+
+.wave__container .wave__circle:nth-child(2) { animation-delay: -1s; }
+.wave__container .wave__circle:nth-child(3) { animation-delay: -2s; }
+
+@keyframes ripple {
+  0% {
+    top: 100px;
+    left: 100px;
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    top: 0;
+    left: 0;
+    width: 200px;
+    height: 200px;
+    opacity: 0;
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .wave__circle {
+    animation: none !important;
+  }
+}
+
+/* =========================
+   TRIANGLE / ACCENTS
+   (updated to palette)
+   ========================= */
+.tr-left {
+  border-color: transparent #38BDF8 transparent transparent; /* cyan */
+  border-width: 0 58px 56px 0;
+}
+
+.tr-right {
+  border-width: 57px 0 0 57px;
+  transform: rotateZ(90deg);
+  border-color: transparent #0EA5E9 transparent #0EA5E9; /* blue hover tone */
+}
+
+/* =========================
+   NAV CONTAINERS
+   ========================= */
+.custom-nav {
+  min-height: 100%;
+  /* subtle cyan glass */
+  background: linear-gradient(
+    0deg,
+    rgba(56,189,248,0.08) 0%,
+    rgba(56,189,248,0.12) 100%
+  );
+  backdrop-filter: blur(6px);
+}
+
+.navBar {
+  /* Futuristic slate base */
+  background-color: #1E293B; /* dark slate */
+  background-image:
+    radial-gradient(1000px 200px at 0% 0%, rgba(56,189,248,0.10) 0%, rgba(56,189,248,0) 60%),
+    radial-gradient(800px 160px at 100% 100%, rgba(14,165,233,0.10) 0%, rgba(14,165,233,0) 60%);
+}
+
+.dark .navBar {
+  background-color: #0f172a; /* slightly darker slate for dark mode */
+  background-image:
+    radial-gradient(1000px 200px at 0% 0%, rgba(56,189,248,0.12) 0%, rgba(56,189,248,0) 60%),
+    radial-gradient(800px 160px at 100% 100%, rgba(14,165,233,0.12) 0%, rgba(14,165,233,0) 60%);
+}
+
+/* Utility: animated underline for header links (optional add-on) */
+.header-underline {
+  position: relative;
+}
+.header-underline::after {
+  content: "";
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: -6px;
+  height: 2px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #38BDF8, #0EA5E9);
+  opacity: 0;
+  transform: scaleX(0.5);
+  transition: transform .2s ease, opacity .2s ease;
+}
+.header-underline:hover::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+/* Ensure the logo area is always clickable and glow is decorative only */
+.logo-link{ position:relative; z-index:10001; } /* keep link on top */
+.decor-overlay { pointer-events: none; }
+/* Your existing glow badge (.block1) already has ::after; ensure none of it intercepts clicks */
+.logo-glow, .logo-glow::before, .logo-glow::after { pointer-events:none; }

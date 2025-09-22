@@ -1,0 +1,322 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+html,
+body,:root{
+  height: 100%;
+  width: 100%;
+}
+
+
+
+html,
+body,:root {
+  min-height: 100%;
+
+}
+
+
+
+    #myVideo {
+      position: fixed;
+      z-index: -999;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      /* https://lh3.googleusercontent.com/ka_5IYJDRkXZnbptxq64LPuggGL5FM8gnpJlsuSiOQh4b39kMkiRbVfX8iK8bjMg5SLkdfoix09P60wyFjN2=w681-h614 */
+      background: url("/images/bgggg.jpg");
+  /*   background-color:black; */
+      background-size: cover;
+      animation: animateBg 50s linear infinite;
+      opacity: 50%;
+  }
+  
+  @keyframes animateBg{
+      0%,100%{
+          transform: scale(1);
+      }
+      50%{
+          transform: scale(1.2);
+      }
+  }
+  
+ #myVideo span{
+      position: absolute;
+      top:50%;
+      left:50%;
+      width: 4px;
+      height: 4px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.1),0 0 0 8px rgba(255,255,255,0.1),0 0 20px rgba(255,255,255,0.1);
+      animation: animate 50s linear infinite;
+  }
+  #myVideo span::before{
+      content:'';
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 300px;
+      height: 1px;
+      background: linear-gradient(90deg,#fff,transparent);
+  }
+  @keyframes animate
+  {
+      0%
+      {
+          transform: rotate(315deg) translateX(0);
+          opacity: 1;
+      }
+      70%
+      {
+          opacity: 1;
+      }
+      100%
+      {
+          transform: rotate(315deg) translateX(-1000px);
+          opacity: 0;
+      }
+  }
+  #myVideo span:nth-child(1){
+      top: 0;
+      right: 0;
+      left: initial;
+      animation-delay: 0s;
+      animation-duration: 3s;
+  }
+  #myVideo span:nth-child(2){
+      top: 0;
+      right: 80px;
+      left: initial;
+      animation-delay: 0.2s;
+      animation-duration: 4s;
+  }
+  #myVideo span:nth-child(3){
+      top: 80;
+      right: 0px;
+      left: initial;
+      animation-delay: 0.4s;
+      animation-duration: 2s;
+  }
+  #myVideo span:nth-child(4){
+      top: 0;
+      right: 180px;
+      left: initial;
+      animation-delay: 0.6s;
+      animation-duration: 5.5s;
+  }
+  #myVideo span:nth-child(5){
+      top: 0;
+      right: 400px;
+      left: initial;
+      animation-delay: 0.8s;
+      animation-duration: 2.5s;
+  }
+  #myVideo span:nth-child(6){
+      top: 0;
+      right: 600px;
+      left: initial;
+      animation-delay: 1s;
+      animation-duration: 3s;
+  }
+  #myVideo span:nth-child(7){
+      top: 300px;
+      right: 0px;
+      left: initial;
+      animation-delay: 1.2s;
+      animation-duration: 6.75s;
+  }
+  #myVideo span:nth-child(8){
+      top: 0px;
+      right: 700px;
+      left: initial;
+      animation-delay: 1.4s;
+      animation-duration: 1.25s;
+  }
+  #myVideo span:nth-child(9){
+      top: 0px;
+      right: 1000px;
+      left: initial;
+      animation-delay: 0.75s;
+      animation-duration: 2.25s;
+  }
+  #myVideo span:nth-child(9){
+      top: 0px;
+      right: 450px;
+      left: initial;
+      animation-delay: 2.75s;
+      animation-duration: 2.75s;
+  }
+
+
+
+.OverlayS{
+  min-height: 100%;
+  width: 100%;
+  background: rgba(213, 151, 255, 0.288); 
+}
+.dark .OverlayS{
+  background: rgba(171, 0, 250, 0.336);
+
+
+}
+
+@layer base {
+  :root {
+    --background: 45 100% 97%; /* Light amber background color (HSL: 45, 100%, 97%) */
+    --foreground: 0 0% 0%; /* Black foreground color (HSL: 0, 0%, 0%) */
+    
+    --muted: 40 80% 90%; /* Slightly desaturated amber muted color (HSL: 40, 80%, 90%) */
+    --muted-foreground: 0 0% 0%; /* Black foreground color */
+    
+    --popover: 45 100% 97%; /* Light amber background color */
+    --popover-foreground: 0 0% 0%; /* Black foreground color */
+    
+    --card: 45 100% 97%; /* Light amber background color */
+    --card-foreground: 0 0% 0%; /* Black foreground color */
+    
+    --border: 40 80% 90%; /* Slightly desaturated amber border color (HSL: 40, 80%, 90%) */
+    --input: 40 80% 90%; /* Slightly desaturated amber input color (HSL: 40, 80%, 90%) */
+    
+    --primary:    38 100% 50%; /* Medium amber primary color (HSL: 45, 100%, 50%) */
+    --primary-foreground: 0 0% 100%; /* White foreground color */
+    
+    --secondary: 40 80% 90%; /* Slightly desaturated amber secondary color (HSL: 40, 80%, 90%) */
+    --secondary-foreground: 0 0% 0%; /* Black foreground color */
+    
+    --accent: 40 80% 90%; /* Slightly desaturated amber accent color (HSL: 40, 80%, 90%) */
+    --accent-foreground: 0 0% 0%; /* Black foreground color */
+    
+    --destructive: 0 100% 50%; /* Red destructive color (HSL: 0, 100%, 50%) */
+    --destructive-foreground: 0 0% 100%; /* White foreground color */
+    
+    --ring: 40 80% 90%; /* Slightly desaturated amber ring color (HSL: 40, 80%, 90%) */
+    
+    --radius: 0.5rem;
+    
+  }
+
+
+  .dark {
+    --background: 222.2 84% 0%;
+    --foreground: 210 40% 98%;
+
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+
+  --popover: 222.2 84% 0%;
+  --popover-foreground: 210 40% 98%;
+
+  --card: 222.2 84% 0%;
+  --card-foreground: 210 40% 98%;
+
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+
+  --primary: 210 40% 98%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: ;
+
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 85.7% 97.3%;
+
+  --ring: 40 80% 90%;
+
+  --radius: 0.5rem;
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+    --tw-ring-offset-color: #08080800 !important;
+  }
+  body {
+    @apply bg-background text-foreground;
+    height: 100%;
+  }
+}
+input[type="search"]::-webkit-search-cancel-button {
+ -webkit-appearance: none;
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-left: 10px;
+  opacity: 40%;
+  background:
+    linear-gradient(45deg, rgba(0,0,0,0) 0%,rgba(0,0,0,0) 43%,#000 45%,#000 55%,rgba(0,0,0,0) 57%,rgba(0,0,0,0) 100%),
+    linear-gradient(135deg, transparent 0%,transparent 43%,#000 45%,#000 55%,transparent 57%,transparent 100%);
+}
+
+/* Remove default checkbox styling */
+input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  color: #ffa100;
+  outline: 0;
+}
+
+/* Style for focused checkbox */
+input[type="checkbox"]:focus {
+  outline: 0; /* Remove default outline */
+}
+
+/* Style for focused and visible checkbox */
+input[type="checkbox"]:focus-visible {
+  outline: 0; /* Remove default outline */
+  outline-offset: 0; /* Adjust outline offset if needed */
+}
+[type='checkbox']:focus,[type='radio']:focus {
+  outline: 0px solid transparent;
+  outline-offset: 2px;
+  --tw-ring-inset: var(
+  --tw-empty,/*!*/ /*!*/);
+  --tw-ring-offset-width: 2px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: #ffa100;
+  --tw-ring-offset-shadow: var(
+  --tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(
+  --tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}
+.strikethrough {
+  position: relative;
+}
+.strikethrough:before {
+  position: absolute;
+  content: "";
+  left: 0;
+  top: 50%;
+  right: 0;
+  border-top: 2px solid !important;
+
+  border-color: inherit;
+
+  -webkit-transform:rotate(-5deg);
+  -moz-transform:rotate(-5deg);
+  -ms-transform:rotate(-5deg);
+  -o-transform:rotate(-5deg);
+  transform:rotate(-5deg);
+}
+.strikethrough::after {
+  position: absolute;
+  content: "";
+  left: 0;
+  top: 50%;
+  right: 0;
+  border-top: 3px solid !important;
+  border-color: inherit;
+
+  -webkit-transform:rotate(5deg);
+  -moz-transform:rotate(5deg);
+  -ms-transform:rotate(5deg);
+  -o-transform:rotate(5deg);
+  transform:rotate(5deg);
+}

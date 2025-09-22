@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+:root {
+  height: 100%;
+}
+ 
+@layer base {
+  .dark {
+    --background: 271 14% 10%;
+    --foreground: 230 60% 90%;
+    --muted: 271 14% 20%;
+    --muted-foreground: 230 60% 70%;
+    --popover: 271 14% 10%;
+    --popover-foreground: 230 60% 90%;
+    --card: 271 14% 10%;
+    --card-foreground: 230 60% 90%;
+    --border: 271 14% 20%;
+    --input: 271 14% 20%;
+    --primary: 230 60% 90%;
+    --primary-foreground: 271 14% 10%;
+    --secondary: 271 14% 20%;
+    --secondary-foreground: 230 60% 90%;
+    --accent: 271 14% 20%;
+    --accent-foreground: ;
+    --destructive: 320 70% 50%;
+    --destructive-foreground: 230 60% 90%;
+    --ring: 271 14% 20%;
+  }
+  
+  /* Light Purple Theme */
+  :root {
+    --background: 271 14% 90%;
+    --foreground: 230 60% 10%;
+    --muted: 271 14% 80%;
+    --muted-foreground: 230 60% 30%;
+    --popover: 271 14% 90%;
+    --popover-foreground: 230 60% 10%;
+    --card: 271 14% 90%;
+    --card-foreground: 230 60% 10%;
+    --border: 271 14% 80%;
+    --input: 271 14% 80%;
+    --primary: 230 60% 10%;
+    --primary-foreground: 271 14% 90%;
+    --secondary: 271 14% 80%;
+    --secondary-foreground: 230 60% 10%;
+    --accent: 271 14% 80%;
+    --accent-foreground: ;
+    --destructive: 320 70% 50%;
+    --destructive-foreground: 230 60% 10%;
+    --ring: 271 14% 80%;
+  }
+  
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
