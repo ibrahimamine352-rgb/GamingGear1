@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
 
-// CSS is imported in globals.css (not here)
+// IMPORTANT: Do NOT import CSS here. It lives in globals.css.
 
 const ReactQuill = dynamic(() => import("react-quill").then(m => m.default), {
   ssr: false,
@@ -16,7 +16,12 @@ type Props = {
   readOnly?: boolean;
 };
 
-export default function EditorWithUseQuill({ value, onChange, placeholder, readOnly }: Props) {
+export default function EditorWithUseQuill({
+  value,
+  onChange,
+  placeholder,
+  readOnly,
+}: Props) {
   const modules = useMemo(
     () => ({
       toolbar: [
