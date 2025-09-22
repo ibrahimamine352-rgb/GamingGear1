@@ -1,8 +1,8 @@
-/* Admin-specific styles ONLY — no Tailwind directives, no @layer base */
+/* Admin-specific styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @layer components {
   .admin-card { @apply rounded-xl border border-border bg-card/70; }
-}
-
-@layer utilities {
-  .admin-muted { @apply text-muted-foreground; }
 }
