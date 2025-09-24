@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 
 import prismadb from '@/lib/prismadb';
 import { NextApiResponse } from 'next';
-import { checkItemGroupsPower } from '@/app/(storefront)/build-pc/_componenets/Power';
+import { CheckItemGroupsPower } from '@/app/(storefront)/build-pc/_componenets/Power';
 
 export async function POST(
   req: Request,
@@ -162,7 +162,7 @@ export async function GET(req: Request, res: NextApiResponse) {
     const filterListParam = searchParams.get('filterList');
    
      if (filterListParam) {
-      const decodedFilterList = JSON.parse(decodeURIComponent(filterListParam)) as checkItemGroupsPower;
+      const decodedFilterList = JSON.parse(decodeURIComponent(filterListParam)) as CheckItemGroupsPower;
     
       const cpuFilters = [];
     
