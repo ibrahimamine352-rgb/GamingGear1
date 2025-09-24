@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Gaming Gear TN - Custom Gaming PCs",
     description: "Build your dream gaming PC with Gaming Gear TN. Custom builds and full setup bundles in Tunisia.",
-    url: "https://gaminggear.tn/landing",
+    url: "https://gaminggeartn.tn/landing",
     siteName: "Gaming Gear TN",
     type: "website",
   },

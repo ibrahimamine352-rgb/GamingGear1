@@ -33,7 +33,7 @@ export default async function og({ params }: Props) {
             <p tw="text-pink-500 text-4xl flex font-black m-5">{prod?.name}</p>
             <p tw="text-pink-300 text-md flex font-bold m-5">{prod?.description}</p>
         </div>
-       <img tw="w-[100px]" src='https://gaminggear.tn/images/logo%20(3).png' alt={prod?.name}  /> 
+       <img tw="w-[100px]" src='https://gaminggeartn.tn/images/logo%20(3).png' alt={prod?.name}  /> 
       </div>
 
     ),

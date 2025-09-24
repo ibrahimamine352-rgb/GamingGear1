@@ -1,5 +1,5 @@
 export default async function sitemap() {
-    const baseUrl="https://gaminggear.tn"
+    const baseUrl="https://gaminggeartn.tn"
 
     const productUrl=""
     return[

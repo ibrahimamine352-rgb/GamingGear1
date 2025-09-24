@@ -856,7 +856,7 @@ style="width:100%;font-family:arial, 'helvetica neue', helvetica, sans-serif;-we
                                                                             <a target="_blank"
                                                                                 href="https://viewstripo.email"
                                                                                 style="color: black; font-size: larger;font-weight:700;text-decoration:none;size: 30px;display:flex;justify-items:center;align-items:center;font-size:25px"><img
-                                                                                    src="https://gaminggear.tn/_next/image?url=%2Fimages%2Flogo%20(3).png&w=96&q=75"
+                                                                                    src="https://gaminggeartn.tn/_next/image?url=%2Fimages%2Flogo%20(3).png&w=96&q=75"
                                                                                     alt="Logo"
                                                                                     style="border-radius: 100%;border-width: 1px;border-color: #a0937d;padding: 7px; background: rgba(0, 0, 0, 0.856); display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic"
                                                                                     width="50" title="Logo"

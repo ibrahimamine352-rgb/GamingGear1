@@ -1,7 +1,7 @@
 import prismadb from "@/lib/prismadb"
 
 export default async function sitemap() {
-    const baseUrl="https://gaminggear.tn"
+    const baseUrl="https://gaminggeartn.tn"
   
         const products=await prismadb.product.findMany()
     const productUrls=products.map((product)=>({
