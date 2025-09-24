@@ -103,7 +103,7 @@ const SignInForm = ({ asModal = false, onSwitch, onSuccess }: Props) => {
       <GoogleSignInButton>Sign in with Google</GoogleSignInButton>
   
       <p className="text-center text-sm text-muted-foreground mt-2">
-        If you don't have an account, please{" "}
+        If you Don&apos;t have an account, please{" "}
         {onSwitch ? (
           <button type="button" onClick={onSwitch} className="text-[hsl(var(--accent))] underline underline-offset-4">
             Sign up
