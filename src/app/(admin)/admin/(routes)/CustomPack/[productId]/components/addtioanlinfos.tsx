@@ -1,6 +1,5 @@
 import TextEditor from '@/components/custom/EditorWithUseQuill';
-import Editor from '@/components/custom/EditorWithUseQuill';
-import Editorr from '@/components/custom/EditorWithUseQuill';
+
 
 import { Button } from '@/components/ui/button';
 import { FormLabel } from '@/components/ui/form';
@@ -43,14 +42,14 @@ function InputArray({  inputArrayp ,onChange}: InputArrayProps) {
    
   };
   const [text, setText] = useState('');
-  const handleTextChange=(e :string)=>{
-setText(e)
-console.log(e)
-  }
+  const handleTextChange = (v: string) => {
+  setText(v);
+  console.log(v);
+};
   return (
     <>
    <h1>Infos Descitption</h1>
-   <TextEditor OnUpdate={(e)=>handleTextChange(e.toString())} value={text} />
+   <TextEditor value={text} onChange={handleTextChange} />
    <h1>Infos Table</h1>
     <div className="space-y-4">
       
