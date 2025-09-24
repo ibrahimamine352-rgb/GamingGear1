@@ -1,6 +1,5 @@
 import TextEditor from '@/components/custom/EditorWithUseQuill';
-import Editor from '@/components/custom/EditorWithUseQuill';
-import Editorr from '@/components/custom/EditorWithUseQuill';
+
 
 import { Button } from '@/components/ui/button';
 import { FormLabel } from '@/components/ui/form';
@@ -43,14 +42,13 @@ function InputArray({  inputArrayp ,onChange}: InputArrayProps) {
    
   };
   const [text, setText] = useState('');
-  const handleTextChange=(e :string)=>{
-setText(e)
-console.log(e)
-  }
+  const handleTextChange = (v: string) => {
+  setText(v);
+};
   return (
     <>
    <h1>Infos Descitption</h1>
-   <TextEditor OnUpdate={(e)=>handleTextChange(e.toString())} value={text} />
+<TextEditor onChange={handleTextChange} value={text} />
    <h1>Infos Table</h1>
     <div className="space-y-4">
       
@@ -73,12 +71,12 @@ console.log(e)
             required
           />
           <Button
-            type="button"
-            onClick={() =>{ removeInput(index);exportInputArray}}
-            className="bg-red-500 text-foreground py-2 px-4 rounded hover:bg-red-600"
-          >
-            <Trash  onClick={() =>{ removeInput(index)}}/>
-          </Button>
+  type="button"
+  onClick={() => removeInput(index)}
+  className="bg-red-500 text-foreground py-2 px-4 rounded hover:bg-red-600"
+>
+  <Trash />
+</Button>
         </div>
       ))}
       <Button
