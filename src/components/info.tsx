@@ -45,11 +45,12 @@ const Info: React.FC<InfoProps> = ({ data }) => {
         </div>
       </div>
       <div className="mt-10 flex items-center gap-x-3">
-        <Button>
-          Add To Cart
-          <ShoppingCart size={20} />
-        </Button>
-      </div>
+  <Button type="button" onClick={onAddToCart} aria-label="Add to cart">
+    Add To Cart
+    <ShoppingCart size={20} />
+  </Button>
+</div>
+
     </div>
   );
 }
