@@ -41,8 +41,7 @@ export async function POST(
       email,
       telephone,
       prenom,
-      rue,
-      ville,
+      address,
       totalPrice,
       data 
     } = await req.json(); 
@@ -97,7 +96,7 @@ console.log(packs)
         data: {
           isPaid: false,
           phone: telephone || "",
-          address: `${rue || ""}, ${ville || ""}, ${codePostal || ""}`,
+          address: `${address|| ""}, ${codePostal || ""}`,
           name: nom || "",
           lastName: prenom || "",
           email: email || "",
@@ -167,8 +166,8 @@ console.log(packs)
     htmlContent = htmlContent.replace("$prodssss", prodshtml);
     htmlContent = htmlContent.replace("$itemNumber", productIdss.length.toString());
     htmlContent = htmlContent.replace("$TotaLPrice", totalPrice);
-    htmlContent = htmlContent.replace("$ville", ville);
-    htmlContent = htmlContent.replace("$rue", rue);
+    htmlContent = htmlContent.replace("$address", address);
+   
     htmlContent = htmlContent.replace("$codePostal", codePostal);
     const emailBody =htmlContent
 
@@ -1088,7 +1087,7 @@ style="width:100%;font-family:arial, 'helvetica neue', helvetica, sans-serif;-we
                                                             <td align="left" style="padding:0;Margin:0">
                                                                 <p
                                                                     style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#666666;font-size:14px">
-                                                                    <span>$ville</span><br>$rue
+                                                                    <span>$address</span><br>$address
                                                                     <br>$codePostal<br>
                                                                 </p>
                                                             </td>

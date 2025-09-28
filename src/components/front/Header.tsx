@@ -243,14 +243,7 @@ export default function Header({ session, cathegories, noscategy, links, noscate
             <div className="flex h-16 items-center justify-between">
               {/* Desktop Navigation */}
               <nav className="hidden lg:flex items-center space-x-8">
-              <Link
-    href="/shop"
-    className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-[hsl(var(--accent))]
-               hover:bg-[hsl(var(--accent))/0.08] hover:shadow-[0_0_0_1px_hsl(var(--accent)/0.25),_0_0_18px_hsl(var(--accent)/0.12)]
-               transition-colors"
-  >
-     Store
-  </Link>
+             
   <Link
     href="/shop?prebuilt=1"
     className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-[hsl(var(--promo))]
@@ -349,7 +342,7 @@ export default function Header({ session, cathegories, noscategy, links, noscate
 
   {/* Drawer */}
   <div
-    className="fixed right-0 top-[var(--header-h,80px)] bottom-0
+    className="fixed left-0 top-[var(--header-h,80px)] bottom-0
                w-[92vw] max-w-[420px]
                bg-background/95 backdrop-blur-md
                border-l border-border/10
@@ -384,14 +377,8 @@ export default function Header({ session, cathegories, noscategy, links, noscate
         </Button>
       </Link>
 
-      <Link href="/shop" onClick={toggleMenu} className="block">
-        <div className="h-10 grid place-items-start rounded-xl px-3
-                        text-[hsl(var(--accent))]
-                        hover:bg-[hsl(var(--accent))/0.08]
-                        hover:shadow-[0_0_0_1px_hsl(var(--accent)/0.25),_0_0_18px_hsl(var(--accent)/0.12)]">
-          Store
-        </div>
-      </Link>
+      
+      
 
       <Link href="/shop?prebuilt=1" onClick={toggleMenu} className="block">
         <div className="h-10 grid place-items-start rounded-xl px-3

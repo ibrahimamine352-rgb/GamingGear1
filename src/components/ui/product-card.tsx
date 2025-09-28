@@ -45,7 +45,7 @@ const ProductCard: React.FC<ProductCard> = ({
       {/* Image & actions */}
       {data.dicountPrice > 0 && (
         <div className="w-full flex justify-end">
-          <div className="bg-gradient-to-r from-[#38BDF8] to-[#0EA5E9] text-black font-bold px-3 py-1 rounded-full text-sm transform rotate-[25deg] z-20 -mt-3 ml-auto">
+          <div className="bg-gradient-to-r from-[#38BDF8] to-[#0EA5E9] text-[hsl(var(--promo))] font-bold px-3 py-1 rounded-full text-sm transform rotate-[25deg] z-20 -mt-3 ml-auto">
             SALE
           </div>
         </div>
@@ -91,7 +91,7 @@ const ProductCard: React.FC<ProductCard> = ({
             <Currency value={data?.price} />
           </b>
           {data?.dicountPrice > 0 && (
-            <div className="bg-gradient-to-r from-[#38BDF8] to-[#0EA5E9] text-black text-xs font-bold px-2 py-1 rounded-full mt-1">
+            <div className="bg-gradient-to-r from-[#38BDF8] to-[#0EA5E9] text-[hsl(var(--promo))] text-xs font-bold px-2 py-1 rounded-full mt-1">
               {Math.round(((data.dicountPrice - data.price) / data.dicountPrice) * 100)}% OFF
             </div>
           )}
