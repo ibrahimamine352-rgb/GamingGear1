@@ -24,6 +24,8 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
+  NavigationMenuViewport,
+
 } from "@/components/ui/navigation-menu"
 import {
   Command,
@@ -101,9 +103,10 @@ interface MenuItemProps {
   open: string;
   setOpen: (value: string) => void;
   id: string;
+  widthClass?: string;
 }
 
-function MenuItem({ label, children, open, setOpen, id }: MenuItemProps) {
+function MenuItem({ label, children, open, setOpen, id, widthClass }: MenuItemProps) {
   const closeTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const openNow = () => {
@@ -129,18 +132,16 @@ function MenuItem({ label, children, open, setOpen, id }: MenuItemProps) {
       </button>
 
       {open === id && (
-        <div
-          className="
-            header-dd absolute left-0 top-[calc(100%+4px)]
-            z-[6000] min-w-[980px] rounded-2xl
-            border border-border/60 bg-background/80 backdrop-blur-md
-            shadow-[0_8px_40px_rgba(0,0,0,.45)]
-            pointer-events-auto
-          "
-        >
-          {children}
-        </div>
-      )}
+  <div
+    className={cn(
+      "header-dd absolute left-0 top-[calc(100%+4px)] z-[6000] rounded-2xl border border-border/60 bg-background/80 backdrop-blur-md shadow-[0_8px_40px_rgba(0,0,0,.45)] pointer-events-auto",
+      // default keeps your old size if widthClass isn't passed
+      widthClass ?? "min-w-[980px]"
+    )}
+  >
+    {children}
+  </div>
+)}
     </div>
   )
 }
@@ -243,14 +244,7 @@ export default function Header({ session, cathegories, noscategy, links, noscate
             <div className="flex h-16 items-center justify-between">
               {/* Desktop Navigation */}
               <nav className="hidden lg:flex items-center space-x-8">
-              <Link
-    href="/shop"
-    className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-[hsl(var(--accent))]
-               hover:bg-[hsl(var(--accent))/0.08] hover:shadow-[0_0_0_1px_hsl(var(--accent)/0.25),_0_0_18px_hsl(var(--accent)/0.12)]
-               transition-colors"
-  >
-     Store
-  </Link>
+             
   <Link
     href="/shop?prebuilt=1"
     className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-[hsl(var(--promo))]
@@ -286,27 +280,38 @@ export default function Header({ session, cathegories, noscategy, links, noscate
                 </Link>
 
                 {/* Keep dropdowns for Components & Peripherals */}
-                <MenuItem label="Components" open={open} setOpen={setOpen} id="Components">
-                  <div className="grid gap-3 p-4 md:grid-cols-3">
-                    {NAV.Components.map((item) => (
-                      <a key={item.href} href={item.href} className="flex items-center gap-2 rounded-lg p-2 text-foreground/80 hover:bg-white/10 hover:text-foreground transition-all duration-200">
-                        {item.icon}
-                        <span>{item.label}</span>
-                      </a>
-                    ))}
-                  </div>
-                </MenuItem>
+                <MenuItem label="Components" open={open} setOpen={setOpen} id="Components" widthClass="min-w-[560px]">
+  <div className="grid grid-cols-2 gap-2 p-3">
+    {NAV.Components.map((item) => (
+      <a
+        key={item.href}
+        href={item.href}
+        className="flex items-center gap-2 rounded-lg p-2 leading-tight text-foreground/80 hover:bg-white/10 hover:text-foreground transition-all duration-200"
+      >
+        <span className="shrink-0">{item.icon}</span>
+        <span className="text-xs md:text-sm">{item.label}</span>
+      </a>
+    ))}
+  </div>
+</MenuItem>
+
                 
-                <MenuItem label="Peripherals" open={open} setOpen={setOpen} id="Peripherals">
-                  <div className="grid gap-3 p-4 md:grid-cols-2">
-                    {NAV.Peripherals.map((item) => (
-                      <a key={item.href} href={item.href} className="flex items-center gap-2 rounded-lg p-2 text-foreground/80 hover:bg-white/10 hover:text-foreground transition-all duration-200">
-                        {item.icon}
-                        <span>{item.label}</span>
-                      </a>
-                    ))}
-                  </div>
-                </MenuItem>
+<MenuItem label="Peripherals" open={open} setOpen={setOpen} id="Peripherals" widthClass="min-w-[440px]">
+  <div className="grid grid-cols-2 gap-2 p-3">
+    {NAV.Peripherals.map((item) => (
+      <a
+        key={item.href}
+        href={item.href}
+        className="flex items-center gap-2 rounded-lg p-2 leading-tight text-foreground/80 hover:bg-white/10 hover:text-foreground transition-all duration-200"
+      >
+        <span className="shrink-0">{item.icon}</span>
+        <span className="text-xs md:text-sm">{item.label}</span>
+      </a>
+    ))}
+  </div>
+</MenuItem>
+
+
               </nav>
 
               {/* Build PC Button and Search Bar */}
@@ -349,7 +354,7 @@ export default function Header({ session, cathegories, noscategy, links, noscate
 
   {/* Drawer */}
   <div
-    className="fixed right-0 top-[var(--header-h,80px)] bottom-0
+    className="fixed left-0 top-[var(--header-h,80px)] bottom-0
                w-[92vw] max-w-[420px]
                bg-background/95 backdrop-blur-md
                border-l border-border/10
@@ -384,14 +389,8 @@ export default function Header({ session, cathegories, noscategy, links, noscate
         </Button>
       </Link>
 
-      <Link href="/shop" onClick={toggleMenu} className="block">
-        <div className="h-10 grid place-items-start rounded-xl px-3
-                        text-[hsl(var(--accent))]
-                        hover:bg-[hsl(var(--accent))/0.08]
-                        hover:shadow-[0_0_0_1px_hsl(var(--accent)/0.25),_0_0_18px_hsl(var(--accent)/0.12)]">
-          Store
-        </div>
-      </Link>
+      
+      
 
       <Link href="/shop?prebuilt=1" onClick={toggleMenu} className="block">
         <div className="h-10 grid place-items-start rounded-xl px-3

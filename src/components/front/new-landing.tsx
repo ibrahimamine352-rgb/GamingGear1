@@ -204,8 +204,11 @@ function Hero() {
           muted
           playsInline
           preload="auto"
-          controls  // <-- TEMP for debugging; remove once you see it play
-          onError={(e) => console.error('VIDEO ERROR', (e.target as HTMLVideoElement).error)}
+          controls={false}
+  controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"// <-- TEMP for debugging; remove once you see it play
+  disablePictureInPicture
+
+  onError={(e) => console.error('VIDEO ERROR', (e.target as HTMLVideoElement).error)}
         >
           {/* H.264 source first (Chrome/Edge/Safari compatible) */}
           <source src="/videos/featured-ryzen7-4070super.mp4" type="video/mp4" />
