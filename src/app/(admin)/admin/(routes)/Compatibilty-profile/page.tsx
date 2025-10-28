@@ -37,6 +37,9 @@ console.log(products)
     price:"0"
     , isFeatured:false,
     createdAt: format(item.createdAt, 'MMMM do, yyyy'),
+    comingSoon: false,
+  outOfStock: false,
+    
   }));
 
   return (
