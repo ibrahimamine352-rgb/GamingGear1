@@ -204,9 +204,10 @@ const ProductPage: React.FC<ProductPageProps> = async ({
                 dicountPrice: parseInt(dicountPrice.toString()),
                 number: 1,
                 category,
-                images
-
-                // Include other properties as needed
+                images,
+                comingSoon: e.product.comingSoon ?? false,
+                outOfStock: e.product.outOfStock ?? false,
+                 // Include other properties as needed
             };
             return cartItem;
         } else {
@@ -220,8 +221,9 @@ const ProductPage: React.FC<ProductPageProps> = async ({
                 stock: parseInt(stock.toString()),
                 number: parseInt(e.number),
                 category,
-                images
-
+                images,
+                comingSoon: e.product.comingSoon ?? false,
+                outOfStock: e.product.outOfStock ?? false,
                 // Include other properties as needed
             };
             return cartItem;
