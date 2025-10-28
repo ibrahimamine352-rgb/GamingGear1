@@ -116,7 +116,7 @@ export const PopFormModal = <TFormValues extends AnyValues = AnyValues>({
                 <DialogContent className="sm:max-w-[425px]">
                   <DialogHeader>
                     <DialogTitle>{label}</DialogTitle>
-                    <DialogDescription>Click save when you're done.</DialogDescription>
+<DialogDescription>Click save when you&apos;re done.</DialogDescription>
                   </DialogHeader>
 
                   <div className="grid gap-4 py-4">
