@@ -81,28 +81,30 @@ export const PopFormModal = <TFormValues extends AnyValues = AnyValues>({
           <FormLabel>{label}</FormLabel>
           <div className="md:grid md:grid-cols-2 items-start gap-8">
             <div>
-            <Select onValueChange={(val) => form1.setValue(formLab as any, val)} value={form1.watch(formLab as any)}>
+            <Select
+  onValueChange={(value: string) => {
+    // if your form field is a number id, convert:
+    form1.setValue(formLab as any, IsNumber ? Number(value) : (value as any));
+  }}
+  value={String(form1.watch(formLab as any) ?? "")}
+>
   <FormControl>
     <SelectTrigger>
       <SelectValue placeholder={`Select ${formCControlName}`} />
     </SelectTrigger>
   </FormControl>
 
-  {/* Scrollable dropdown */}
-  <SelectContent
-    position="popper"
-    sideOffset={4}
-    className="max-h-64 p-0"
-  >
+  <SelectContent position="popper" sideOffset={4} className="max-h-64 p-0">
     <div className="max-h-64 overflow-y-auto">
       {data.map((row: any) => (
-        <SelectItem key={row.id} value={row.id}>
+        <SelectItem key={row.id} value={String(row.id)}>
           {row[fieldaAfficher]}
         </SelectItem>
       ))}
     </div>
   </SelectContent>
 </Select>
+
 
               <FormMessage />
             </div>
