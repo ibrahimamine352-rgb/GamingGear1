@@ -75,7 +75,9 @@ const CustomPcTemplate: React.FC<ProductFormProps> = ({ initialData, motherboard
         category: {
             id: '',
             name: ''
-        }
+        },
+        comingSoon: initialData?.comingSoon ?? false,
+  outOfStock: initialData?.outOfStock ?? false,
     }
     const [TableData, setTableData] = useState<TableData[]>([]);
     const [AdvancedTableData, setAdvancedTableData] = useState<AdvancedTableData[]>([]);
