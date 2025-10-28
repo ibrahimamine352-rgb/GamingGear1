@@ -46,7 +46,6 @@ console.log(products)
     isArchived: item.isArchived,
     price: formatter.format(item.price.toNumber()),
     category: item.category.name,
-
     createdAt: format(item.createdAt, 'MMMM do, yyyy'),
     comingSoon: item.comingSoon ?? false,
     outOfStock: item.outOfStock ?? false,
