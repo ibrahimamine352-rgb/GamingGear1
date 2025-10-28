@@ -113,7 +113,8 @@ interface ProductPageProps {
                 stock:parseInt(stock.toString()),
                 number:1,
       category,
-      images
+      images,comingSoon: e.product.comingSoon ?? false,
+                outOfStock: e.product.outOfStock ?? false,
       
                 // Include other properties as needed
               };
@@ -129,7 +130,8 @@ interface ProductPageProps {
                 stock:parseInt(stock.toString()),
                 number:parseInt(e.number),
       category,
-      images
+      images,comingSoon: e.product.comingSoon ?? false,
+                outOfStock: e.product.outOfStock ?? false,
       
                 // Include other properties as needed
               };
