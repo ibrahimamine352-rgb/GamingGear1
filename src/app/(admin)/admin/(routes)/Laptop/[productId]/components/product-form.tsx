@@ -45,6 +45,8 @@ const formSchema = z.object({
   categoryId: z.string().min(1),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
+  comingSoon: z.boolean().default(false).optional(),
+  outOfStock: z.boolean().default(false).optional(),
   SystemId:z.string().min(1),
   ProcesseurId:z.string().min(1),
 
@@ -151,6 +153,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     categoryId: '',
     isFeatured: false,
     isArchived: false,
+    comingSoon: false,
+    outOfStock: false,
     additionalDetails:[],
     TouchScreen:false
   }
@@ -473,6 +477,36 @@ console.log(initialData)
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="comingSoon"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Coming Soon</FormLabel>
+                    <FormDescription>Mark this product as coming soon</FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="outOfStock"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Out of Stock</FormLabel>
+                    <FormDescription>Mark this product as out of stock</FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
          
           </div>
           <Separator />
@@ -614,7 +648,7 @@ console.log(initialData)
               form1={form} 
               loading={loading} 
               setLoading={setLoading} 
-              data={...LapSystem}
+              data={LapSystem}
               fieldaAfficher="name"
               url="/api/laptop/LapSystem"
               formLab="SystemId"
@@ -626,7 +660,7 @@ console.log(initialData)
               form1={form} 
               loading={loading} 
               setLoading={setLoading} 
-              data={...LapProcesseur}
+              data={LapProcesseur}
               fieldaAfficher="name"
               url="/api/laptop/LapProcesseur"
               formLab="ProcesseurId"
@@ -639,7 +673,7 @@ console.log(initialData)
               form1={form} 
               loading={loading} 
               setLoading={setLoading} 
-              data={...LapGraphiccard}
+              data={LapGraphiccard}
               fieldaAfficher="name"
               url="/api/laptop/LapGraphiccard"
               formLab="GraphiccardId"
@@ -652,7 +686,7 @@ console.log(initialData)
               form1={form} 
               loading={loading} 
               setLoading={setLoading} 
-              data={...Lapmemory}
+              data={Lapmemory}
               fieldaAfficher="name"
               url="/api/laptop/Lapmemory"
               formLab="memoryId"
@@ -663,7 +697,7 @@ console.log(initialData)
               form1={form} 
               loading={loading} 
               setLoading={setLoading} 
-              data={...LapHardisk}
+              data={LapHardisk}
               fieldaAfficher="name"
               url="/api/laptop/LapHardisk"
               formLab="HardiskId"
@@ -675,7 +709,7 @@ console.log(initialData)
               form1={form} 
               loading={loading} 
               setLoading={setLoading} 
-              data={...LapScreenSize}
+              data={LapScreenSize}
               fieldaAfficher="name"
               url="/api/laptop/LapScreenSize"
               formLab="ScreenSizeId"
@@ -687,7 +721,7 @@ console.log(initialData)
               form1={form} 
               loading={loading} 
               setLoading={setLoading} 
-              data={...LapRefreshRate}
+              data={LapRefreshRate}
               fieldaAfficher="name"
               url="/api/laptop/LapRefreshRate"
               formLab="RefreshRateId"

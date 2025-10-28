@@ -11,7 +11,9 @@ export async function POST(
 
     const body = await req.json();
 
-    const { name, price, categoryId,  images, isFeatured, isArchived ,description,stock,additionalDetails} = body;
+    const { name, price, categoryId,  images, isFeatured, isArchived ,comingSoon,
+      outOfStock,
+      description,stock,additionalDetails} = body;
     if (!additionalDetails) {
       return new NextResponse("additionalDetails is required", { status: 400 });
     }
@@ -49,7 +51,9 @@ export async function POST(
         isFeatured,
         isArchived,
         categoryId,
-        description,
+        description,comingSoon,
+        outOfStock,
+        
         
         additionalDetails:{
           createMany:{

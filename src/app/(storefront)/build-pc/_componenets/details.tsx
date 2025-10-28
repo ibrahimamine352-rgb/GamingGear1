@@ -382,7 +382,7 @@ const Details = (props: {
                     </div>
                     <div className='w-full mt-3 flex justify-end'>
                         <div className='ml-auto'>
-                            <Button variant={'outline'} className='bg-transparent' onClick={() => sendTocart()} >Ajouter au panier <Shopcard /></Button>
+                            <Button variant={'outline'} className='bg-transparent' onClick={() => sendTocart()} >Add To Cart <Shopcard /></Button>
 
 
                             <Button onClick={() => {

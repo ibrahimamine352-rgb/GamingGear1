@@ -25,6 +25,8 @@ export async function POST(req: Request) {
       images,
       isFeatured,
       isArchived,
+      comingSoon,
+      outOfStock,
       chipsetId,
       cpusupportId,
       formatId,
@@ -59,6 +61,8 @@ export async function POST(req: Request) {
             price,
             isFeatured: !!isFeatured,
             isArchived: !!isArchived,
+            comingSoon,     // include it
+            outOfStock,
             description,
             categoryId,
             stock,

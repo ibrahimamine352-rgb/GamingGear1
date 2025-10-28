@@ -11,6 +11,8 @@ export interface Product {
   images: Image[]
   additionalDetails:Field[] 
   stock:number
+  comingSoon: boolean;
+  outOfStock: boolean;
 };
 
 

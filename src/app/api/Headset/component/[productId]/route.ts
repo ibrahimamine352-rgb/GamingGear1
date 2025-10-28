@@ -72,6 +72,8 @@ export async function PATCH(
       images,
       isFeatured,
       isArchived,
+      comingSoon,
+      outOfStock,
       manufacturerId,
 
       headsetSonSurroundId,
@@ -146,6 +148,8 @@ export async function PATCH(
         price: price,
         isFeatured: isFeatured,
         isArchived: isArchived,
+        comingSoon,
+          outOfStock,
         description,
         categoryId: categoryId,
         stock:stock,

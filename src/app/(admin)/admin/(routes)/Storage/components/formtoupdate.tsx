@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -22,6 +20,8 @@ const formSchema = z.object({
   categoryId: z.string().min(1),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
+  comingSoon: z.boolean().default(false).optional(),
+  outOfStock: z.boolean().default(false).optional(),
   brandId: z.string().min(1),
   typeId:  z.string().min(1),
   capacityId:  z.string().min(1),
@@ -129,6 +129,8 @@ export const PopFormModal: React.FC<PopUpProps> = ({
   
  
   };
+  const getLabel = (row: Record<string, any>) =>
+    String(row?.[fieldaAfficher as string] ?? row?.name ?? row?.label ?? row?.title ?? "");
   return (
     <FormField
             control={form.control}
@@ -138,18 +140,28 @@ export const PopFormModal: React.FC<PopUpProps> = ({
               <FormLabel>{label}</FormLabel>
               <div className="md:grid md:grid-cols-2 align-top items-center gap-8">
                 <div>
-                  <Select disabled={loading} onValueChange={ field.onChange } value={field.value ? String(field.value) : ''} defaultValue={field.value ? String(field.value) : ''}>
-                    <FormControl>
-                      <SelectTrigger>
-                      <SelectValue defaultValue={field.value ? String(field.value) : ''} placeholder={'Select a ' + label} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {data.map((category) => (
-                     <SelectItem key={category.id} value={category.id}>
-                     {category[fieldaAfficher as keyof typeof category.TypeOf]}
-                   </SelectItem>    ))}
-                    </SelectContent>
+                <Select
+  disabled={loading}
+  value={field.value ? String(field.value) : ""}
+  onValueChange={(v) => field.onChange(v)}
+>
+  <FormControl>
+    <SelectTrigger>
+      <SelectValue placeholder={`Select a ${label}`} />
+    </SelectTrigger>
+  </FormControl>
+
+  {/* scrollable list */}
+  <SelectContent position="popper" sideOffset={4} className="max-h-64 p-0">
+  <div className="max-h-64 overflow-y-auto">
+    {data.map((item) => (
+      <SelectItem key={String(item.id)} value={String(item.id)}>
+        {String(item.name ?? item.label ?? item.title ?? "")}
+      </SelectItem>
+    ))}
+  </div>
+</SelectContent>
+
                   </Select>
           
           

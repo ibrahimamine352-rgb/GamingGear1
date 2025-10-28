@@ -37,7 +37,7 @@ const SelectContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
 >(({ className, children, position = "popper", ...props }, ref) => (
   <SelectPrimitive.Portal>
-   <SelectPrimitive.Content
+    <SelectPrimitive.Content
   ref={ref}
   position={position}
   side="bottom"

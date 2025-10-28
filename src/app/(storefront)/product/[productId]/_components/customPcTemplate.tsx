@@ -352,7 +352,7 @@ useEffect(() => {
                     }
                     <div className=" mb-7 flex items-center gap-x-3">
                         <Button variant={"default"}   onClick={onAddToCart} className="flex items-center bg-purple-500 text-foreground hover:bg-[hsl(var(--accent))] focus:bg-[hsl(var(--accent))]">
-                           Ajouter au panier
+                           Add To Cart
                             <ShoppingCart size={20} />
                         </Button>
                     </div>

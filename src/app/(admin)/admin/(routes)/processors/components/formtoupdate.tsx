@@ -1,52 +1,32 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Control, FormProps, UseFormGetValues, UseFormReturn, useForm } from "react-hook-form";
-import * as z from "zod"
-import { zodResolver } from "@hookform/resolvers/zod";
+import type { UseFormReturn } from "react-hook-form";
 import axios from "axios";
 import toast from "react-hot-toast";
-import  { useRouter } from "next/navigation";
-import { apiBaseUrl } from "next-auth/client/_utils";
+import { useRouter } from "next/navigation";
 
-const formSchema = z.object({
-  name: z.string().min(1),
-  images: z.object({ url: z.string() }).array().min(1),
-  price: z.coerce.number().min(1),
-  categoryId: z.string().min(1),
-  isFeatured: z.boolean().default(false).optional(),
-  isArchived: z.boolean().default(false).optional(),
-  processorModelId: z.string().min(1),
-  supportduprocesseurId: z.string().min(1),
-  additionalDetails : z.object({ name: z.string(),value:z.string() }).array() ,
-  dicountPrice: z.coerce.number().optional(),
-  stock: z.coerce.number().min(1),
-  description:z.string().min(1),
-  
-});
-type ProductFormValues = z.infer<typeof formSchema>
+type AnyValues = Record<string, any>;
 
-interface PopUpProps {
-     label:String;
-     form1 :  UseFormReturn<ProductFormValues>;
-     loading:boolean
-     setLoading: (value: boolean) => void;
-     data:any[]
-     url:string
-     formLab:String
-     formCControlName:String
-     fieldaAfficher:String
-     IsNumber?:boolean
+interface PopUpProps<TFormValues extends AnyValues = AnyValues> {
+  label: string;
+  form1: UseFormReturn<TFormValues>;
+  loading: boolean;
+  setLoading: (v: boolean) => void;
+  data: any[];                 // list of options from the server
+  url: string;                 // POST endpoint to create a new option
+  formLab: keyof TFormValues;  // the field in the parent form that stores the *ID* (e.g. "cpusupportId")
+  formCControlName: string;    // only used as a label in the dialog
+  fieldaAfficher: string;      // property to display as label (e.g. "name")
+  IsNumber?: boolean;          // whether the dialog input is numeric
 }
 
-export const PopFormModal: React.FC<PopUpProps> = ({
+export const PopFormModal = <TFormValues extends AnyValues = AnyValues>({
   label,
   form1,
   loading,
@@ -56,171 +36,110 @@ export const PopFormModal: React.FC<PopUpProps> = ({
   formLab,
   formCControlName,
   fieldaAfficher,
-  IsNumber
-}) => {
+  IsNumber,
+}: PopUpProps<TFormValues>) => {
   const router = useRouter();
-  const [isMounted, setIsMounted] = useState(false);
+  const form = form1;
 
-
-  const form =form1
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newOptionName, setNewOptionName] = useState<string>(""); // keep new name locally
 
   useEffect(() => {
-    setIsMounted(true);
+    // no-op, but keeps the behavior you had
   }, []);
 
- 
   const openDialog = () => {
+    setNewOptionName("");
     setIsDialogOpen(true);
-    console.log(data)
   };
-  const toastMessage ="created"
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-
-  const closeDialogRam = async () => {
-  
-    const values = form.getValues();
-    
-    const fieldValue = values[formCControlName as keyof typeof values];
-    console.log(fieldValue)
-    if (fieldValue) {
-      // Do something with fieldValue
-
-      try {
-        const values = form.getValues();
-        const name = values[formCControlName as keyof typeof values];
-    
-        setLoading(true);
-  
-        await axios.post(url, { name});
-  
-        toast.success(toastMessage);
-        router.refresh();
-        setIsDialogOpen(false);
-      } catch (error: any) {
-        toast.error('Something went wrong.');
-        setIsDialogOpen(false);
-      } finally {
-        setLoading(false);
-        setIsDialogOpen(false);
-      }
-
-
-    } else {
-      form.setError(formCControlName as keyof typeof values, { message: 'Insert the '+fieldaAfficher });
-      setLoading(false);
-   
-      // Handle the case where fieldName is not in the form values
+  const closeDialogAndCreate = async () => {
+    if (!newOptionName.trim()) {
+      toast.error(`Insert the ${fieldaAfficher}`);
+      return;
     }
 
- 
-  
- 
+    try {
+      setLoading(true);
+      await axios.post(url, { name: IsNumber ? Number(newOptionName) : newOptionName });
+      toast.success("created");
+      setIsDialogOpen(false);
+      router.refresh();
+    } catch {
+      toast.error("Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
   };
+
   return (
     <FormField
-            control={form.control}
-            name={formLab as keyof  ProductFormValues }
-            render={({ field }) => (
-              <FormItem  >
-              <FormLabel>{label}</FormLabel>
-              <div className="md:grid md:grid-cols-2 align-top items-center gap-8">
-                <div>
-                  <Select disabled={loading} onValueChange={ field.onChange } value={field.value ? String(field.value) : ''} defaultValue={field.value ? String(field.value) : ''}>
-                    <FormControl>
-                      <SelectTrigger>
-                      <SelectValue defaultValue={field.value ? String(field.value) : ''} placeholder={'Select a ' + label} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {data.map((category) => (
-                     <SelectItem key={category.id} value={category.id}>
-                     {category[fieldaAfficher as keyof typeof category.TypeOf]}
-                   </SelectItem>    ))}
-                    </SelectContent>
-                  </Select>
-          
-          
-                  <FormMessage />
-                </div>
-                <div className="w-full">
-          
-                  <Button type="button" className="w-full" variant={"outline"} onClick={openDialog}>Add {label}</Button>
-          
-          
-                  <Dialog  open={isDialogOpen} onOpenChange={()=>setIsDialogOpen(!isDialogOpen)}
-                  >
-          
-                    <DialogContent className="sm:max-w-[425px]">
-                      <DialogHeader >
-          
-                        <DialogTitle>{label}</DialogTitle>
-                        <DialogDescription>
-                          Click save when you&apos;re done.
-                        </DialogDescription>
-                      </DialogHeader>
-          
-          
-                      <div className="grid gap-4 py-4">
-          
-                        <FormField
-                          control={form.control}
-                          name={formCControlName as keyof  ProductFormValues }
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Name</FormLabel>
-                              <FormControl>
-                              {
-  IsNumber ? (
-    <Input
-      disabled={loading}
-      type="number"
-      value={field.value ? String(field.value) : ''}
-      onChange={field.onChange}
-    />
-  ) : (
-    <Input
-      disabled={loading}
-      type="text"
-      value={field.value ? String(field.value) : ''}
-      onChange={field.onChange}
-    />
-  )
-}
+      control={form.control}
+      name={formLab as any}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>{label}</FormLabel>
+          <div className="md:grid md:grid-cols-2 items-start gap-8">
+            <div>
+            <Select onValueChange={(val) => form1.setValue(formLab as any, val)} value={form1.watch(formLab as any)}>
+  <FormControl>
+    <SelectTrigger>
+      <SelectValue placeholder={`Select ${formCControlName}`} />
+    </SelectTrigger>
+  </FormControl>
 
-                              
-                            
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-          
-          
-                      </div>
-          
-          
-                      <DialogFooter className="sm:justify-end">
-          
-                        <Button onClick={closeDialogRam} type="button" variant="secondary">
-                          save
-                        </Button>
-          
-                      </DialogFooter>
-          
-          
-          
-                    </DialogContent>
-                  </Dialog>
-          
-                
-          
-                </div>
-              </div>
-          
-            </FormItem>
-                )}
-          />
-   
+  {/* Scrollable dropdown */}
+  <SelectContent
+    position="popper"
+    sideOffset={4}
+    className="max-h-64 p-0"
+  >
+    <div className="max-h-64 overflow-y-auto">
+      {data.map((row: any) => (
+        <SelectItem key={row.id} value={row.id}>
+          {row[fieldaAfficher]}
+        </SelectItem>
+      ))}
+    </div>
+  </SelectContent>
+</Select>
+
+              <FormMessage />
+            </div>
+
+            <div className="w-full">
+              <Button type="button" className="w-full" variant="outline" onClick={openDialog}>
+                Add {label}
+              </Button>
+
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>{label}</DialogTitle>
+                    <DialogDescription>Click save when you're done.</DialogDescription>
+                  </DialogHeader>
+
+                  <div className="grid gap-4 py-4">
+                    <FormLabel>Name</FormLabel>
+                    <Input
+                      disabled={loading}
+                      type={IsNumber ? "number" : "text"}
+                      value={newOptionName}
+                      onChange={(e) => setNewOptionName(e.target.value)}
+                    />
+                  </div>
+
+                  <DialogFooter className="sm:justify-end">
+                    <Button onClick={closeDialogAndCreate} type="button" variant="secondary">
+                      Save
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+        </FormItem>
+      )}
+    />
   );
 };

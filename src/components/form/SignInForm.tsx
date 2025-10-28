@@ -100,7 +100,7 @@ const SignInForm = ({ asModal = false, onSwitch, onSuccess }: Props) => {
         or
       </div>
   
-      <GoogleSignInButton>Sign in with Google</GoogleSignInButton>
+{/* <GoogleSignInButton>Sign in with Google</GoogleSignInButton> */}
   
       <p className="text-center text-sm text-muted-foreground mt-2">
         If you Don&apos;t have an account, please{" "}

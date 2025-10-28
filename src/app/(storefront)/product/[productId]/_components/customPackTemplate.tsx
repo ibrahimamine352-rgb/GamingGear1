@@ -1,6 +1,8 @@
 "use client"
 import Gallery from '@/components/gallery';
 import Info from '@/components/info';
+import type { Field } from '@/types'; // make sure Field is imported
+
 import { Product, Case, Cooling, Cpu, Gpu, HDD, Motherboard, Power, PreCustmizedPc, Prod, RAM, ProdCol } from '@/types';
 import {
     Table,
@@ -93,12 +95,15 @@ const CustomPackTemplate: React.FC<ProductFormProps> = ({ initialData }) => {
         stock: parseInt(initialData.stock.toString()),
         price: calculePrix(),
         description: initialData.description,
-        additionalDetails: [],
+        additionalDetails: [] as Field[],   // avoid `never[]`
         category: {
-            id: '',
-            name: ''
-        }
-    }
+          id: '',
+          name: ''
+        },
+        // ✅ add the required flags (fallback to false if not present)
+        comingSoon: Boolean((initialData as any)?.comingSoon),
+        outOfStock: Boolean((initialData as any)?.outOfStock),
+      };
     const [TableData, setTableData] = useState<TableData[]>([]);
 
     const [keyboardList, setkeyboardList] = useState<ProdCol[]>(initialData && initialData.PackProduct && initialData.PackProduct[0].Clavier
@@ -300,7 +305,7 @@ const CustomPackTemplate: React.FC<ProductFormProps> = ({ initialData }) => {
                     }
                     <div className=" mb-7 flex items-center gap-x-3">
                         <Button variant={"default"} onClick={onAddToCart} className="flex items-center bg-gradient-to-r from-[#38BDF8] to-[#0EA5E9] text-black font-semibold hover:shadow-[0_0_20px_rgba(56,189,248,0.35)] gap-x-2">
-                            Ajouter au panier
+                            Add To Cart
                             <ShoppingCart size={20} />
                         </Button>
                     </div>

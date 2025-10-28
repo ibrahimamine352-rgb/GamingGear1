@@ -86,7 +86,7 @@ export async function PATCH(
             defaultprocessorId,
             defaultramIdArray,
             defaultcooling,
-            discountOnPc,coolings,name, price, categoryId, images, isFeatured, isArchived, description, stock, additionalDetails, caseId, graphicCardId, motherBoardId, powerSupplyId, processorId, hardDiskArray, ramIdArray } = body;
+            discountOnPc,coolings,name, price, categoryId, images, isFeatured, isArchived, comingSoon, outOfStock, description, stock, additionalDetails, caseId, graphicCardId, motherBoardId, powerSupplyId, processorId, hardDiskArray, ramIdArray } = body;
 
     // Validation checks (similar to the POST function)
     const preBuiltPcmodelll= await prismadb.preBuiltPcmodel.findFirst({
@@ -159,6 +159,8 @@ export async function PATCH(
             price,
             isFeatured,
             isArchived,
+            comingSoon,
+            outOfStock,
             categoryId,
             description,
             stock,

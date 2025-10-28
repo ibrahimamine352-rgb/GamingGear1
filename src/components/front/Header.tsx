@@ -1,22 +1,15 @@
 "use client";
-import { useEffect } from "react"
-import { useSession } from "next-auth/react"
-
-import { useState } from 'react';
-import * as React from "react"
-import Link from 'next/link';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
-import { Session } from 'next-auth';
-import UserAccountNav from '../custom/UserAccountNav';
-import { Button, buttonVariants } from '../ui/button';
-import './Header.css'
-import { Category, navitem } from '@prisma/client';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Input } from '../ui/input';
-import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu"
-import { cn } from "@/lib/utils"
-import { Icons } from "@/components/icons"
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import * as React from "react";
+import Link from "next/link";
+import { Session } from "next-auth";
+import UserAccountNav from "../custom/UserAccountNav";
+import { Button } from "../ui/button";
+import "./Header.css";
+import { Category, navitem } from "@prisma/client";
+import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
+import { cn } from "@/lib/utils";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -25,8 +18,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
   NavigationMenuViewport,
-
-} from "@/components/ui/navigation-menu"
+} from "@/components/ui/navigation-menu";
 import {
   Command,
   CommandDialog,
@@ -37,39 +29,46 @@ import {
   CommandList,
   CommandSeparator,
   CommandShortcut,
-} from "@/components/ui/command"
-import HeaderNavigation from './headerNavigation';
-import { MainNav } from './main-nav';
-import Image from 'next/image';
-import SearchBar from './SearchBar';
-import { LocalCathegoryCollection } from '@/app/(admin)/admin/(routes)/mainpage/components/NavbarList';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
-import NavbarActions from '../navbar-actions';
-import { ChevronDown, Cpu, Monitor, Package, Keyboard, Mouse, Headphones, Laptop, Search, X, HardDrive, Battery, Fan, MemoryStick } from 'lucide-react';
+} from "@/components/ui/command";
+import HeaderNavigation from "./headerNavigation";
+import { MainNav } from "./main-nav";
+import Image from "next/image";
+import SearchBar from "./SearchBar";
+import { LocalCathegoryCollection } from "@/app/(admin)/admin/(routes)/mainpage/components/NavbarList";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
+import NavbarActions from "../navbar-actions";
 import {
-  AlertDialog,
-  AlertDialogContent,
-} from "@/components/ui/alert-dialog"
-import SignInForm from "@/components/form/SignInForm"
-import SignUpForm from "@/components/form/SignUpForm"
+  ChevronDown,
+  Cpu,
+  Monitor,
+  Package,
+  Keyboard,
+  Mouse,
+  Headphones,
+  Laptop,
+  X,
+  HardDrive,
+  Battery,
+  Fan,
+  MemoryStick,
+} from "lucide-react";
+import { AlertDialog, AlertDialogContent } from "@/components/ui/alert-dialog";
+import SignInForm from "@/components/form/SignInForm";
+import SignUpForm from "@/components/form/SignUpForm";
+
 interface HeaderProps {
   session?: Session | null;
-  cathegories?: Category[] | null
-  noscategy: LocalCathegoryCollection[]
-  links: navitem[]
-  noscategyMobile: LocalCathegoryCollection[]
-  linkMobile: navitem[]
+  cathegories?: Category[] | null;
+  noscategy: LocalCathegoryCollection[];
+  links: navitem[];
+  noscategyMobile: LocalCathegoryCollection[];
+  linkMobile: navitem[];
 }
 
-// Navigation structure matching the new design
+// Navigation structure
 const NAV = {
-  Laptops: [
-    { label: "All Laptops", href: "/shop?categorie=Laptops" },
-  ],
-  Monitors: [
-    { label: "All Monitors", href: "/shop?categorie=Monitors" },
-    
-  ],
+  Laptops: [{ label: "All Laptops", href: "/shop?categorie=Laptops" }],
+  Monitors: [{ label: "All Monitors", href: "/shop?categorie=Monitors" }],
   Components: [
     { label: "Processors (CPU)", href: "/shop?categorie=CPU", icon: <Cpu className="h-5 w-5 text-[hsl(var(--promo))]" /> },
     { label: "Graphics Cards (GPU)", href: "/shop?categorie=GPU", icon: <Monitor className="h-5 w-5 text-[hsl(var(--promo))]" /> },
@@ -87,12 +86,10 @@ const NAV = {
   ],
 };
 
-// Helper components from the new design
 interface ContainerProps {
   children: React.ReactNode;
   className?: string;
 }
-
 function Container({ children, className = "" }: ContainerProps) {
   return <div className={`mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-8 ${className}`}>{children}</div>;
 }
@@ -105,61 +102,49 @@ interface MenuItemProps {
   id: string;
   widthClass?: string;
 }
-
 function MenuItem({ label, children, open, setOpen, id, widthClass }: MenuItemProps) {
-  const closeTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
-
+  const closeTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const openNow = () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current)
-    setOpen(id)
-  }
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setOpen(id);
+  };
   const closeLater = () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current)
-    closeTimer.current = setTimeout(() => setOpen(""), 120) // small grace
-  }
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setOpen(""), 120);
+  };
 
   return (
-    <div
-      className="relative"
-      onMouseEnter={openNow}
-      onMouseLeave={closeLater}
-    >
-      <button
-        className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-foreground/90 hover:text-foreground transition-colors"
-      >
+    <div className="relative" onMouseEnter={openNow} onMouseLeave={closeLater}>
+      <button className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-foreground/90 hover:text-foreground transition-colors">
         {label}
         <ChevronDown className="h-4 w-4" />
       </button>
 
       {open === id && (
-  <div
-    className={cn(
-      "header-dd absolute left-0 top-[calc(100%+4px)] z-[6000] rounded-2xl border border-border/60 bg-background/80 backdrop-blur-md shadow-[0_8px_40px_rgba(0,0,0,.45)] pointer-events-auto",
-      // default keeps your old size if widthClass isn't passed
-      widthClass ?? "min-w-[980px]"
-    )}
-  >
-    {children}
-  </div>
-)}
+        <div
+          className={cn(
+            "header-dd absolute left-0 top-[calc(100%+4px)] z-[6000] rounded-2xl border border-border/60 bg-background/80 backdrop-blur-md shadow-[0_8px_40px_rgba(0,0,0,.45)] pointer-events-auto",
+            widthClass ?? "min-w-[980px]"
+          )}
+        >
+          {children}
+        </div>
+      )}
     </div>
-  )
+  );
 }
-
 
 interface MenuColProps {
   title: string;
   items: { label: string; href: string; icon?: React.ReactNode }[];
   icon?: React.ReactNode;
 }
-
 function MenuCol({ title, items, icon }: MenuColProps) {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2 text-[13px] font-semibold text-foreground/70 tracking-wide">
         {icon}
         <span className="uppercase">{title}</span>
-        
       </div>
       <div className="space-y-1.5">
         {items.map((item) => (
@@ -176,20 +161,29 @@ function MenuCol({ title, items, icon }: MenuColProps) {
   );
 }
 
-export default function Header({ session, cathegories, noscategy, links, noscategyMobile, linkMobile }: HeaderProps) {
+export default function Header({
+  session,
+  cathegories,
+  noscategy,
+  links,
+  noscategyMobile,
+  linkMobile,
+}: HeaderProps) {
   const [open, setOpen] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [authOpen, setAuthOpen] = useState(false)
-  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin")
-  const { status } = useSession()
-  useEffect(() => {
-    if (status === "authenticated") setAuthOpen(false)
-  }, [status])
-  
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
+  const { status } = useSession();
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  // NEW: controls the right-side panel inside All Products (desktop)
+  const [allTab, setAllTab] =
+    useState<"Laptops" | "Monitors" | "Components" | "Peripherals">("Laptops");
+
+  useEffect(() => {
+    if (status === "authenticated") setAuthOpen(false);
+  }, [status]);
+
+  const toggleMenu = () => setIsMenuOpen((v) => !v);
 
   return (
     <>
@@ -203,12 +197,10 @@ export default function Header({ session, cathegories, noscategy, links, noscate
           <div className="flex h-20 items-center justify-between">
             {/* Logo */}
             <div className="flex items-center">
-              <Link href="/" aria-label="Go to homepage" className="logo-link relative z-[10001] inline-flex items-center"
-              >
+              <Link href="/" aria-label="Go to homepage" className="logo-link relative z-[10001] inline-flex items-center">
                 <div className="relative ">
-                  
-                  <Image 
-                    width={90} 
+                  <Image
+                    width={90}
                     height={90}
                     src="/images/new logo.png"
                     className="relative z-10 h-14 w-14 rounded-full max-w-full dark:invert invert-0 hover:brightness-0 hover:saturate-100 hover:hue-rotate-[200deg] transition-all duration-300"
@@ -224,15 +216,16 @@ export default function Header({ session, cathegories, noscategy, links, noscate
               {session ? (
                 <UserAccountNav />
               ) : (
-                
-                  <Button 
-                    variant="outline" 
-                    onClick={() => { setAuthMode("signin"); setAuthOpen(true); }}
-                    className="bg-gradient-to-r from-[#38BDF8] to-[#0EA5E9] text-black font-semibold hover:shadow-[0_0_20px_rgba(56,189,248,0.35)] transition-all duration-300 border-0"
-                  >
-                    Sign in
-                  </Button>
-                
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setAuthMode("signin");
+                    setAuthOpen(true);
+                  }}
+                  className="bg-gradient-to-r from-[#38BDF8] to-[#0EA5E9] text-black font-semibold hover:shadow-[0_0_20px_rgba(56,189,248,0.35)] transition-all duration-300 border-0"
+                >
+                  Sign in
+                </Button>
               )}
             </div>
           </div>
@@ -244,26 +237,78 @@ export default function Header({ session, cathegories, noscategy, links, noscate
             <div className="flex h-16 items-center justify-between">
               {/* Desktop Navigation */}
               <nav className="hidden lg:flex items-center space-x-8">
-             
-  <Link
-    href="/shop?prebuilt=1"
-    className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-[hsl(var(--promo))]
-               hover:bg-[hsl(var(--accent))/0.08] hover:shadow-[0_0_0_1px_hsl(var(--accent)/0.25),_0_0_18px_hsl(var(--accent)/0.12)]
-               transition-colors"
-  >
-  
-     Builds
-  </Link>
-                <MenuItem label="All Products" open={open} setOpen={setOpen} id="All">
-                <div className="grid grid-cols-4 gap-x-8 p-6 divide-x divide-border/50 [&>*]:px-6">
-                   <MenuCol title="Laptops" items={NAV.Laptops} icon={<Laptop className="h-5 w-5 text-[hsl(var(--promo))]" />} />
-                   <MenuCol title="Monitors" items={NAV.Monitors} icon={<Monitor className="h-5 w-5 text-[hsl(var(--promo))]" />} />
-                   <MenuCol title="Components" items={NAV.Components} icon={<Package className="h-5 w-5 text-[hsl(var(--promo))]" />} />
-                   <MenuCol title="Peripherals" items={NAV.Peripherals} icon={<Keyboard className="h-5 w-5 text-[hsl(var(--promo))]" />} />
-                </div>
+                {/* ALL PRODUCTS — vertical flyout (desktop) */}
+                <MenuItem label="All Products" open={open} setOpen={setOpen} id="All" widthClass="min-w-[260px]">
+                  <div className="flex flex-col p-3 space-y-1">
+                    {/* Laptops */}
+                    {NAV.Laptops.map((it) => (
+                      <a
+                        key={it.href}
+                        href={it.href}
+                        className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground/80 hover:bg-white/10 hover:text-foreground transition-colors"
+                      >
+                        <Laptop className="h-5 w-5 text-[hsl(var(--promo))]" />
+                        {it.label}
+                      </a>
+                    ))}
+
+                    {/* Monitors */}
+                    {NAV.Monitors.map((it) => (
+                      <a
+                        key={it.href}
+                        href={it.href}
+                        className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground/80 hover:bg-white/10 hover:text-foreground transition-colors"
+                      >
+                        <Monitor className="h-5 w-5 text-[hsl(var(--promo))]" />
+                        {it.label}
+                      </a>
+                    ))}
+
+                    {/* Components */}
+                    <div className="pt-2">
+                      <div className="px-3 pb-1 text-xs uppercase tracking-wide text-foreground/50">Components</div>
+                      <div className="flex flex-col space-y-1">
+                        {NAV.Components.map((it) => (
+                          <a
+                            key={it.href}
+                            href={it.href}
+                            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground/80 hover:bg-white/10 hover:text-foreground transition-colors"
+                          >
+                            {it.icon}
+                            {it.label}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Peripherals */}
+                    <div className="pt-2">
+                      <div className="px-3 pb-1 text-xs uppercase tracking-wide text-foreground/50">Peripherals</div>
+                      <div className="flex flex-col space-y-1">
+                        {NAV.Peripherals.map((it) => (
+                          <a
+                            key={it.href}
+                            href={it.href}
+                            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground/80 hover:bg-white/10 hover:text-foreground transition-colors"
+                          >
+                            {it.icon}
+                            {it.label}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </MenuItem>
 
-                {/* Laptops — direct link (no dropdown) */}
+                {/* Builds link */}
+                <Link
+                  href="/shop?prebuilt=1"
+                  className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-[hsl(var(--promo))] hover:bg-[hsl(var(--accent))/0.08] hover:shadow-[0_0_0_1px_hsl(var(--accent)/0.25),_0_0_18px_hsl(var(--accent)/0.12)] transition-colors"
+                >
+                  Builds
+                </Link>
+
+                {/* Laptops — direct link */}
                 <Link
                   href="/shop?categorie=Laptops"
                   className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-foreground/90 hover:text-foreground transition-colors"
@@ -271,7 +316,7 @@ export default function Header({ session, cathegories, noscategy, links, noscate
                   Laptops
                 </Link>
 
-                {/* Monitors — direct link (no dropdown) */}
+                {/* Monitors — direct link */}
                 <Link
                   href="/shop?categorie=Monitors"
                   className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-foreground/90 hover:text-foreground transition-colors"
@@ -279,42 +324,40 @@ export default function Header({ session, cathegories, noscategy, links, noscate
                   Monitors
                 </Link>
 
-                {/* Keep dropdowns for Components & Peripherals */}
+                {/* Components dropdown (compact) */}
                 <MenuItem label="Components" open={open} setOpen={setOpen} id="Components" widthClass="min-w-[560px]">
-  <div className="grid grid-cols-2 gap-2 p-3">
-    {NAV.Components.map((item) => (
-      <a
-        key={item.href}
-        href={item.href}
-        className="flex items-center gap-2 rounded-lg p-2 leading-tight text-foreground/80 hover:bg-white/10 hover:text-foreground transition-all duration-200"
-      >
-        <span className="shrink-0">{item.icon}</span>
-        <span className="text-xs md:text-sm">{item.label}</span>
-      </a>
-    ))}
-  </div>
-</MenuItem>
+                  <div className="grid grid-cols-2 gap-2 p-3">
+                    {NAV.Components.map((item) => (
+                      <a
+                        key={item.href}
+                        href={item.href}
+                        className="flex items-center gap-2 rounded-lg p-2 leading-tight text-foreground/80 hover:bg-white/10 hover:text-foreground transition-all duration-200"
+                      >
+                        <span className="shrink-0">{item.icon}</span>
+                        <span className="text-xs md:text-sm">{item.label}</span>
+                      </a>
+                    ))}
+                  </div>
+                </MenuItem>
 
-                
-<MenuItem label="Peripherals" open={open} setOpen={setOpen} id="Peripherals" widthClass="min-w-[440px]">
-  <div className="grid grid-cols-2 gap-2 p-3">
-    {NAV.Peripherals.map((item) => (
-      <a
-        key={item.href}
-        href={item.href}
-        className="flex items-center gap-2 rounded-lg p-2 leading-tight text-foreground/80 hover:bg-white/10 hover:text-foreground transition-all duration-200"
-      >
-        <span className="shrink-0">{item.icon}</span>
-        <span className="text-xs md:text-sm">{item.label}</span>
-      </a>
-    ))}
-  </div>
-</MenuItem>
-
-
+                {/* Peripherals dropdown (compact) */}
+                <MenuItem label="Peripherals" open={open} setOpen={setOpen} id="Peripherals" widthClass="min-w-[440px]">
+                  <div className="grid grid-cols-2 gap-2 p-3">
+                    {NAV.Peripherals.map((item) => (
+                      <a
+                        key={item.href}
+                        href={item.href}
+                        className="flex items-center gap-2 rounded-lg p-2 leading-tight text-foreground/80 hover:bg-white/10 hover:text-foreground transition-all duration-200"
+                      >
+                        <span className="shrink-0">{item.icon}</span>
+                        <span className="text-xs md:text-sm">{item.label}</span>
+                      </a>
+                    ))}
+                  </div>
+                </MenuItem>
               </nav>
 
-              {/* Build PC Button and Search Bar */}
+              {/* Build PC Button and Search Bar (DESKTOP ONLY) */}
               <div className="hidden lg:flex items-center space-x-4">
                 <div className="w-48">
                   <SearchBar cats={cathegories} />
@@ -327,112 +370,132 @@ export default function Header({ session, cathegories, noscategy, links, noscate
                 </Link>
               </div>
 
-              {/* Mobile Menu Button */}
-              <button
-                className="lg:hidden p-2 text-foreground hover:bg-white/10 rounded-lg transition-colors"
-                onClick={toggleMenu}
-              >
-                <svg fill="currentColor" height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M4 5h16a1 1 0 0 1 0 2H4a1 1 0 1 1 0-2zm0 6h16a1 1 0 0 1 0 2H4a1 1 0 1 1 0-2zm0 6h16a1 1 0 0 1 0 2H4a1 1 0 1 1 0-2z"/>
-                </svg>
-              </button>
+              {/* Mobile Menu & Search (MOBILE ONLY) */}
+              <div className="flex items-center gap-2 lg:hidden">
+                {/* Hamburger */}
+                <button
+                  className="p-2 text-foreground hover:bg-white/10 rounded-lg transition-colors"
+                  onClick={toggleMenu}
+                  aria-label="Toggle menu"
+                >
+                  <svg fill="currentColor" height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 5h16a1 1 0 0 1 0 2H4a1 1 0 1 1 0-2zm0 6h16a1 1 0 0 1 0 2H4a1 1 0 1 1 0-2zm0 6h16a1 1 0 0 1 0 2H4a1 1 0 1 1 0-2z" />
+                  </svg>
+                </button>
+
+                {/* Same SearchBar component, constrained width for mobile */}
+                <div className="flex-1 min-w-[140px] max-w-[220px] sm:max-w-[260px]">
+                  <SearchBar cats={cathegories} />
+                </div>
+              </div>
             </div>
           </Container>
         </div>
       </div>
 
-    
-     {/* Mobile Menu */}
-{/* === Mobile Menu (styled, scrollable) === */}
-<div className={`${isMenuOpen ? "flex" : "hidden"} fixed inset-x-0 top-[var(--header-h,80px)] bottom-0 z-[6000] lg:hidden`}>
-
-  {/* Scrim */}
-  <div
-    className="fixed inset-x-0 top-[var(--header-h,80px)] bottom-0 bg-black/45 backdrop-blur-[1px]"
-    onClick={toggleMenu}
-  />
-
-  {/* Drawer */}
-  <div
-    className="fixed left-0 top-[var(--header-h,80px)] bottom-0
-               w-[92vw] max-w-[420px]
-               bg-background/95 backdrop-blur-md
-               border-l border-border/10
-               shadow-[0_10px_40px_rgba(0,0,0,.55)]
-               flex flex-col"
-  >
-    {/* Drawer header (keeps your close button) */}
-    <div className="sticky top-0 z-10 h-12 flex items-center justify-between px-4
-                    border-b border-border/10 bg-background/95">
-      
-      <button
-        onClick={toggleMenu}
-        className="p-2 text-foreground/80 hover:bg-white/5 rounded-lg transition"
-        aria-label="Close"
-      >
-        <X className="h-5 w-5" />
-      </button>
-    </div>
-
-    {/* Content (SCROLLS) */}
-    <div className="flex-1 overflow-y-auto p-4 space-y-3">
-      {/* Build Your PC — unchanged behavior, only styling */}
-      <Link href="/build-pc" onClick={toggleMenu}>
-        <Button
-          className="w-full h-11 rounded-xl
-                     bg-gradient-to-r from-[#38BDF8] to-[#0EA5E9]
-                     text-black font-semibold border-0
-                     hover:shadow-[0_0_20px_rgba(56,189,248,0.35)]"
+      {/* === Mobile Menu (unchanged) === */}
+      <div className={`${isMenuOpen ? "flex" : "hidden"} fixed inset-x-0 top-[var(--header-h,80px)] bottom-0 z-[6000] lg:hidden`}>
+        {/* Scrim */}
+        <div className="fixed inset-x-0 top-[var(--header-h,80px)] bottom-0 bg-black/45 backdrop-blur-[1px]" onClick={toggleMenu} />
+        {/* Drawer */}
+        <div
+          className="fixed left-0 top-[var(--header-h,80px)] bottom-0 w-[92vw] max-w-[420px] bg-background/95 backdrop-blur-md
+               border-l border-border/10 shadow-[0_10px_40px_rgba(0,0,0,.55)] flex flex-col"
         >
-          <Cpu className="h-4 w-4 mr-2" />
-          Build Your PC
-        </Button>
-      </Link>
+          {/* Drawer header */}
+          <div className="sticky top-0 z-10 h-12 flex items-center justify-between px-4 border-b border-border/10 bg-background/95">
+            <button onClick={toggleMenu} className="p-2 text-foreground/80 hover:bg-white/5 rounded-lg transition" aria-label="Close">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
 
-      
-      
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            <Link href="/build-pc" onClick={toggleMenu}>
+              <Button className="w-full h-11 rounded-xl bg-gradient-to-r from-[#38BDF8] to-[#0EA5E9] text-black font-semibold border-0 hover:shadow-[0_0_20px_rgba(56,189,248,0.35)]">
+                <Cpu className="h-4 w-4 mr-2" />
+                Build Your PC
+              </Button>
+            </Link>
 
-      <Link href="/shop?prebuilt=1" onClick={toggleMenu} className="block">
-        <div className="h-10 grid place-items-start rounded-xl px-3
-                  text-[hsl(var(--promo))]
-                 
-                  focus:outline-none focus:ring-0">
-          Builds
-        </div>
-      </Link>
-      {/* Full Setup (mobile only) */}
-<Link href="/full-setup" onClick={toggleMenu} className="block">
-  <div className="h-10 grid place-items-start rounded-xl px-3
-                  text-foreground/90
-                  hover:bg-white/5
-                  focus:outline-none focus:ring-0">
-    Full Setup
-  </div>
-</Link>
+            <Link href="/shop?prebuilt=1" onClick={toggleMenu} className="block">
+              <div className="h-10 grid place-items-start rounded-xl px-3 text-[hsl(var(--promo))] focus:outline-none focus:ring-0">Builds</div>
+            </Link>
 
-      {/* Mobile “All Products” + sections (mirrors desktop) */}
-      <Accordion
-        type="single"
-        collapsible
-        className="w-full rounded-2xl border border-border/10 overflow-hidden divide-y divide-border/10"
-      >
-        {/* All Products */}
-        <AccordionItem value="all" className="border-0">
-          <AccordionTrigger className="px-4 py-3 text-foreground/90 hover:text-[hsl(var(--accent))]">
-            All Products
-          </AccordionTrigger>
-          <AccordionContent className="pb-3">
-            <div className="grid grid-cols-1 gap-2">
-              <Link href="/shop?categorie=Laptops" onClick={toggleMenu} className="block rounded-lg px-4 py-2 text-foreground/80 hover:text-foreground hover:bg-white/5">
-                Laptops
-              </Link>
-              <Link href="/shop?categorie=Monitors" onClick={toggleMenu} className="block rounded-lg px-4 py-2 text-foreground/80 hover:text-foreground hover:bg-white/5">
-                Monitors
-              </Link>
+            <Link href="/full-setup" onClick={toggleMenu} className="block">
+              <div className="h-10 grid place-items-start rounded-xl px-3 text-foreground/90 hover:bg-white/5 focus:outline-none focus:ring-0">Full Setup</div>
+            </Link>
 
-              <div className="pt-2">
-                <div className="px-4 pb-1 text-xs uppercase tracking-wide text-foreground/50">Components</div>
-                <div className="mt-1">
+            <Accordion type="single" collapsible className="w-full rounded-2xl border border-border/10 overflow-hidden divide-y divide-border/10">
+              <AccordionItem value="all" className="border-0">
+                <AccordionTrigger className="px-4 py-3 text-foreground/90 hover:text-[hsl(var(--accent))]">All Products</AccordionTrigger>
+                <AccordionContent className="pb-3">
+                  <div className="grid grid-cols-1 gap-2">
+                    <Link href="/shop?categorie=Laptops" onClick={toggleMenu} className="block rounded-lg px-4 py-2 text-foreground/80 hover:text-foreground hover:bg-white/5">
+                      Laptops
+                    </Link>
+                    <Link href="/shop?categorie=Monitors" onClick={toggleMenu} className="block rounded-lg px-4 py-2 text-foreground/80 hover:text-foreground hover:bg-white/5">
+                      Monitors
+                    </Link>
+
+                    <div className="pt-2">
+                      <div className="px-4 pb-1 text-xs uppercase tracking-wide text-foreground/50">Components</div>
+                      <div className="mt-1">
+                        {NAV.Components.map((it) => (
+                          <Link
+                            key={it.href}
+                            href={it.href}
+                            onClick={toggleMenu}
+                            className="flex items-center gap-2 rounded-lg px-4 py-2 text-foreground/80 hover:text-foreground hover:bg-white/5"
+                          >
+                            {it.icon}
+                            <span>{it.label}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pt-2">
+                      <div className="px-4 pb-1 text-xs uppercase tracking-wide text-foreground/50">Peripherals</div>
+                      <div className="mt-1">
+                        {NAV.Peripherals.map((it) => (
+                          <Link
+                            key={it.href}
+                            href={it.href}
+                            onClick={toggleMenu}
+                            className="flex items-center gap-2 rounded-lg px-4 py-2 text-foreground/80 hover:text-foreground hover:bg-white/5"
+                          >
+                            {it.icon}
+                            <span>{it.label}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="laptops" className="border-0">
+                <AccordionTrigger className="px-4 py-3 text-foreground/90 hover:text-[hsl(var(--accent))]">Laptops</AccordionTrigger>
+                <AccordionContent>
+                  <Link href="/shop?categorie=Laptops" onClick={toggleMenu} className="block rounded-lg px-4 py-2 text-foreground/80 hover:text-foreground hover:bg-white/5">
+                    All Laptops
+                  </Link>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="monitors" className="border-0">
+                <AccordionTrigger className="px-4 py-3 text-foreground/90 hover:text-[hsl(var(--accent))]">Monitors</AccordionTrigger>
+                <AccordionContent>
+                  <Link href="/shop?categorie=Monitors" onClick={toggleMenu} className="block rounded-lg px-4 py-2 text-foreground/80 hover:text-foreground hover:bg-white/5">
+                    All Monitors
+                  </Link>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="components" className="border-0">
+                <AccordionTrigger className="px-4 py-3 text-foreground/90 hover:text-[hsl(var(--accent))]">Components</AccordionTrigger>
+                <AccordionContent className="pb-2">
                   {NAV.Components.map((it) => (
                     <Link
                       key={it.href}
@@ -440,15 +503,16 @@ export default function Header({ session, cathegories, noscategy, links, noscate
                       onClick={toggleMenu}
                       className="flex items-center gap-2 rounded-lg px-4 py-2 text-foreground/80 hover:text-foreground hover:bg-white/5"
                     >
-                      {it.icon}<span>{it.label}</span>
+                      {it.icon}
+                      <span>{it.label}</span>
                     </Link>
                   ))}
-                </div>
-              </div>
+                </AccordionContent>
+              </AccordionItem>
 
-              <div className="pt-2">
-                <div className="px-4 pb-1 text-xs uppercase tracking-wide text-foreground/50">Peripherals</div>
-                <div className="mt-1">
+              <AccordionItem value="peripherals" className="border-0">
+                <AccordionTrigger className="px-4 py-3 text-foreground/90 hover:text-[hsl(var(--accent))]">Peripherals</AccordionTrigger>
+                <AccordionContent className="pb-2">
                   {NAV.Peripherals.map((it) => (
                     <Link
                       key={it.href}
@@ -456,104 +520,29 @@ export default function Header({ session, cathegories, noscategy, links, noscate
                       onClick={toggleMenu}
                       className="flex items-center gap-2 rounded-lg px-4 py-2 text-foreground/80 hover:text-foreground hover:bg-white/5"
                     >
-                      {it.icon}<span>{it.label}</span>
+                      {it.icon}
+                      <span>{it.label}</span>
                     </Link>
                   ))}
-                </div>
-              </div>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
 
-        {/* Laptops */}
-        <AccordionItem value="laptops" className="border-0">
-          <AccordionTrigger className="px-4 py-3 text-foreground/90 hover:text-[hsl(var(--accent))]">
-            Laptops
-          </AccordionTrigger>
-          <AccordionContent>
-            <Link href="/shop?categorie=Laptops" onClick={toggleMenu} className="block rounded-lg px-4 py-2 text-foreground/80 hover:text-foreground hover:bg-white/5">
-              All Laptops
-            </Link>
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* Monitors */}
-        <AccordionItem value="monitors" className="border-0">
-          <AccordionTrigger className="px-4 py-3 text-foreground/90 hover:text-[hsl(var(--accent))]">
-            Monitors
-          </AccordionTrigger>
-          <AccordionContent>
-            <Link href="/shop?categorie=Monitors" onClick={toggleMenu} className="block rounded-lg px-4 py-2 text-foreground/80 hover:text-foreground hover:bg-white/5">
-              All Monitors
-            </Link>
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* Components */}
-        <AccordionItem value="components" className="border-0">
-          <AccordionTrigger className="px-4 py-3 text-foreground/90 hover:text-[hsl(var(--accent))]">
-            Components
-          </AccordionTrigger>
-          <AccordionContent className="pb-2">
-            {NAV.Components.map((it) => (
-              <Link
-                key={it.href}
-                href={it.href}
-                onClick={toggleMenu}
-                className="flex items-center gap-2 rounded-lg px-4 py-2 text-foreground/80 hover:text-foreground hover:bg-white/5"
-              >
-                {it.icon}<span>{it.label}</span>
-              </Link>
-            ))}
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* Peripherals */}
-        <AccordionItem value="peripherals" className="border-0">
-          <AccordionTrigger className="px-4 py-3 text-foreground/90 hover:text-[hsl(var(--accent))]">
-            Peripherals
-          </AccordionTrigger>
-          <AccordionContent className="pb-2">
-            {NAV.Peripherals.map((it) => (
-              <Link
-                key={it.href}
-                href={it.href}
-                onClick={toggleMenu}
-                className="flex items-center gap-2 rounded-lg px-4 py-2 text-foreground/80 hover:text-foreground hover:bg-white/5"
-              >
-                {it.icon}<span>{it.label}</span>
-              </Link>
-            ))}
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-
-      {/* bottom padding for iOS safe area */}
-      <div className="h-3" />
-    </div>
-  </div>
-</div>
-{/* === /Mobile Menu === */}
-
+            <div className="h-3" />
+          </div>
+        </div>
+      </div>
+      {/* === /Mobile Menu === */}
 
       <AlertDialog open={authOpen} onOpenChange={setAuthOpen}>
-  <AlertDialogContent className="w-[92vw] max-w-md p-6">
-    {authMode === "signin" ? (
-      <SignInForm
-        asModal
-        onSwitch={() => setAuthMode("signup")}
-        onSuccess={() => setAuthOpen(false)}   // 👈 close after successful sign-in
-      />
-    ) : (
-      <SignUpForm
-        asModal
-        onSwitch={() => setAuthMode("signin")}
-        onSuccess={() => setAuthMode("signin")} // 👈 after sign-up, switch to sign-in
-      />
-    )}
-  </AlertDialogContent>
-</AlertDialog>
-
+        <AlertDialogContent className="w-[92vw] max-w-md p-6">
+          {authMode === "signin" ? (
+            <SignInForm asModal onSwitch={() => setAuthMode("signup")} onSuccess={() => setAuthOpen(false)} />
+          ) : (
+            <SignUpForm asModal onSwitch={() => setAuthMode("signin")} onSuccess={() => setAuthMode("signin")} />
+          )}
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

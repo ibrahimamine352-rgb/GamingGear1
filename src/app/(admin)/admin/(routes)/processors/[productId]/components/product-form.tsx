@@ -9,6 +9,8 @@ import { toast } from "react-hot-toast"
 import { Trash } from "lucide-react"
 import { Category, Image, Product, Manufacturer, RamSlots, MotherboardChipset, CPUSupport, Guarantee, MotherboardFormat, ProcessorModel, Processor } from "@prisma/client"
 import { useParams, useRouter } from "next/navigation"
+import ManageProcessorModels from "./ManageProcessorModels";
+import ManageCpuSupports from "./ManageCpuSupports";
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -21,6 +23,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+
 import { Separator } from "@/components/ui/separator"
 import { Heading } from "@/components/ui/heading"
 import { AlertModal } from "@/components/modals/alert-modal"
@@ -44,8 +47,10 @@ const formSchema = z.object({
   categoryId: z.string().min(1),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
+  comingSoon: z.boolean().default(false).optional(),
+  outOfStock: z.boolean().default(false).optional(),
   processorModelId: z.string().min(1),
-  supportduprocesseurId: z.string().min(1),
+  cpusupportId: z.string().min(1),
   additionalDetails : z.object({ name: z.string(),value:z.string() }).array() ,
   dicountPrice: z.coerce.number().optional(),
   stock: z.coerce.number().min(1),
@@ -74,6 +79,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [cpuSupports, setCpuSupports] = useState<any[]>([]);
 
   const title = initialData ? 'Edit product' : 'Create product';
   const description = initialData ? 'Edit a product.' : 'Add a new product';
@@ -83,8 +89,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const defaultValues = initialData ? {
     ...initialData,
     price: parseFloat(String(initialData?.price)),
-    processorModelId:initialData.cpus[0].processorModelId,
-    supportduprocesseurId:initialData.cpus[0].cpusupportId,
+    processorModelId: initialData.cpus[0].processorModelId,
+    cpusupportId:      initialData.cpus[0].cpusupportId,
     additionalDetails:   (initialData?.additionalDetails || []).map((item) => ({
       name: item.name,
       value: item.value
@@ -98,6 +104,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     categoryId: '',
     isFeatured: false,
     isArchived: false,
+    comingSoon: false,
+    outOfStock: false,
     dicountPrice:0,
     stock:0,
     description:'',
@@ -109,17 +117,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     defaultValues
   });
 
-
-console
-
-
   
   const onSubmit = async (data: ProductFormValues) => {
  
     try {
       setLoading(true);
       if (initialData) {
-        await axios.patch(`/api/products/${params.productId}`, data);
+        await axios.patch(`/api/processor/component/${params.productId}`, data);
       } else {
         await axios.post(`/api/processor/component`, data);
       }
@@ -216,18 +220,26 @@ console
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue defaultValue={field.value} placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Select disabled={loading} onValueChange={field.onChange} value={field.value}>
+  <FormControl>
+    <SelectTrigger>
+      <SelectValue placeholder="Select CPU Support" />
+    </SelectTrigger>
+  </FormControl>
+  <SelectContent
+    position="popper"
+    sideOffset={4}
+    className="max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent"
+  >
+    {supportduprocesseurss.map((support) => (
+      <SelectItem key={support.id} value={support.id}>
+        {support.name}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
+
+
                   <FormMessage />
                 </FormItem>
               )}
@@ -332,7 +344,36 @@ console
                 </FormItem>
               )}
             />
-         
+            <FormField
+              control={form.control}
+              name="comingSoon"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Coming Soon</FormLabel>
+                    <FormDescription>Mark this product as coming soon</FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />        
+            <FormField
+              control={form.control}
+              name="outOfStock"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Out of Stock</FormLabel>
+                    <FormDescription>Mark this product as out of stock</FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
           </div>
           <Separator />
 
@@ -378,26 +419,30 @@ console
               form1={form} 
               loading={loading} 
               setLoading={setLoading} 
-              data={...processorModels}
+              data={processorModels}
               fieldaAfficher="name"
               url="/api/processor/ProcessorModel"
               formLab="processorModelId"
               formCControlName="ProcessorModel"
               IsNumber={false}
               />
+  <ManageProcessorModels />
 
          
-<PopFormModal label={"CPU Support"} 
-              form1={form} 
-              loading={loading} 
-              setLoading={setLoading} 
-              data={...supportduprocesseurss}
-              fieldaAfficher="name"
-              url="/api/motherboard/CPUSupport"
-              formLab="supportduprocesseurId"
-              formCControlName="supportduprocesseur"
-              IsNumber={false}
-              />
+<PopFormModal
+   label={"CPU Support"}
+   form1={form}
+   loading={loading}
+   setLoading={setLoading}
+   data={supportduprocesseurss}
+   fieldaAfficher="name"
+   url="/api/motherboard/CPUSupport"  // keep your existing source for options
+   formLab="cpusupportId"              // <-- important
+   formCControlName="CPUSupport"       // label only; can be anything, but keep it consistent
+   IsNumber={false}
+/>
+<ManageCpuSupports />
+
           
 
 

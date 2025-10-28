@@ -68,6 +68,8 @@ const formSchema = z.object({
   stock: z.coerce.number().min(0).optional(),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
+  comingSoon: z.boolean().default(false).optional(),
+  outOfStock: z.boolean().default(false).optional(),
   additionalDetails: z.object({ name: z.string(), value: z.string() }).array(),
 });
 
@@ -108,6 +110,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
     stock: Number(initialData?.stock ?? 0),
     isFeatured: Boolean(initialData?.isFeatured),
     isArchived: Boolean(initialData?.isArchived),
+    comingSoon: Boolean(initialData?.comingSoon),
+    outOfStock: Boolean(initialData?.outOfStock),
     additionalDetails: (initialData?.additionalDetails ?? []).map((d: Field) => ({
       name: d.name,
       value: d.value,
@@ -415,7 +419,46 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="comingSoon"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      // @ts-ignore
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Coming Soon</FormLabel>
+                    <FormDescription>Mark this product as coming soon</FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="outOfStock"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      // @ts-ignore
+                      onCheckedChange={field.onChange}
+                    />
+                    </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Out of Stock</FormLabel>
+                    <FormDescription>Mark this product as out of stock</FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
           </div>
+          <Separator />
 
           {/* Sticky footer with total + discount */}
           <div className="w-full fixed bottom-0 left-0 z-40 bg-white dark:bg-black border-t-small py-3 px-3">

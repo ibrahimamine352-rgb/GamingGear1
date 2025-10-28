@@ -130,7 +130,7 @@ const FormSchema = z
         or
       </div>
   
-      <GoogleSignInButton>Sign up with Google</GoogleSignInButton>
+{/* <GoogleSignInButton>Sign up with Google</GoogleSignInButton> */}
   
       <p className="text-center text-sm text-muted-foreground mt-2">
         Already have an account?{" "}

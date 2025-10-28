@@ -23,6 +23,8 @@ const formSchema = z.object({
   categoryId: z.string().min(1),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
+  comingSoon: z.boolean().default(false).optional(),
+  outOfStock: z.boolean().default(false).optional(),
   SystemId:z.string().min(1),
   ProcesseurId:z.string().min(1),
 

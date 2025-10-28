@@ -25,6 +25,8 @@ const formSchema = z.object({
   categoryId: z.string().min(1),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
+  comingSoon: z.boolean().default(false).optional(),
+  outOfStock: z.boolean().default(false).optional(),
   RgbTypeId:z.string().min(1),
   Connectiviteid:z.string().min(1),
   RgbType:z.string().optional(),

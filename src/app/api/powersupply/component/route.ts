@@ -15,7 +15,7 @@ export async function POST(
 
     const body = await req.json();
 
-    const { name, price, categoryId, images, isFeatured, isArchived,  description, stock, additionalDetails,
+    const { name, price, categoryId, images, isFeatured, isArchived, comingSoon, outOfStock,   description, stock, additionalDetails,
       certification80ID,
       powersupplyMarqueID,
       modularity,
@@ -64,7 +64,10 @@ export async function POST(
             isFeatured,
             isArchived
             , description
-            , stock,
+            , stock,      
+            comingSoon,
+            outOfStock,
+              
             images: {
               createMany: {
                 data: [...images]

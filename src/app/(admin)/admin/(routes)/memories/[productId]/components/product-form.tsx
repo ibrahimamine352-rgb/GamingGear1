@@ -43,6 +43,8 @@ const formSchema = z.object({
   categoryId: z.string().min(1),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
+  comingSoon: z.boolean().default(false).optional(),
+  outOfStock: z.boolean().default(false).optional(),
   rgb: z.boolean().default(false),
   marqueId:  z.string().min(1),
   numberId:  z.string().min(1),
@@ -106,6 +108,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     price: 0,
     categoryId: '',
     isFeatured: false,
+    comingSoon: false,
+    outOfStock: false,
     isArchived: false,
     dicountPrice:0,
     stock:0,
@@ -347,6 +351,36 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="comingSoon"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Coming Soon</FormLabel>
+                    <FormDescription>Mark this product as coming soon</FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />          
+            <FormField
+              control={form.control}
+              name="outOfStock"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Out of Stock</FormLabel>
+                    <FormDescription>Mark this product as out of stock</FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
          
           </div>
           <Separator />
@@ -380,7 +414,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               form1={form} 
               loading={loading} 
               setLoading={setLoading} 
-              data={...memoryMarque}
+              data={memoryMarque}
               fieldaAfficher="name"
               url="/api/memory/MemoryMarque"
               formLab="marqueId"
@@ -393,7 +427,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               form1={form} 
               loading={loading} 
               setLoading={setLoading} 
-              data={...memoryNumber}
+              data={memoryNumber}
               fieldaAfficher="number"
               url="/api/memory/MemoryNumber"
               formLab="numberId"
@@ -405,7 +439,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               form1={form} 
               loading={loading} 
               setLoading={setLoading} 
-              data={...memoryType}
+              data={memoryType}
               fieldaAfficher="name"
               url="/api/memory/MemoryType"
               formLab="typeId"
@@ -417,7 +451,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               form1={form} 
               loading={loading} 
               setLoading={setLoading} 
-              data={...memoryFrequency}
+              data={memoryFrequency}
               fieldaAfficher="name"
               url="/api/memory/MemoryFrequency"
               formLab="frequencyId"

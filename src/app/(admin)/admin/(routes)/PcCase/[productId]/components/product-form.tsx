@@ -43,6 +43,8 @@ const formSchema = z.object({
   categoryId: z.string().min(1),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
+  comingSoon: z.boolean().default(false).optional(),
+  outOfStock: z.boolean().default(false).optional(),
   brandId:  z.string().min(1),
   caseformatiD:  z.string().min(1),
   numberofFansPreinstalledId:  z.string().min(1),
@@ -104,7 +106,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     price: 0,
     categoryId: '',
     isFeatured: false,
-    isArchived: false,
+    isArchived: false,  
+    comingSoon: false,
+    outOfStock: false,
     dicountPrice:0,
     stock:0,
     description:'',
@@ -345,7 +349,36 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 </FormItem>
               )}
             />
-         
+            <FormField
+              control={form.control}
+              name="comingSoon"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Coming Soon</FormLabel>
+                    <FormDescription>Mark this product as coming soon</FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="outOfStock"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Out of Stock</FormLabel>
+                    <FormDescription>Mark this product as out of stock</FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
           </div>
           <Separator />
 
@@ -378,7 +411,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               form1={form} 
               loading={loading} 
               setLoading={setLoading} 
-              data={...pCcaseBrand}
+              data={pCcaseBrand}
               fieldaAfficher="name"
               url="/api/pcCase/pCcaseBrand"
               formLab="brandId"
@@ -387,23 +420,24 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               />
 
          
-<PopFormModal label={"Case format"} 
-              form1={form} 
-              loading={loading} 
-              setLoading={setLoading} 
-              data={...pCcaseCaseformat}
-              fieldaAfficher="name"
-              url="/api/pcCase/pCcaseCaseformat"
-              formLab="caseformatiD"
-              formCControlName="MemoryNumber"
-              IsNumber={false}
-              />
+<PopFormModal
+  label={"Case format"}
+  form1={form}
+  loading={loading}
+  setLoading={setLoading}
+  data={pCcaseCaseformat}
+  fieldaAfficher="name"
+  url="/api/pcCase/pCcaseCaseformat"
+  formLab="caseformatiD"
+  formCControlName="caseFormatName" // ✅ use a case-related name
+  IsNumber={false}
+/>
           
           <PopFormModal label={"Number of Preinstalled Fans"} 
               form1={form} 
               loading={loading} 
               setLoading={setLoading} 
-              data={...pCcaseNumberofFansPreinstalled}
+              data={pCcaseNumberofFansPreinstalled}
               fieldaAfficher="name"
               url="/api/pcCase/pCcaseNumberofFansPreinstalled"
               formLab="numberofFansPreinstalledId"
@@ -415,7 +449,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               form1={form} 
               loading={loading} 
               setLoading={setLoading} 
-              data={...pCcaseRGBType}
+              data={pCcaseRGBType}
               fieldaAfficher="name"
               url="/api/pcCase/pCcaseRGBType"
               formLab="rGBTypeId"

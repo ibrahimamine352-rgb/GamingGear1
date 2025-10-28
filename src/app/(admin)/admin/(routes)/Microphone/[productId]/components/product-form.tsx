@@ -120,6 +120,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     categoryId: '',
     isFeatured: false,
     isArchived: false,
+    comingSoon: false,     // ← add
+    outOfStock: false,     // ← add
+
     additionalDetails:[],
     wireless:false,
     rgb:false
@@ -584,7 +587,7 @@ console.log(initialData)
               form1={form} 
               loading={loading} 
               setLoading={setLoading} 
-              data={...MicModel}
+              data={MicModel}
               fieldaAfficher="name"
               url="/api/Mic/MicModel"
               formLab="micModelId"
@@ -596,7 +599,7 @@ console.log(initialData)
               form1={form} 
               loading={loading} 
               setLoading={setLoading} 
-              data={...MicInterfaceAvecOrdinateur}
+              data={MicInterfaceAvecOrdinateur}
               fieldaAfficher="name"
               url="/api/Mic/MicInterfaceAvecOrdinateur"
               formLab="micInterfaceAvecOrdinateurId"

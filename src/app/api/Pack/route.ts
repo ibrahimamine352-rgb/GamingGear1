@@ -16,6 +16,8 @@ export async function POST(
       images,
       isFeatured,
       isArchived,
+      comingSoon,
+      outOfStock,
       description,
       stock,
 
@@ -69,6 +71,8 @@ export async function POST(
             price: price,
             isFeatured,
             isArchived,
+            comingSoon,
+          outOfStock,
             description,
             categoryId,
             stock,

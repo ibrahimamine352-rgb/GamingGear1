@@ -15,7 +15,9 @@ export async function POST(
 
     const body = await req.json(); 
 
-    const { name, price, categoryId,  images, isFeatured, isArchived ,marqueId,numberId
+    const { name, price, categoryId,  images, isFeatured, isArchived ,comingSoon,
+outOfStock,
+marqueId,numberId
 ,typeId,frequencyId,rgb,
 description,
 stock,
@@ -56,6 +58,8 @@ console.log("dazdz")
       price: price,
       isFeatured: isFeatured,
       isArchived: isArchived,
+      comingSoon,
+          outOfStock,
       description:description,
       categoryId: categoryId,
       stock:stock,
