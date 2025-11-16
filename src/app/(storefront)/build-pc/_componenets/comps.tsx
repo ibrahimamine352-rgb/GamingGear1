@@ -19,31 +19,31 @@ export type AllProductsCompatibility = {
 export const defaultAllProductsCompatibility: AllProductsCompatibility = {
     Compatibility:{
         motherboardCompatibility: {
-            message: 'Veuillez sélectionner une carte mére',
+            message: 'Please select a motherboard',
             error: true,
         },
         processorCompatibility: {
-            message: 'Veuillez sélectionner un processeur',
+            message: 'Please select a processor',
             error: true,
         },
         ramCompatibility: {
-            message: 'Veuillez sélectionner au moins une barrette RAM',
+            message: 'Please select at least one RAM module',
             error: true,
         },
         hardDiskCompatibility: {
-            message: 'Veuillez sélectionner un disque dur',
+            message: 'Please select a hard drive',
             error: true,
         },
         caseCompatibility: {
-            message: 'Veuillez sélectionner une boîtier',
+            message: 'Please select a case',
             error: true,
         },
         powerCompatibility: {
-            message: 'Veuillez sélectionner la boîte d\'alimentation',
+            message: 'Please select the power supply box',
             error: true,
         },
     gpuCompatibility: {
-            message: 'Veuillez sélectionner une carte graphique',
+            message: 'Please select a graphics card',
             error: true,
         },
        

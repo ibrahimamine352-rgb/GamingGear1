@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
@@ -14,6 +16,8 @@ import { LoaderIcon } from 'react-hot-toast';
 import { Icon } from '@radix-ui/react-select';
 import IconButton from '../ui/icon-button';
 import { Category } from '@prisma/client';
+import { useLanguage } from "@/context/language-context";
+import { UI_TEXT } from "@/i18n/ui-text";
 
 interface PriceFilterProps { cats?: Category[] | null }
 
@@ -32,7 +36,10 @@ const SearchBar: React.FC<PriceFilterProps> = ({ cats }) => {
     const router = useRouter();
     const searchParams = useSearchParams()
     const [dataToDis, setDataToDis] = useState<Product[] | undefined>([])
+    const { lang } = useLanguage();
+const ui = UI_TEXT[lang];
 
+    
     // Define searchQuery using router.query inside the component.
     const [searchQuery, setSearchQuery] = useState("")
     const encodedSearchQuery = encodeURI(searchQuery ?? "");
@@ -53,7 +60,7 @@ const SearchBar: React.FC<PriceFilterProps> = ({ cats }) => {
                 <svg className='mr-4' width="20" height="20" viewBox="0 0 15 15" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path d="M10 6.5C10 8.433 8.433 10 6.5 10C4.567 10 3 8.433 3 6.5C3 4.567 4.567 3 6.5 3C8.433 3 10 4.567 10 6.5ZM9.30884 10.0159C8.53901 10.6318 7.56251 11 6.5 11C4.01472 11 2 8.98528 2 6.5C2 4.01472 4.01472 2 6.5 2C8.98528 2 11 4.01472 11 6.5C11 7.56251 10.6318 8.53901 10.0159 9.30884L12.8536 12.1464C13.0488 12.3417 13.0488 12.6583 12.8536 12.8536C12.6583 13.0488 12.3417 13.0488 12.1464 12.8536L9.30884 10.0159Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path>
                 </svg>
-                Search...
+                {ui.searchPlaceholder}
             </Button>
             
             <CommandDialog 
@@ -69,7 +76,8 @@ const SearchBar: React.FC<PriceFilterProps> = ({ cats }) => {
                         }
                     }} 
                     onValueChange={(e) => setSearchQuery(e)} 
-                    placeholder="Search..." 
+                    placeholder={ui.searchPlaceholder}
+ 
                     className='border-0 outline-0 focus:outline-none focus:outline-0 focus:outline-transparent focus:border-0 focus:shadow-none text-foreground placeholder-white/60 bg-background' 
                 />
                 
@@ -83,7 +91,7 @@ const SearchBar: React.FC<PriceFilterProps> = ({ cats }) => {
                     )}
 
                     {data && data?.length > 0 && (
-                        <CommandGroup heading="Results" className="text-foreground">
+                        <CommandGroup heading={ui.resultsHeading} className="text-foreground">
                             <CommandItem value={searchQuery} className="text-foreground hover:bg-white/10 rounded-lg mx-2 my-1">
                                 <div 
                                     onClick={() => {
@@ -93,7 +101,7 @@ const SearchBar: React.FC<PriceFilterProps> = ({ cats }) => {
                                     }} 
                                     className='flex justify-between w-full items-center px-2 py-2'
                                 >
-                                    Voir Tous
+                                    {ui.seeAllResults}
                                 </div>
                             </CommandItem>
                             
@@ -139,7 +147,7 @@ const SearchBar: React.FC<PriceFilterProps> = ({ cats }) => {
                         </CommandGroup>
                     )}
 
-                    <CommandGroup heading="Categories" className="text-foreground">
+                    <CommandGroup heading={ui.categoriesHeading} className="text-foreground">
                         {cats && cats.map((cat, k) => (
                             <CommandItem 
                                 key={k} 

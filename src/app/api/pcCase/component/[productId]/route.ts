@@ -64,7 +64,9 @@ export async function DELETE(
       const body = await req.json();
 
   
-      const { name, price, categoryId,  images, isFeatured, isArchived ,          brandId,
+      const { name, price, categoryId,  images, isFeatured, isArchived ,comingSoon,
+        outOfStock,
+                  brandId,
         caseformatiD,
         numberofFansPreinstalledId,
         rGBTypeId,
@@ -130,6 +132,8 @@ export async function DELETE(
           },
           isFeatured,
           isArchived,
+          comingSoon,
+          outOfStock,
         },
       });
   

@@ -1,7 +1,4 @@
-
 import { NextResponse } from 'next/server';
-
-
 import prismadb from '@/lib/prismadb';
 import { NextApiResponse } from 'next';
 import { checkItemGroupsCase } from '@/app/(storefront)/build-pc/_componenets/Case';
@@ -9,24 +6,30 @@ import { checkItemGroupsCooling } from '@/app/(storefront)/build-pc/_componenets
 
 export async function POST(
   req: Request,
-  { params }: { params: { } }
+  { params }: { params: {} }
 ) {
   try {
-    
+    const body = await req.json();
 
-    const body = await req.json(); 
-
-    const { name, price, categoryId,  images, isFeatured, isArchived ,
+    const {
+      name,
+      price,
+      categoryId,
+      images,
+      isFeatured,
+      isArchived,
+      comingSoon,
+      outOfStock,
       CPUSupportId,
       CoolingMarkId,
       CoolingTypeId,
       FansNumberId,
       rgb,
-description,
-stock,
-dicountPrice,
-} = body;
-   
+      description,
+      stock,
+      dicountPrice,
+    } = body;
+
     if (!name) {
       return new NextResponse("Name is required", { status: 400 });
     }
@@ -42,50 +45,45 @@ dicountPrice,
     if (!categoryId) {
       return new NextResponse("Category id is required", { status: 400 });
     }
-console.log("dazdz")
-
+    console.log("dazdz");
 
     const product = await prismadb.cooling.create({
-        data:{
-          CPUSupportId,
-          CoolingMarkId,
-          CoolingTypeId,
-          FansNumberId,
-          Rgb: rgb,
-            product:{
-                create:{
-                   
-               
-      name,
-      price: price,
-      isFeatured: isFeatured,
-      isArchived: isArchived,
-      description:description,
-      categoryId: categoryId,
-      stock:stock,
-      dicountPrice:dicountPrice,
-    
-      images: {
-        createMany: {
-          data: images.map((image: { url: string }) => ({
-            url: image.url,
-          })),
-        }
-         // Replace any with the actual data types from your Prisma schema
-    
-     
-    },}
-        }
-     
-      }
+      data: {
+        CPUSupportId,
+        CoolingMarkId,
+        CoolingTypeId,
+        FansNumberId,
+        Rgb: rgb,
+        product: {
+          create: {
+            name,
+            price: price,
+            isFeatured: isFeatured,
+            isArchived: isArchived,
+            comingSoon,      // include it
+  outOfStock,      
+            description: description,
+            categoryId: categoryId,
+            stock: stock,
+            dicountPrice: dicountPrice,
+            images: {
+              createMany: {
+                data: images.map((image: { url: string }) => ({
+                  url: image.url,
+                })),
+              },
+            },
+          },
+        },
+      },
     });
-  
+
     return NextResponse.json(product);
   } catch (error) {
     console.log('[PRODUCTS_POST]', error);
     return new NextResponse("Internal error", { status: 500 });
   }
-}; 
+};
 
 export async function GET(req: Request, res: NextApiResponse) {
   try {
@@ -97,24 +95,23 @@ export async function GET(req: Request, res: NextApiResponse) {
     const isFeatured = searchParams.get('isFeatured');
     const sort = searchParams.get('sort') || '';
     const maxDt = searchParams.get('maxDt') || '';
-    const minDt = searchParams.get('minDt') || ''; 
+    const minDt = searchParams.get('minDt') || '';
     const motherboardId = searchParams.get('motherboardId') || '';
 
-
-   
     const whereClause: Record<string, any> = {
-      isArchived:false ,
+      isArchived: false,
       cooling: {
         some: {},
       },
     };
-  
+
     if (q) {
       whereClause.name = {
         contains: q,
         mode: 'insensitive',
       };
     }
+
     let orderByClause: Record<string, 'asc' | 'desc'> = {};
 
     if (sort && sort.length > 0) {
@@ -123,48 +120,45 @@ export async function GET(req: Request, res: NextApiResponse) {
           orderByClause = {
             soldnumber: 'desc',
           };
-          break; 
+          break;
         case 'Les plus récents':
           orderByClause = {
-            price: 'desc', // or 'desc' depending on your preference
+            price: 'desc',
           };
           break;
         case 'Les plus récents':
           orderByClause = {
-            createdAt: 'asc', // or 'desc' depending on your preference
+            createdAt: 'asc',
           };
           break;
         case 'Prix : Croissant':
           orderByClause = {
-            price: 'asc', // or 'desc' depending on your preference
+            price: 'asc',
           };
           break;
         case 'Prix : Décroissant':
           orderByClause = {
-            price: 'desc', // or 'desc' depending on your preference
+            price: 'desc',
           };
           break;
-        // Add more cases for other fields you want to support
         default:
-          // Default sorting if no match is found
           orderByClause = {
-           price: 'asc',
+            price: 'asc',
           };
       }
-    }else{
+    } else {
       orderByClause = {
-        price: 'asc', // or 'desc' depending on your preference
+        price: 'asc',
       };
     }
- 
 
     const filterListParam = searchParams.get('filterList');
-   
-     if (filterListParam) {
+
+    if (filterListParam) {
       const decodedFilterList = JSON.parse(decodeURIComponent(filterListParam)) as checkItemGroupsCooling;
-    
+
       const cpuFilters = [];
-    
+
       const chipsetFilter = decodedFilterList.coolingMark;
       if (chipsetFilter && chipsetFilter.length > 0) {
         cpuFilters.push({
@@ -175,7 +169,7 @@ export async function GET(req: Request, res: NextApiResponse) {
           },
         });
       }
-    
+
       const motherboardcpusupportFilter = decodedFilterList.coolingType;
       if (motherboardcpusupportFilter && motherboardcpusupportFilter.length > 0) {
         cpuFilters.push({
@@ -186,6 +180,7 @@ export async function GET(req: Request, res: NextApiResponse) {
           },
         });
       }
+
       const pCcaseNumberofFansPreinstalled = decodedFilterList.coolingcPUSupport;
       if (pCcaseNumberofFansPreinstalled && pCcaseNumberofFansPreinstalled.length > 0) {
         cpuFilters.push({
@@ -196,6 +191,7 @@ export async function GET(req: Request, res: NextApiResponse) {
           },
         });
       }
+
       const pCcaseRGBType = decodedFilterList.fansNumber;
       if (pCcaseRGBType && pCcaseRGBType.length > 0) {
         cpuFilters.push({
@@ -206,18 +202,19 @@ export async function GET(req: Request, res: NextApiResponse) {
           },
         });
       }
-      if(maxDt.length>0&&maxDt.length){
+
+      if (maxDt.length > 0 && maxDt.length) {
         whereClause.price = {
           lte: parseInt(maxDt),
         };
-        if (minDt.length>0&&minDt.length ) {
+        if (minDt.length > 0 && minDt.length) {
           whereClause.price = {
             ...(whereClause.price || {}),
             gte: parseInt(minDt),
           };
         }
       }
-     
+
       if (cpuFilters.length > 0) {
         whereClause.cooling = {
           some: {
@@ -227,32 +224,34 @@ export async function GET(req: Request, res: NextApiResponse) {
       }
     }
 
-    if(motherboardId.length>0){
-      const prossa=  await prismadb.compatibiltyProfile.findMany({
-        where:{
-          motherboards:{
-            some:{
-              productId:{
-                equals:motherboardId
+    if (motherboardId.length > 0) {
+      const prossa = await prismadb.compatibiltyProfile.findMany({
+        where: {
+          motherboards: {
+            some: {
+              productId: {
+                equals: motherboardId
               }
             }
           }
         },
-        include:{
-          coolings:true
+        include: {
+          coolings: true
         }
-      })
+      });
 
-      if(prossa.length>0){
-        whereClause.id={
+      if (prossa.length > 0) {
+        whereClause.id = {
           in: prossa
-    .flatMap((e) => e.coolings.map((ee) => ee.productId))
-    .filter((productId) => productId !== undefined), 
-        }
-        console.log( whereClause.id)
+            .flatMap((e) => e.coolings.map((ee) => ee.productId))
+            .filter((productId) => productId !== undefined),
+        };
+        console.log(whereClause.id);
       }
     }
-    console.log(whereClause)
+
+    console.log(whereClause);
+
     const products = await prismadb.product.findMany({
       where: whereClause,
       include: {
@@ -268,8 +267,10 @@ export async function GET(req: Request, res: NextApiResponse) {
     
    
     });
+
     console.log();
-    return NextResponse.json({data:products,total});
+
+    return NextResponse.json({ data: products, total });
   } catch (error) {
     console.error('[PRODUCTS_GET]', error);
     res.status(500).json({ error: 'Internal error' });

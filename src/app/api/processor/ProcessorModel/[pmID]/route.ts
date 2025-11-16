@@ -22,30 +22,25 @@ export async function GET(
   }
 };
 
-export async function DELETE(
-  req: Request,
-  { params }: { params: { pmID: string, storeId: string } }
-) {
+export async function DELETE(_: Request, { params }: { params: { pmID: string } }) {
   try {
-  
+    if (!params.pmID) return new NextResponse("processorModel id is required", { status: 400 });
 
-    if (!params.pmID) {
-      return new NextResponse("processorModel id is required", { status: 400 });
+    // prevent deleting if it's referenced by any Processor
+    const used = await prismadb.processor.count({
+      where: { processorModelId: params.pmID },
+    });
+    if (used > 0) {
+      return new NextResponse("Cannot delete: in use by processors", { status: 409 });
     }
 
-  
-    const processorModel = await prismadb.processorModel.delete({
-      where: {
-        id: params.pmID,
-      }
-    });
-  
-    return NextResponse.json(processorModel);
+    await prismadb.processorModel.delete({ where: { id: params.pmID } });
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
-    console.log('[processorModel_DELETE]', error);
+    console.log("[PROCESSOR_MODEL_DELETE]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
-};
+}
 
 
 export async function PATCH(

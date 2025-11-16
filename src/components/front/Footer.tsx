@@ -1,8 +1,13 @@
+'use client';
+
 import Image from 'next/image'
 import React from 'react'
+import { UI_TEXT } from "@/i18n/ui-text";
+import { useLanguage } from "@/context/language-context";
 
 const Footer = () => {
-    
+    const { lang } = useLanguage();
+    const ui = UI_TEXT[lang];
     return (
         <div>
             <footer className="bg-background text-foreground border-t border-border/10">
@@ -33,20 +38,20 @@ const Footer = () => {
                         {/* Useful Links */}
                         <div className="space-y-4">
                             <h6 className="text-lg font-semibold text-foreground border-b border-border/10 pb-2">
-                                Liens Utiles
+                              {ui.landingutilslink}
                             </h6>
                             <div className="space-y-3">
                                 <a href="/shop" className="flex items-center text-foreground/70 hover:text-accent transition-colors group">
                                     <span className="text-xs mr-2 group-hover:translate-x-1 transition-transform">&gt;&gt;</span>
-                                    Tous les produits
+                                    {ui.navAllProducts}
                                 </a>
                                 <a href="/build-pc" className="flex items-center text-foreground/70 hover:text-accent transition-colors group">
                                     <span className="text-xs mr-2 group-hover:translate-x-1 transition-transform">&gt;&gt;</span>
-                                    Build your PC
+                                    {ui.navBuildYourPc}
                                 </a>
                                 <a href="/cart" className="flex items-center text-foreground/70 hover:text-accent transition-colors group">
                                     <span className="text-xs mr-2 group-hover:translate-x-1 transition-transform">&gt;&gt;</span>
-                                    Panier
+                                    {ui.cartEmptyTitle}
                                 </a>
                             </div>
                         </div>

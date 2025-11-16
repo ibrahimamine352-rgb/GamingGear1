@@ -1,6 +1,9 @@
 import * as React from "react";
-
+import { useLanguage } from "@/context/language-context";
+import { UI_TEXT } from "@/i18n/ui-text";
 export function InlineDetails({ text }: { text?: string }) {
+  const { lang } = useLanguage();
+  const ui = UI_TEXT[lang];
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -12,7 +15,7 @@ export function InlineDetails({ text }: { text?: string }) {
         // keep the label white; lock ONLY the border to your orange
         style={{ borderColor: "var(--brand-orange, #FF7A1A)" }}
       >
-        Détails
+       {ui.builderBtndetails}
       </button>
 
       {open && (

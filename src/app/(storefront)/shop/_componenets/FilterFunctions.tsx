@@ -1,1021 +1,384 @@
+// app/(storefront)/_componenets/FilterFunctions.ts
 import { FilterList } from "../page";
 
+/* small helper for numeric options like “16 Gb”, “3 Fans”, etc. */
+const onlyNums = (arr: { searchKey: string }[] = []) =>
+  arr
+    .map(i => parseInt(String(i.searchKey).replace(/[^\d]/g, ""), 10))
+    .filter(n => Number.isFinite(n));
 
-export const addmotherboardFitlters=(decodedFilterList:FilterList)=>{
+/* -------------------- MOTHERBOARD -------------------- */
+export const addmotherboardFitlters = (decoded: FilterList) => {
+  const where: any = { motherboard: { some: {} } };
+  const and: any[] = [];
 
+  if (decoded.motherboardchipset?.length)
+    and.push({ chipset: { name: { in: decoded.motherboardchipset.map(i => i.searchKey) } } });
 
+  if (decoded.motherboardcpusupport?.length)
+    and.push({ cpusupport: { name: { in: decoded.motherboardcpusupport.map(i => i.searchKey) } } });
 
+  if (decoded.motherboardformat?.length)
+    and.push({ format: { name: { in: decoded.motherboardformat.map(i => i.searchKey) } } });
 
+  if (decoded.motherboardmanufacturer?.length)
+    and.push({ manufacturer: { name: { in: decoded.motherboardmanufacturer.map(i => i.searchKey) } } });
 
-    const whereClause: Record<string, any> = {
-        motherboard: {
-          some: {},
+  if (decoded.motherboardramslots?.length)
+    and.push({ ramslots: { name: { in: decoded.motherboardramslots.map(i => i.searchKey) } } });
+
+  if (and.length) where.motherboard = { some: { AND: and } };
+  return { data: where.motherboard };
+};
+
+/* -------------------- CPU -------------------- */
+/* -------------------- CPU -------------------- */
+export const addcpuFitlters = (decoded: FilterList) => {
+  // "decoded" is the decoded filterList from query params
+  // It may contain selected checkboxes from the UI.
+  // We build a Prisma "where" fragment for product -> cpus relation.
+
+  const where: any = { cpus: { some: {} } };
+  const and: any[] = [];
+
+  // Socket filter (ex: AM5, LGA1700, etc.)
+  if (decoded.cPUSupport?.length) {
+    and.push({
+      cpusupport: {
+        name: {
+          in: decoded.cPUSupport.map((i) => i.searchKey),
         },
-      };
-
-      const motherboardFilters = []; 
-    
-      const chipsetFilter = decodedFilterList.motherboardchipset;
-      if (chipsetFilter && chipsetFilter.length > 0) {
-        motherboardFilters.push({
-          chipset: {
-            name: {
-              in: decodedFilterList.motherboardchipset.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      const motherboardcpusupportFilter = decodedFilterList.motherboardcpusupport;
-      if (motherboardcpusupportFilter && motherboardcpusupportFilter.length > 0) {
-        motherboardFilters.push({
-          cpusupport: {
-            name: {
-              in: decodedFilterList.motherboardcpusupport.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      const motherboardformatFilter = decodedFilterList.motherboardformat;
-      if (motherboardformatFilter && motherboardformatFilter.length > 0) {
-        motherboardFilters.push({
-          format: {
-            name: {
-              in: decodedFilterList.motherboardformat.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      const motherboardmanufacturerFilter = decodedFilterList.motherboardmanufacturer;
-      if (motherboardmanufacturerFilter && motherboardmanufacturerFilter.length > 0) {
-        motherboardFilters.push({
-          manufacturer: {
-            name: {
-              in: decodedFilterList.motherboardmanufacturer.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      const motherboardramslotsFilter = decodedFilterList.motherboardramslots;
-      if (motherboardramslotsFilter && motherboardramslotsFilter.length > 0) {
-        motherboardFilters.push({
-          ramslots: {
-            name: {
-              in: decodedFilterList.motherboardramslots.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      if (motherboardFilters.length > 0) {
-        whereClause.motherboard = {
-          some: {
-            AND: motherboardFilters,
-          },
-        };
-      }
-    
-    return{
-       data: whereClause.motherboard
-    }
-}
-export const addcpuFitlters=(decodedFilterList:FilterList)=>{
-
-
-
-
-
-    const whereClause: Record<string, any> = {
-        cpus: {
-          some: {},
-        },
-      };
-      const cpuFilters = [];
-      const chipsetFilter = decodedFilterList.cPUSupport;
-      if (chipsetFilter && chipsetFilter.length > 0) {
-        cpuFilters.push({
-          cpusupport: {
-            name: {
-              in: decodedFilterList.cPUSupport.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      const motherboardcpusupportFilter = decodedFilterList.processorModel;
-      if (motherboardcpusupportFilter && motherboardcpusupportFilter.length > 0) {
-        cpuFilters.push({
-          processorModel: {
-            name: {
-              in: decodedFilterList.processorModel.map(item => item.searchKey),
-            },
-          },
-        });
-      }
- 
-     
-      if (cpuFilters.length > 0) {
-        whereClause.cpus = {
-          some: {
-            AND: cpuFilters,
-          },
-        };
-      }
-    
-    return{
-       data: whereClause.cpus
-    }
-}
-export const addgpuitlters=(decodedFilterList:FilterList)=>{
-
-
-
-
-
-    const whereClause: Record<string, any> = {
-        gpus: {
-          some: {},
-        },
-      };
-      const cpuFilters = [];
-   
-      const chipsetFilter = decodedFilterList.gpuArchBrand;
-      if (chipsetFilter && chipsetFilter.length > 0) {
-        cpuFilters.push({
-            gpuArchBrand: {
-            name: {
-              in: decodedFilterList.gpuArchBrand.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      const motherboardgpusupportFilter = decodedFilterList.gpuBrand;
-      if (motherboardgpusupportFilter && motherboardgpusupportFilter.length > 0) {
-        cpuFilters.push({
-          gpuBrand: {
-            name: {
-              in: decodedFilterList.gpuBrand.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-      const graphiccardName = decodedFilterList.graphiccardName;
-      if (graphiccardName && graphiccardName.length > 0) {
-        cpuFilters.push({
-          graphiccardName: {
-            name: {
-              in: decodedFilterList.graphiccardName.map(item => item.searchKey),
-            },
-          },
-        }); 
-      }
-
-     
-      if (cpuFilters.length > 0) {
-        whereClause.gpus = {
-          some: {
-            AND: cpuFilters,
-          },
-        };
-      }
-    
-    
-    return{
-       data: whereClause.gpus
-    }
-}
-export const addRamFitlters=(decodedFilterList:FilterList)=>{
-
-
-
-
-
-  const whereClause: Record<string, any> = {
-    memories: {
-        some: {},
       },
-    };
-    const memoryFilters = [];
-    
-    const motherboardcpusupportFilter = decodedFilterList.memoryFrequency;
-    if (motherboardcpusupportFilter && motherboardcpusupportFilter.length > 0) {
-      memoryFilters.push({
-        frequency: {
-          name: {
-            in: decodedFilterList.memoryFrequency.map(item => item.searchKey),
-          },
+    });
+  }
+
+  // Model filter (ex: AMD, Intel, etc.)
+  if (decoded.processorModel?.length) {
+    and.push({
+      processorModel: {
+        name: {
+          in: decoded.processorModel.map((i) => i.searchKey),
         },
-      });
-    }
-  
-    const motherboardformatFilter = decodedFilterList.memoryNumber;
-    if (motherboardformatFilter && motherboardformatFilter.length > 0) {
-      memoryFilters.push({
-        number: {
-          number: {
-            in: decodedFilterList.memoryNumber.map(item => parseInt(item.searchKey.replace(' Gb',''))),
-          },
-        },
-      });
-    }
-  
-    const motherboardmanufacturerFilter = decodedFilterList.memoryType;
-    if (motherboardmanufacturerFilter && motherboardmanufacturerFilter.length > 0) {
-      memoryFilters.push({
-        type: {
-          name: {
-            in: decodedFilterList.memoryType.map(item => item.searchKey),
-          },
-        },
-      });
-    }
-  
-    const memoryMarqueFilter = decodedFilterList.memoryMarque;
-    if (memoryMarqueFilter && memoryMarqueFilter.length > 0) {
-      memoryFilters.push({
-        marque: {
-          name: {
-            in: decodedFilterList.memoryMarque.map(item => item.searchKey),
-          },
-        },
-      });
-    }
-  
-    if (memoryFilters.length > 0) {
-      whereClause.memories = {
+      },
+    });
+  }
+
+  // If any filters were selected, wrap them in AND inside cpus.some
+  if (and.length) {
+    where.cpus = { some: { AND: and } };
+  }
+
+  // Return what the main page expects
+  return { data: where.cpus };
+};
+
+
+/* -------------------- GPU -------------------- */
+export const addgpuitlters = (decoded: FilterList) => {
+  const where: any = { gpus: { some: {} } };
+  const and: any[] = [];
+
+  if (decoded.gpuArchBrand?.length)
+    and.push({ gpuArchBrand: { name: { in: decoded.gpuArchBrand.map(i => i.searchKey) } } });
+
+  if (decoded.gpuBrand?.length)
+    and.push({ gpuBrand: { name: { in: decoded.gpuBrand.map(i => i.searchKey) } } });
+
+  if (decoded.graphiccardName?.length)
+    and.push({ graphiccardName: { name: { in: decoded.graphiccardName.map(i => i.searchKey) } } });
+
+  if (and.length) where.gpus = { some: { AND: and } };
+  return { data: where.gpus };
+};
+
+/* -------------------- RAM -------------------- */
+export const addRamFitlters = (decoded: FilterList) => {
+  const where: any = { memories: { some: {} } };
+  const and: any[] = [];
+
+  if (decoded.memoryFrequency?.length)
+    and.push({ frequency: { name: { in: decoded.memoryFrequency.map(i => i.searchKey) } } });
+
+  if (decoded.memoryNumber?.length)
+    and.push({ number: { number: { in: onlyNums(decoded.memoryNumber) } } });
+
+  if (decoded.memoryType?.length)
+    and.push({ type: { name: { in: decoded.memoryType.map(i => i.searchKey) } } });
+
+  if (decoded.memoryMarque?.length)
+    and.push({ marque: { name: { in: decoded.memoryMarque.map(i => i.searchKey) } } });
+
+  if (and.length) where.memories = { some: { AND: and } };
+  return { data: where.memories };
+};
+
+/* -------------------- STORAGE -------------------- */
+export const addHardDiskFitlters = (decoded: FilterList) => {
+  const where: any = { storages: { some: {} } };
+  const and: any[] = [];
+
+  if (decoded.harddiskBrand?.length)
+    and.push({ brand: { name: { in: decoded.harddiskBrand.map(i => i.searchKey) } } });
+
+  // capacity.name is a STRING in your schema (e.g., "512GB")
+  if (decoded.harddiskCapacity?.length)
+    and.push({ capacity: { name: { in: decoded.harddiskCapacity.map(i => i.searchKey) } } });
+
+  if (decoded.harddiskComputerinterface?.length)
+    and.push({ Computerinterface: { name: { in: decoded.harddiskComputerinterface.map(i => i.searchKey) } } });
+
+  if (decoded.harddiskType?.length)
+    and.push({ type: { name: { in: decoded.harddiskType.map(i => i.searchKey) } } });
+
+  if (and.length) where.storages = { some: { AND: and } };
+  return { data: where.storages };
+};
+
+/* -------------------- CASES -------------------- */
+export const addCaseFitlters = (decoded: FilterList) => {
+  const where: any = { cases: { some: {} } };
+  const and: any[] = [];
+
+  if (decoded.pCcaseBrand?.length)
+    and.push({ brand: { name: { in: decoded.pCcaseBrand.map(i => i.searchKey) } } });
+
+  if (decoded.pCcaseCaseformat?.length)
+    and.push({ caseformat: { name: { in: decoded.pCcaseCaseformat.map(i => i.searchKey) } } });
+
+  if (decoded.pCcaseNumberofFansPreinstalled?.length)
+    and.push({ numberofFansPreinstalled: { name: { in: decoded.pCcaseNumberofFansPreinstalled.map(i => i.searchKey) } } });
+
+  if (decoded.pCcaseRGBType?.length)
+    and.push({ rGBType: { name: { in: decoded.pCcaseRGBType.map(i => i.searchKey) } } });
+
+  if (and.length) where.cases = { some: { AND: and } };
+  return { data: where.cases };
+};
+
+/* -------------------- PSU -------------------- */
+export const addPowerFitlters = (decoded: FilterList) => {
+  const where: any = { powersupplies: { some: {} } };
+  const and: any[] = [];
+
+  if (decoded.powersupplyMarque?.length)
+    and.push({ Marque: { name: { in: decoded.powersupplyMarque.map(i => i.searchKey) } } });
+
+  if (decoded.psCertification?.length)
+    and.push({ certification: { name: { in: decoded.psCertification.map(i => i.searchKey) } } });
+
+  if (and.length) where.powersupplies = { some: { AND: and } };
+  return { data: where.powersupplies };
+};
+
+/* -------------------- COOLING (fixed CPUSupport + numeric Fans) -------------------- */
+export const addCoolingFitlters = (decoded: FilterList) => {
+  const where: any = { cooling: { some: {} } };
+  const and: any[] = [];
+
+  if (decoded.coolingMark?.length)
+    and.push({ CoolingMark: { name: { in: decoded.coolingMark.map(i => i.searchKey) } } });
+
+  if (decoded.coolingType?.length)
+    and.push({ CoolingType: { name: { in: decoded.coolingType.map(i => i.searchKey) } } });
+
+  // schema uses **CPUSupport** (capitalized)
+  if (decoded.coolingcPUSupport?.length)
+    and.push({ CPUSupport: { name: { in: decoded.coolingcPUSupport.map(i => i.searchKey) } } });
+
+  if (decoded.fansNumber?.length) {
+    const nums = onlyNums(decoded.fansNumber);
+    if (nums.length) and.push({ FansNumber: { number: { in: nums } } });
+  }
+
+  if (and.length) where.cooling = { some: { AND: and } };
+  return { data: where.cooling };
+};
+
+/* -------------------- SCREENS -------------------- */
+export const addScreenFitlters = (decoded: FilterList) => {
+  const where: any = { screens: { some: {} } };
+  const and: any[] = [];
+
+  if (decoded.mark?.length)
+    and.push({ Mark: { name: { in: decoded.mark.map(i => i.searchKey) } } });
+
+  if (decoded.pouce?.length)
+    and.push({ Pouce: { name: { in: decoded.pouce.map(i => i.searchKey) } } });
+
+  if (decoded.refreshRate?.length)
+    and.push({ RefreshRate: { name: { in: decoded.refreshRate.map(i => i.searchKey) } } });
+
+  if (decoded.resolution?.length)
+    and.push({ resolution: { name: { in: decoded.resolution.map(i => i.searchKey) } } });
+
+  // ✅ NEW: Type filter using Category ("Screen Gaming", "Screen Pro")
+  if (decoded.screenType?.length) {
+    const names = decoded.screenType.map(i => i.searchKey);
+    and.push({
+      products: {
         some: {
-          AND: memoryFilters,
+          category: {
+            name: { in: names },
+          },
         },
-      };
-    }
-  
-  
-  
-  return{
-     data: whereClause.memories
-  }
-}
-export const addHardDiskFitlters=(decodedFilterList:FilterList)=>{
-
-
-
-
-
-  const whereClause: Record<string, any> = {
-    storages: {
-        some: {},
       },
-    };
-    const memoryFilters = [];
-    
-      const motherboardcpusupportFilter = decodedFilterList.harddiskBrand;
-      if (motherboardcpusupportFilter && motherboardcpusupportFilter.length > 0) {
-        memoryFilters.push({
-          brand: {
-            name: {
-              in: decodedFilterList.harddiskBrand.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      const motherboardformatFilter = decodedFilterList.harddiskCapacity;
-      if (motherboardformatFilter && motherboardformatFilter.length > 0) {
-        memoryFilters.push({
-          capacity: {
-            name: {
-              in: decodedFilterList.harddiskCapacity.map(item => parseInt(item.searchKey.replace(' Gb',''))),
-            },
-          },
-        });
-      }
-    
-      const motherboardmanufacturerFilter = decodedFilterList.harddiskComputerinterface;
-      if (motherboardmanufacturerFilter && motherboardmanufacturerFilter.length > 0) {
-        memoryFilters.push({
-          Computerinterface: {
-            name: {
-              in: decodedFilterList.harddiskComputerinterface.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      const memoryMarqueFilter = decodedFilterList.harddiskType;
-      if (memoryMarqueFilter && memoryMarqueFilter.length > 0) {
-        memoryFilters.push({
-          type: {
-            name: {
-              in: decodedFilterList.harddiskType.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      if (memoryFilters.length > 0) {
-        whereClause.storages = {
-          some: {
-            AND: memoryFilters,
-          },
-        };
-      }
-    
-  
-  
-  return{
-     data: whereClause.storages
+    });
   }
-}
-export const addCaseFitlters=(decodedFilterList:FilterList)=>{
+
+  if (and.length) where.screens = { some: { AND: and } };
+  return { data: where.screens };
+};
 
 
+/* -------------------- LAPTOP (Product relation is `Laptop`) -------------------- */
+export const addLaptopFitlters = (decoded: FilterList) => {
+  const where: any = { Laptop: { some: {} } };
+  const and: any[] = [];
+
+  if (decoded.LapSystem?.length)       and.push({ System: { name: { in: decoded.LapSystem.map(i => i.searchKey) } } });
+  if (decoded.LapProcesseur?.length)   and.push({ Processeur: { name: { in: decoded.LapProcesseur.map(i => i.searchKey) } } });
+  if (decoded.LapGraphiccard?.length)  and.push({ Graphiccard: { name: { in: decoded.LapGraphiccard.map(i => i.searchKey) } } });
+  if (decoded.LapScreenSize?.length)   and.push({ ScreenSize: { name: { in: decoded.LapScreenSize.map(i => i.searchKey) } } });
+  if (decoded.LapScreenType?.length)   and.push({ ScreenType: { name: { in: decoded.LapScreenType.map(i => i.searchKey) } } });
+  if (decoded.LapHardisk?.length)      and.push({ Hardisk: { name: { in: decoded.LapHardisk.map(i => i.searchKey) } } });
+  if (decoded.Lapmemory?.length)       and.push({ memory: { name: { in: decoded.Lapmemory.map(i => i.searchKey) } } });
+  if (decoded.Lapnetwork?.length)      and.push({ network: { name: { in: decoded.Lapnetwork.map(i => i.searchKey) } } });
+  if (decoded.LapSound?.length)        and.push({ Sound: { name: { in: decoded.LapSound.map(i => i.searchKey) } } });
+  if (decoded.LapCamera?.length)       and.push({ Camera: { name: { in: decoded.LapCamera.map(i => i.searchKey) } } });
+  if (decoded.LapRefreshRate?.length)  and.push({ RefreshRate: { name: { in: decoded.LapRefreshRate.map(i => i.searchKey) } } });
+  if (decoded.manufacturer?.length)    and.push({ Manufacturer: { name: { in: decoded.manufacturer.map(i => i.searchKey) } } });
+
+  if (and.length) where.Laptop = { some: { AND: and } };
+  return { data: where.Laptop };
+};
+
+/* -------------------- KEYBOARD -------------------- */
+export const addKeyboardFitlters = (decoded: FilterList) => {
+  const where: any = { keyboard: { some: {} } };
+  const and: any[] = [];
+
+  if (decoded.manufacturer?.length)
+    and.push({ Manufacturer: { name: { in: decoded.manufacturer.map(i => i.searchKey) } } });
+
+  if (decoded.keyboarFormat?.length)
+    and.push({ keyboarFormat: { name: { in: decoded.keyboarFormat.map(i => i.searchKey) } } });
+
+  if (decoded.keyboarTouchType?.length)
+    and.push({ keyboarTouchType: { name: { in: decoded.keyboarTouchType.map(i => i.searchKey) } } });
+
+  if (and.length) where.keyboard = { some: { AND: and } };
+  return { data: where.keyboard };
+};
+
+/* -------------------- HEADSET -------------------- */
+export const addHeadsetFitlters = (decoded: FilterList) => {
+  const where: any = { Headset: { some: {} } };
+  const and: any[] = [];
+
+  if (decoded.manufacturer?.length)
+    and.push({ Manufacturer: { name: { in: decoded.manufacturer.map(i => i.searchKey) } } });
+
+  if (decoded.headsetModel?.length)
+    and.push({ HeadsetModel: { name: { in: decoded.headsetModel.map(i => i.searchKey) } } });
+
+  if (decoded.headsetSonSurround?.length)
+    and.push({ HeadsetSonSurround: { name: { in: decoded.headsetSonSurround.map(i => i.searchKey) } } });
+
+  if (decoded.headsetInterfaceAvecOrdinateur?.length)
+    and.push({ HeadsetInterfaceAvecOrdinateur: { name: { in: decoded.headsetInterfaceAvecOrdinateur.map(i => i.searchKey) } } });
+
+  if (and.length) where.Headset = { some: { AND: and } };
+  return { data: where.Headset };
+};
+
+/* -------------------- MOUSE -------------------- */
+export const addMouseFitlters = (decoded: FilterList) => {
+  const where: any = { Mouse: { some: {} } };
+  const and: any[] = [];
+
+  if (decoded.manufacturer?.length)
+    and.push({ Manufacturer: { name: { in: decoded.manufacturer.map(i => i.searchKey) } } });
+
+  if (decoded.SensorType?.length)
+    and.push({ SensorType: { name: { in: decoded.SensorType.map(i => i.searchKey) } } });
+
+  if (and.length) where.Mouse = { some: { AND: and } };
+  return { data: where.Mouse };
+};
+
+/* -------------------- MOUSEPAD -------------------- */
+export const addMousepadFitlters = (decoded: FilterList) => {
+  const where: any = { Mousepad: { some: {} } };
+  const and: any[] = [];
+
+  if (decoded.manufacturer?.length)
+    and.push({ Manufacturer: { name: { in: decoded.manufacturer.map(i => i.searchKey) } } });
+
+  if (decoded.mousepadModel?.length)
+    and.push({ MousepadModel: { name: { in: decoded.mousepadModel.map(i => i.searchKey) } } });
+
+  if (decoded.mousepadSize?.length)
+    and.push({ MousepadSize: { name: { in: decoded.mousepadSize.map(i => i.searchKey) } } });
+
+  if (and.length) where.Mousepad = { some: { AND: and } };
+  return { data: where.Mousepad };
+};
+
+/* -------------------- MIC -------------------- */
+export const addMicFitlters = (decoded: FilterList) => {
+  const where: any = { Mic: { some: {} } };
+  const and: any[] = [];
+
+  if (decoded.manufacturer?.length)
+    and.push({ Manufacturer: { name: { in: decoded.manufacturer.map(i => i.searchKey) } } });
+
+  if (decoded.micModel?.length)
+    and.push({ MicModel: { name: { in: decoded.micModel.map(i => i.searchKey) } } });
+
+  if (decoded.micInterfaceAvecOrdinateur?.length)
+    and.push({ MicInterfaceAvecOrdinateur: { name: { in: decoded.micInterfaceAvecOrdinateur.map(i => i.searchKey) } } });
+
+  if (decoded.micSonSurround?.length)
+    and.push({ MicSonSurround: { name: { in: decoded.micSonSurround.map(i => i.searchKey) } } });
+
+  if (and.length) where.Mic = { some: { AND: and } };
+  return { data: where.Mic };
+};
+// 👇 ADD THIS BLOCK somewhere with the other addXXXFitlters
 
 
+export const addCameraFitlters = (decoded: FilterList) => {
+  const where: any = { Camera: { some: {} } };
+  const and: any[] = [];
 
-  const whereClause: Record<string, any> = {
-    cases: {
-        some: {},
-      },
-    };
-    const cpuFilters = [];
-    
-    const chipsetFilter = decodedFilterList.pCcaseBrand;
-    if (chipsetFilter && chipsetFilter.length > 0) {
-      cpuFilters.push({
-        brand: {
-          name: {
-            in: decodedFilterList.pCcaseBrand.map(item => item.searchKey),
-          },
-        },
-      });
-    }
-  
-    const motherboardcpusupportFilter = decodedFilterList.pCcaseCaseformat;
-    if (motherboardcpusupportFilter && motherboardcpusupportFilter.length > 0) {
-      cpuFilters.push({
-        caseformat: {
-          name: {
-            in: decodedFilterList.pCcaseCaseformat.map(item => item.searchKey),
-          },
-        },
-      });
-    }
-    const pCcaseNumberofFansPreinstalled = decodedFilterList.pCcaseNumberofFansPreinstalled;
-    if (pCcaseNumberofFansPreinstalled && pCcaseNumberofFansPreinstalled.length > 0) {
-      cpuFilters.push({
-        numberofFansPreinstalled: {
-          name: {
-            in: decodedFilterList.pCcaseNumberofFansPreinstalled.map(item => item.searchKey),
-          },
-        },
-      });
-    }
-    const pCcaseRGBType = decodedFilterList.pCcaseRGBType;
-    if (pCcaseRGBType && pCcaseRGBType.length > 0) {
-      cpuFilters.push({
-        rGBType: {
-          name: {
-            in: decodedFilterList.pCcaseRGBType.map(item => item.searchKey),
-          },
-        },
-      });
-    }
+  // 🔹 Later, when you add real camera filters (brand, resolution, etc),
+  //     you will push Prisma conditions into `and` here.
+  //
+  // Example for future:
+  // if (decoded.mark?.length) {
+  //   and.push({
+  //     Mark: { name: { in: decoded.mark.map(i => i.searchKey) } },
+  //   });
+  // }
 
-   
-    if (cpuFilters.length > 0) {
-      whereClause.cases = {
-        some: {
-          AND: cpuFilters,
-        },
-      };
-    }
-  
-
-  
-  
-  return{
-     data: whereClause.cases
+  if (and.length) {
+    where.Camera = { some: { AND: and } };
   }
-}
-export const addPowerFitlters=(decodedFilterList:FilterList)=>{
 
+  return { data: where.Camera };
+};
 
+export const addControllerFitlters = (decoded: FilterList) => {
+  const where: any = { Controller: { some: {} } };
+  const and: any[] = [];
 
+  // 🔹 Same idea here: add conditions when you create filters
+  // example in the future (brand, type, etc)
 
-
-  const whereClause: Record<string, any> = {
-    powersupplies: {
-        some: {},
-      },
-    };
-    const cpuFilters = [];
-    
-    const chipsetFilter = decodedFilterList.powersupplyMarque;
-    if (chipsetFilter && chipsetFilter.length > 0) {
-      cpuFilters.push({
-        Marque: {
-          name: {
-            in: decodedFilterList.powersupplyMarque.map(item => item.searchKey),
-          },
-        },
-      });
-    }
-  
-    const motherboardcpusupportFilter = decodedFilterList.psCertification;
-    if (motherboardcpusupportFilter && motherboardcpusupportFilter.length > 0) {
-      cpuFilters.push({
-        certification: {
-          name: {
-            in: decodedFilterList.psCertification.map(item => item.searchKey),
-          },
-        },
-      });
-    }
-
-    if (cpuFilters.length > 0) {
-      whereClause.powersupplies = {
-        some: {
-          AND: cpuFilters,
-        },
-      };
-    }
-  
-
-  
-  
-  return{
-     data: whereClause.powersupplies
+  if (and.length) {
+    where.Controller = { some: { AND: and } };
   }
-}
-export const addCoolingFitlters=(decodedFilterList:FilterList)=>{
 
+  return { data: where.Controller };
+};
 
-
-
-
-  const whereClause: Record<string, any> = {
-    cooling: {
-        some: {},
-      },
-    };
-    const cpuFilters = [];
-    
-    const chipsetFilter = decodedFilterList.coolingMark;
-    if (chipsetFilter && chipsetFilter.length > 0) {
-      cpuFilters.push({
-        CoolingMark: {
-          name: {
-            in: decodedFilterList.coolingMark.map(item => item.searchKey),
-          },
-        },
-      });
-    }
-  
-    const motherboardcpusupportFilter = decodedFilterList.coolingType;
-    if (motherboardcpusupportFilter && motherboardcpusupportFilter.length > 0) {
-      cpuFilters.push({
-        CoolingType: {
-          name: {
-            in: decodedFilterList.coolingType.map(item => item.searchKey),
-          },
-        },
-      });
-    }
-    const pCcaseNumberofFansPreinstalled = decodedFilterList.coolingcPUSupport;
-    if (pCcaseNumberofFansPreinstalled && pCcaseNumberofFansPreinstalled.length > 0) {
-      cpuFilters.push({
-        numberofFansPreinstalled: {
-          number: {
-            in: decodedFilterList.coolingcPUSupport.map(item => item.searchKey),
-          },
-        },
-      });
-    }
-    const pCcaseRGBType = decodedFilterList.fansNumber;
-    if (pCcaseRGBType && pCcaseRGBType.length > 0) {
-      cpuFilters.push({
-        FansNumber: {
-          name: {
-            in: decodedFilterList.fansNumber.map(item => parseInt(item.searchKey)),
-          },
-        },
-      });
-    }
-  
-   
-    if (cpuFilters.length > 0) {
-      whereClause.cooling = {
-        some: {
-          AND: cpuFilters,
-        },
-      };
-    }
-  
-
-  
-  return{
-     data: whereClause.cooling
-  }
-}
-export const addScreenFitlters=(decodedFilterList:FilterList)=>{
-
-  const whereClause: Record<string, any> = {
-    screens: {
-        some: {},
-      },
-    };
-    const cpuFilters = [];
-    
-      const chipsetFilter = decodedFilterList.mark;
-      if (chipsetFilter && chipsetFilter.length > 0) {
-        cpuFilters.push({
-          Mark: {
-            name: {
-              in: decodedFilterList.mark.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      const motherboardscreensupportFilter = decodedFilterList.pouce;
-      if (motherboardscreensupportFilter && motherboardscreensupportFilter.length > 0) {
-        cpuFilters.push({
-          Pouce: {
-            name: {
-              in: decodedFilterList.pouce.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-          
-      const refreshRate = decodedFilterList.refreshRate;
-      if (refreshRate && refreshRate.length > 0) {
-        cpuFilters.push({
-          RefreshRate: {
-            name: {
-              in: decodedFilterList.refreshRate.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      const resolution = decodedFilterList.resolution;
-      if (resolution && resolution.length > 0) {
-        cpuFilters.push({
-          resolution: {
-            name: {
-              in: decodedFilterList.resolution.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-      
-     
-      if (cpuFilters.length > 0) {
-        whereClause.screens = {
-          some: {
-            AND: cpuFilters,
-          },
-        };
-      }
-    
-  
-  return{
-     data: whereClause.screens
-  }
-}
-export const addLaptopFitlters=(decodedFilterList:FilterList)=>{
-
-  const whereClause: Record<string, any> = {
-    laptops: {
-        some: {},
-      },
-    };
-    const cpuFilters = [];
-    
-      const LapSystem = decodedFilterList.LapSystem;
-      if (LapSystem && LapSystem.length > 0) {
-        cpuFilters.push({
-          System: {
-            name: {
-              in: LapSystem.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-      const LapProcesseur = decodedFilterList.LapProcesseur;
-      if (LapProcesseur && LapProcesseur.length > 0) {
-        cpuFilters.push({
-          Processeur: {
-            name: {
-              in: LapProcesseur.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      const LapGraphiccard = decodedFilterList.LapGraphiccard;
-      if (LapGraphiccard && LapGraphiccard.length > 0) {
-        cpuFilters.push({
-          Graphiccard: {
-            name: {
-              in: LapGraphiccard.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      const LapScreenSize = decodedFilterList.LapScreenSize;
-      if (LapScreenSize && LapScreenSize.length > 0) {
-        cpuFilters.push({
-          ScreenSize: {
-            name: {
-              in: LapScreenSize.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      const LapScreenType = decodedFilterList.LapScreenType;
-      if (LapScreenType && LapScreenType.length > 0) {
-        cpuFilters.push({
-          ScreenType: {
-            name: {
-              in: LapScreenType.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      const LapHardisk = decodedFilterList.LapHardisk;
-      if (LapHardisk && LapHardisk.length > 0) {
-        cpuFilters.push({
-          Hardisk: {
-            name: {
-              in: LapHardisk.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      const Lapmemory = decodedFilterList.Lapmemory;
-      if (Lapmemory && Lapmemory.length > 0) {
-        cpuFilters.push({
-          memory: {
-            name: {
-              in: Lapmemory.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      const Lapnetwork = decodedFilterList.Lapnetwork;
-      if (Lapnetwork && Lapnetwork.length > 0) {
-        cpuFilters.push({
-          network: {
-            name: {
-              in: Lapnetwork.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-      const LapSound = decodedFilterList.LapSound;
-      if (LapSound && LapSound.length > 0) {
-        cpuFilters.push({
-          Sound: {
-            name: {
-              in: LapSound.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-      const LapCamera = decodedFilterList.LapCamera;
-      if (LapCamera && LapCamera.length > 0) {
-        cpuFilters.push({
-          Camera: {
-            name: {
-              in: LapCamera.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-        const LapRefreshRate = decodedFilterList.LapRefreshRate;
-      if (LapRefreshRate && LapRefreshRate.length > 0) {
-        cpuFilters.push({
-          RefreshRate: {
-            name: {
-              in: LapRefreshRate.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-        const manufacturer = decodedFilterList.manufacturer;
-      if (manufacturer && manufacturer.length > 0) {
-        cpuFilters.push({
-          Manufacturer: {
-            name: {
-              in: manufacturer.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      if (cpuFilters.length > 0) {
-        whereClause.laptops = {
-          some: {
-            AND: cpuFilters,
-          },
-        };
-      }
-    
-  
-  return{
-     data: whereClause.laptops
-  }
-}
-export const addKeyboardFitlters=(decodedFilterList:FilterList)=>{
-
-  const whereClause: Record<string, any> = {
-    laptops: {
-        some: {},
-      },
-    };
-    const cpuFilters = [];
-    
-      const manufacturer = decodedFilterList.manufacturer;
-      if (manufacturer && manufacturer.length > 0) {
-        cpuFilters.push({
-          Manufacturer: {
-            name: {
-              in: manufacturer.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-      const keyboarFormat = decodedFilterList.keyboarFormat;
-      if (keyboarFormat && keyboarFormat.length > 0) {
-        cpuFilters.push({
-          keyboarFormat: {
-            name: {
-              in: keyboarFormat.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      const keyboarTouchType = decodedFilterList.keyboarTouchType;
-      if (keyboarTouchType && keyboarTouchType.length > 0) {
-        cpuFilters.push({
-          keyboarTouchType: {
-            name: {
-              in: keyboarTouchType.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      if (cpuFilters.length > 0) {
-        whereClause.laptops = {
-          some: {
-            AND: cpuFilters,
-          },
-        };
-      }
-    
-  
-  return{
-     data: whereClause.laptops
-  }
-}
-export const addHeadsetFitlters=(decodedFilterList:FilterList)=>{
-
-  const whereClause: Record<string, any> = {
-    laptops: {
-        some: {},
-      },
-    };
-    const cpuFilters = [];
-    
-      const manufacturer = decodedFilterList.manufacturer;
-      if (manufacturer && manufacturer.length > 0) {
-        cpuFilters.push({
-          Manufacturer: {
-            name: {
-              in: manufacturer.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-      const headsetModel = decodedFilterList.headsetModel;
-      if (headsetModel && headsetModel.length > 0) {
-        cpuFilters.push({
-          HeadsetModel: {
-            name: {
-              in: headsetModel.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      const headsetSonSurround = decodedFilterList.headsetSonSurround;
-      if (headsetSonSurround && headsetSonSurround.length > 0) {
-        cpuFilters.push({
-          HeadsetSonSurround: {
-            name: {
-              in: headsetSonSurround.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-         const headsetInterfaceAvecOrdinateur = decodedFilterList.headsetInterfaceAvecOrdinateur;
-      if (headsetInterfaceAvecOrdinateur && headsetInterfaceAvecOrdinateur.length > 0) {
-        cpuFilters.push({
-          HeadsetInterfaceAvecOrdinateur: {
-            name: {
-              in: headsetInterfaceAvecOrdinateur.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-      if (cpuFilters.length > 0) {
-        whereClause.laptops = {
-          some: {
-            AND: cpuFilters,
-          },
-        };
-      }
-    
-  
-  return{
-     data: whereClause.laptops
-  }
-}
-export const addMouseFitlters=(decodedFilterList:FilterList)=>{
-
-  const whereClause: Record<string, any> = {
-    laptops: {
-        some: {},
-      },
-    };
-    const cpuFilters = [];
-    
-      const manufacturer = decodedFilterList.manufacturer;
-      if (manufacturer && manufacturer.length > 0) {
-        cpuFilters.push({
-          Manufacturer: {
-            name: {
-              in: manufacturer.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-      const SensorType = decodedFilterList.SensorType;
-      if (SensorType && SensorType.length > 0) {
-        cpuFilters.push({
-          SensorType: {
-            name: {
-              in: SensorType.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-
-    
-      if (cpuFilters.length > 0) {
-        whereClause.laptops = {
-          some: {
-            AND: cpuFilters,
-          },
-        };
-      }
-    
-  
-  return{
-     data: whereClause.laptops
-  }
-}
-export const addMousepadFitlters=(decodedFilterList:FilterList)=>{
-
-  const whereClause: Record<string, any> = {
-    laptops: {
-        some: {},
-      },
-    };
-    const cpuFilters = [];
-    
-      const manufacturer = decodedFilterList.manufacturer;
-      if (manufacturer && manufacturer.length > 0) {
-        cpuFilters.push({
-          Manufacturer: {
-            name: {
-              in: manufacturer.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-      const mousepadModel = decodedFilterList.mousepadModel;
-      if (mousepadModel && mousepadModel.length > 0) {
-        cpuFilters.push({
-          MousepadModel: {
-            name: {
-              in: mousepadModel.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      const mousepadSize = decodedFilterList.mousepadSize;
-      if (mousepadSize && mousepadSize.length > 0) {
-        cpuFilters.push({
-          MousepadSize: {
-            name: {
-              in: mousepadSize.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      if (cpuFilters.length > 0) {
-        whereClause.laptops = {
-          some: {
-            AND: cpuFilters,
-          },
-        };
-      }
-    
-  
-  return{
-     data: whereClause.laptops
-  }
-}
-export const addMicFitlters=(decodedFilterList:FilterList)=>{
-
-  const whereClause: Record<string, any> = {
-    laptops: {
-        some: {},
-      },
-    };
-    const cpuFilters = [];
-    
-      const manufacturer = decodedFilterList.manufacturer;
-      if (manufacturer && manufacturer.length > 0) {
-        cpuFilters.push({
-          Manufacturer: {
-            name: {
-              in: manufacturer.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-      const micModel = decodedFilterList.micModel;
-      if (micModel && micModel.length > 0) {
-        cpuFilters.push({
-          MicModel: {
-            name: {
-              in: micModel.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      const micInterfaceAvecOrdinateur = decodedFilterList.micInterfaceAvecOrdinateur;
-      if (micInterfaceAvecOrdinateur && micInterfaceAvecOrdinateur.length > 0) {
-        cpuFilters.push({
-          MicInterfaceAvecOrdinateur: {
-            name: {
-              in: micInterfaceAvecOrdinateur.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-       
-      const micSonSurround = decodedFilterList.micSonSurround;
-      if (micSonSurround && micSonSurround.length > 0) {
-        cpuFilters.push({
-          MicSonSurround: {
-            name: {
-              in: micSonSurround.map(item => item.searchKey),
-            },
-          },
-        });
-      }
-    
-      if (cpuFilters.length > 0) {
-        whereClause.laptops = {
-          some: {
-            AND: cpuFilters,
-          },
-        };
-      }
-    
-  
-  return{
-     data: whereClause.laptops
-  }
-}

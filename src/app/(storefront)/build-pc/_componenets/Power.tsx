@@ -26,6 +26,8 @@ import { Menu, Transition } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { Trash } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useLanguage } from "@/context/language-context";
+import { UI_TEXT } from "@/i18n/ui-text";
 
 import type { Product } from "@/types";
 import type { Filter, ProfileType, filterItem } from "../page";
@@ -72,6 +74,8 @@ export const Power = (props: {
   powersupplyMarque: Filter;
   motherboardId: Product | undefined;
 }) => {
+  const { lang } = useLanguage();
+  const ui = UI_TEXT[lang];
   const [data, setData] = useState<PSUProduct[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -178,8 +182,8 @@ export const Power = (props: {
               <Card className="rounded-xl build-selector">
                 <CardHeader>
                   <CardTitle className="text-center">
-                    Bloc d&apos;alimentation
-                    <p className="text-xs text-muted-foreground p-1">(*Obligatoire)</p>
+                  {ui.builderCompatPsu}
+                    <p className="text-xs text-muted-foreground p-1">{ui.builderRequiredTag}</p>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -225,7 +229,7 @@ export const Power = (props: {
                     {/* Compatibilité */}
                     {props.selectedCompatibility ? (
                       <div className="w-4/5">
-                        <div className="font-bold my-2 text-sm">Compatibilité:</div>
+                        <div className="font-bold my-2 text-sm">Compatibility:</div>
                         <div className="text-left grid text-xs max-w-screen-md mx-auto border border-white rounded mb-3 mr-3">
                           <div className="p-1 pl-3 border-b border-white hover:bg-[#101218] hover:font-bold cursor-pointer">
                             <p
@@ -235,7 +239,7 @@ export const Power = (props: {
                                   : "text-primary"
                               }`}
                             >
-                              Carte mére :
+                              Motherboard :
                             </p>
                             <p
                               className={
@@ -255,7 +259,7 @@ export const Power = (props: {
                                   : "text-primary"
                               }`}
                             >
-                              Processeur :
+                              Processor :
                             </p>
                             <p
                               className={
@@ -275,7 +279,7 @@ export const Power = (props: {
                                   : "text-primary"
                               }`}
                             >
-                              Carte graphique :
+                              Graphic Card :
                             </p>
                             <p
                               className={
@@ -295,7 +299,7 @@ export const Power = (props: {
                                   : "text-primary"
                               }`}
                             >
-                              Ram :
+                              RAM :
                             </p>
                             <p
                               className={
@@ -315,7 +319,7 @@ export const Power = (props: {
                                   : "text-primary"
                               }`}
                             >
-                              Disque dur compatibilité :
+                              Hard drive compatibility :
                             </p>
                             <p
                               className={
@@ -335,7 +339,7 @@ export const Power = (props: {
                                   : "text-primary"
                               }`}
                             >
-                              Boîte d&apos;alimentation compatibilité :
+                              Power supply box compatibility :
                             </p>
                             <p
                               className={
@@ -355,7 +359,8 @@ export const Power = (props: {
                                   : "text-primary"
                               }`}
                             >
-                              Boîtier compatibilité :
+                              Case compatibility:
+
                             </p>
                             <p
                               className={
@@ -390,7 +395,7 @@ export const Power = (props: {
                           <Trash className="h-4 w-4" />
                         </Button>
                         <Button onClick={() => setOpenDialog(true)} className="btn-primary-blue">
-                          Changer
+                        {ui.builderBtnChange}
                         </Button>
                         <a
                           href={`product/${props.processorId.id}`}
@@ -398,7 +403,7 @@ export const Power = (props: {
                           target="_blank"
                           rel="noreferrer"
                         >
-                          Voir en store
+                          {ui.builderLinkSeeInStore}
                         </a>
                       </div>
                     </div>
@@ -443,7 +448,7 @@ export const Power = (props: {
             <DialogHeader className="sticky top-0 z-10 bg-card border-b border-border px-4 py-3">
               <DialogTitle>
                 <div className="flex justify-between items-center">
-                  <h1>Bloc d&apos;alimentation store</h1>
+                  <h1>power supply store </h1>
                   <Menu as="div" className="relative inline-block text-left">
                     <div className="flex">
                       <Menu.Button className="group inline-flex justify-center text-sm font-medium text-foreground">
@@ -519,7 +524,7 @@ export const Power = (props: {
                             checked={compatible}
                             onChange={(e) => setCompatible(e.target.checked)}
                           />
-                          <label className="text-sm">Compatible avec Carte mére</label>
+                          <label className="text-sm">Compatible with Motherboard </label>
                         </div>
                       </div>
                     ) : null}
@@ -559,12 +564,12 @@ export const Power = (props: {
                   </div>
                 ) : (
                   <>
-                    {!loading && data && data.length === 0 && <p className="text-muted-foreground">No results found.</p>}
+                    {!loading && data && data.length === 0 && <p className="text-muted-foreground">{ui.builderNoResults}.</p>}
 
                     {!loading && data.length > 0 && (
                       <>
                         <div className="text-sm text-muted-foreground">
-                          ({totalPages}) Résultats en {searchTime.toFixed(2)} seconds
+                          ({totalPages}) {ui.builderResultsSummary(totalPages, searchTime)}
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -578,7 +583,7 @@ export const Power = (props: {
                               <div key={item.id} className={`bg-[#12141b] hover:bg-[#101218] transition flex flex-col justify-between group cursor-pointer rounded-xl border border-white/5 p-3 space-y-1 ${
                               checkcompatibility(item) ? "ring-1 ring-[#00e0ff]/50" : "ring-1 ring-red-500/40"}`}>
                                 <div>
-                                  {isRecommended && <span className="text-[#007bff] font-semibold">Recommandé par AI</span>}
+                                  {isRecommended && <span className="text-[#007bff] font-semibold">Recommended by AI</span>}
                                   <div className="aspect-square rounded-xl bg-transparent relative">
                                     <Image src={item.images?.[0]?.url} alt={item.name} fill className="aspect-square object-cover rounded-md" />
                                   </div>
@@ -605,7 +610,7 @@ export const Power = (props: {
                                     }}
                                     className="w-full btn-primary-blue"
                                   >
-                                    Ajouter
+                                    {ui.builderBtnAdd}
                                   </Button>
                                 </div>
                               </div>
@@ -623,12 +628,13 @@ export const Power = (props: {
             <DialogFooter className="sticky bottom-0 bg-[#101218] border-t border-border px-4 py-3">
             <div className='grid grid-cols-12 gap-4 w-full items-center'>
               <div className='col-span-12 md:col-span-4 lg:col-span-3'>
-                <Button
-                  className='w-full px-6 py-2 bg-[#00a2ff] hover:bg-[#0092e6] text-foreground'
-                  onClick={() => { setCurrentPage(0); fetchData(); }}
-                >
-                  Filter
-                </Button>
+              <Button
+  className='w-full px-6 py-2 bg-[#00a2ff] hover:bg-[#0092e6] text-foreground'
+  onClick={() => { setCurrentPage(0); fetchData(); }}
+>
+  {ui.filterButton}
+</Button>
+
               </div>
 
                 <div className="col-span-12 md:col-span-8 lg:col-span-9 flex justify-end">

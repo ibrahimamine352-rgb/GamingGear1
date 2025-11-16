@@ -12,7 +12,7 @@ const NavigationMenu = React.forwardRef<
   <NavigationMenuPrimitive.Root
     ref={ref}
     className={cn(
-      "relative z-50 flex max-w-max flex-1 items-center justify-center",
+      "relative isolate z-[80] flex max-w-max flex-1 items-center justify-center",
       className
     )}
     {...props}
@@ -69,8 +69,8 @@ const NavigationMenuContent = React.forwardRef<
   <NavigationMenuPrimitive.Content
     ref={ref}
     className={cn(
-      " top-0 w-full text-foreground data-[motion^=from-]:animate-in data-[motion^=to-]:animate-out data-[motion^=from-]:fade-in data-[motion^=to-]:fade-out data-[motion=from-end]:slide-in-from-right-52 data-[motion=from-start]:slide-in-from-left-52 data-[motion=to-end]:slide-out-to-right-52 data-[motion=to-start]:slide-out-to-left-52 md:absolute md:w-auto",
-      className
+      "w-full text-foreground text-xs md:text-sm data-[motion^=from-]:animate-in data-[motion^=to-]:animate-out data-[motion^=from-]:fade-in data-[motion^=to-]:fade-out data-[motion=from-end]:slide-in-from-right-52 data-[motion=from-start]:slide-in-from-left-52 data-[motion=to-end]:slide-out-to-right-52 data-[motion=to-start]:slide-out-to-left-52 md:w-auto",
+
     )}
     {...props}
   />
@@ -83,9 +83,9 @@ const NavigationMenuViewport = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Viewport>,
   React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Viewport>
 >(({ className, ...props }, ref) => (
-  <div className={cn("absolute inset-x-0 top-full z-[10001] flex justify-center pointer-events-none")}>
+  <div className={cn("absolute inset-x-0 top-full z-[10001] flex justify-center pointer-events-auto")}>
     <NavigationMenuPrimitive.Viewport
-      className={cn("pointer-events-auto origin-top-center relative rounded-b-md pr-0 py-2 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden border border-border bg-background text-foreground shadow-lg md:w-[900px]", className)}
+      className={cn("pointer-events-auto origin-top-center relative rounded-b-md pr-0 py-2 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-visible border border-border bg-background text-foreground shadow-lg md:w-[900px]", className)}
       ref={ref}
       {...props}
     />

@@ -1,1949 +1,1770 @@
 import prismadb from "@/lib/prismadb";
 import { Filter } from "../../build-pc/page";
 
-
 export const PreBuiltPcmodelFilters = async () => {
-
-    return {}
-}
+  return {};
+};
 
 export const LaptopFilters = async () => {
+  const LapSystemm = await prismadb.lapSystem.findMany({
+    where: {
+      laptops: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          laptops: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-    const LapSystemm = await prismadb.lapSystem.findMany({
-        where: {
-            laptops: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        } 
-        , include: {
-            _count: {
+  const LapSystem: Filter = {
+    title: "Operating System",
+    list: LapSystemm.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.laptops ?? 0,
+    })),
+  };
 
-                select: {
-                    laptops: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
+  const LapProcesseurr = await prismadb.lapProcesseur.findMany({
+    where: {
+      laptops: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          laptops: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-    const LapSystem: Filter = {
-        title: "Système",
-        list: LapSystemm.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.laptops ?? 0,
+  const LapProcesseur: Filter = {
+    title: "Processor",
+    list: LapProcesseurr.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.laptops ?? 0,
+    })),
+  };
 
-            }
+  const LapGraphiccardd = await prismadb.lapGraphiccard.findMany({
+    where: {
+      laptops: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          laptops: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-        }),
-    };
-    const LapProcesseurr = await prismadb.lapProcesseur.findMany({
-        where: {
-            laptops: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
+  const LapGraphiccard: Filter = {
+    title: "Graphics Card",
+    list: LapGraphiccardd.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.laptops ?? 0,
+    })),
+  };
 
-                select: {
-                    laptops: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
+  const LapGraphiccardReff = await prismadb.lapGraphiccardRef.findMany({
+    where: {
+      laptops: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          laptops: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-    const LapProcesseur: Filter = {
-        title: "Processeur",
-        list: LapProcesseurr.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.laptops ?? 0,
+  const LapGraphiccardRef: Filter = {
+    title: "Brand",
+    list: LapGraphiccardReff.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.laptops ?? 0,
+    })),
+  };
 
-            }
+  const LapScreenSizee = await prismadb.lapScreenSize.findMany({
+    where: {
+      laptops: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          laptops: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-        }),
-    };
-    const LapGraphiccardd = await prismadb.lapGraphiccard.findMany({
-        where: {
-            laptops: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
+  const LapScreenSize: Filter = {
+    title: "Screen Size",
+    list: LapScreenSizee.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.laptops ?? 0,
+    })),
+  };
 
-                select: {
-                    laptops: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
+  const LapScreenTypee = await prismadb.lapScreenType.findMany({
+    where: {
+      laptops: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          laptops: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-    const LapGraphiccard: Filter = {
-        title: "Graphique card",
-        list: LapGraphiccardd.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.laptops ?? 0,
+  const LapHardiskk = await prismadb.lapHardisk.findMany({
+    where: {
+      laptops: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          laptops: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-            }
+  const LapHardisk: Filter = {
+    title: "Storage",
+    list: LapHardiskk.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.laptops ?? 0,
+    })),
+  };
 
-        }),
-    };
-    const LapGraphiccardReff = await prismadb.lapGraphiccardRef.findMany({
-        where: {
-            laptops: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
+  const Lapmemoryy = await prismadb.lapmemory.findMany({
+    where: {
+      laptops: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          laptops: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-                select: {
-                    laptops: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
+  const Lapmemory: Filter = {
+    title: "Memory",
+    list: Lapmemoryy.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.laptops ?? 0,
+    })),
+  };
 
-    const LapGraphiccardRef: Filter = {
-        title: "Mark",
-        list: LapGraphiccardReff.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.laptops ?? 0,
+  const LapRefreshRatee = await prismadb.lapRefreshRate.findMany({
+    where: {
+      laptops: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          laptops: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-            }
+  const LapRefreshRate: Filter = {
+    title: "Refresh Rate",
+    list: LapRefreshRatee.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.laptops ?? 0,
+    })),
+  };
 
-        }),
-    };
-    const LapScreenSizee = await prismadb.lapScreenSize.findMany({
-        where: {
-            laptops: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
+  const markk = await prismadb.manufacturer.findMany({
+    where: {
+      Laptops: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          Laptops: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-                select: {
-                    laptops: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
+  const manufacturer: Filter = {
+    title: "Brand",
+    list: markk.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.Laptops ?? 0,
+    })),
+  };
 
-    const LapScreenSize: Filter = {
-        title: "Taille d'écran",
-        list: LapScreenSizee.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.laptops ?? 0,
+  return {
+    title: "laptop",
+    data: {
+      manufacturer,
+      LapSystem,
+      LapProcesseur,
+      LapGraphiccard,
+      LapScreenSize,
+      LapHardisk,
+      Lapmemory,
+      LapRefreshRate,
+    },
+  };
+};
 
-            }
-
-        }),
-    };
-    const LapScreenTypee = await prismadb.lapScreenType.findMany({
-        where: {
-            laptops: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-
-                select: {
-                    laptops: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
-
- 
-    const LapHardiskk = await prismadb.lapHardisk.findMany({
-        where: {
-            laptops: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-
-                select: {
-                    laptops: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
-
-    const LapHardisk: Filter = {
-        title: "Disque Dur",
-        list: LapHardiskk.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.laptops ?? 0,
-
-            }
-
-        }),
-    };
-    const Lapmemoryy = await prismadb.lapmemory.findMany({
-        where: {
-            laptops: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-
-                select: {
-                    laptops: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
-
-    const Lapmemory: Filter = {
-        title: "Mémoire",
-        list: Lapmemoryy.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.laptops ?? 0,
-
-            }
-
-        }),
-    };
-  
-    const LapRefreshRatee = await prismadb.lapRefreshRate.findMany({
-        where: {
-            laptops: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-
-                select: {
-                    laptops: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
-
-    const LapRefreshRate: Filter = {
-        title: "Taux de Rafraîchissement",
-        list: LapRefreshRatee.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.laptops ?? 0,
-
-            }
-
-        }),
-    };
-
-    const markk = await prismadb.manufacturer.findMany({
-        where: {
-            Laptops: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-
-                select: {
-                    Laptops: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
-
-    const manufacturer: Filter = {
-        title: "Fabricants",
-        list: markk.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.Laptops ?? 0,
-
-            }
-
-        }),
-    };
-
-    return {
-        title: "laptop",
-        data: {
-            manufacturer, LapSystem, LapProcesseur, LapGraphiccard, LapScreenSize, LapHardisk, Lapmemory,
-             LapRefreshRate
-
-        }
-    }
-}
 export const HeadsetFilters = async () => {
-    const headsetModell = await prismadb.headsetModel.findMany({
-        where: {
+  const headsetModell = await prismadb.headsetModel.findMany({
+    where: {
+      Headset: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          Headset: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const headsetModel: Filter = {
+    title: "Model",
+    list: headsetModell.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.Headset ?? 0,
+    })),
+  };
+
+  const headsetSonSurroundd = await prismadb.headsetSonSurround.findMany({
+    where: {
+      Headset: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          Headset: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const headsetSonSurround: Filter = {
+    title: "Surround Sound",
+    list: headsetSonSurroundd.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.Headset ?? 0,
+    })),
+  };
+
+  const headsetInterfaceAvecOrdinateurr =
+    await prismadb.headsetInterfaceAvecOrdinateur.findMany({
+      where: {
+        Headset: {
+          some: {
+            product: { some: {} },
+          },
+        },
+      },
+      include: {
+        _count: {
+          select: {
             Headset: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
+              where: {
+                product: { some: {} },
+              },
+            },
+          },
+        },
+      },
+    });
 
-                select: {
-                    Headset: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
+  const headsetInterfaceAvecOrdinateur: Filter = {
+    title: "Interface With Computer",
+    list: headsetInterfaceAvecOrdinateurr.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.Headset ?? 0,
+    })),
+  };
 
-    const headsetModel: Filter = {
-        title: "Model",
-        list: headsetModell.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.Headset ?? 0,
+  const markk = await prismadb.manufacturer.findMany({
+    where: {
+      Headset: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          Headset: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-            }
+  const manufacturer: Filter = {
+    title: "Brand",
+    list: markk.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.Headset ?? 0,
+    })),
+  };
 
-        }),
-    };
-    const headsetSonSurroundd = await prismadb.headsetSonSurround.findMany({
-        where: {
-            Headset: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
+  return {
+    title: "headset",
+    data: {
+      manufacturer,
+      headsetSonSurround,
+      headsetInterfaceAvecOrdinateur,
+    },
+  };
+};
 
-                select: {
-                    Headset: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
-
-    const headsetSonSurround: Filter = {
-        title: "Casque Son Surround",
-        list: headsetSonSurroundd.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.Headset ?? 0,
-
-            }
-
-        }),
-    };
-    const headsetInterfaceAvecOrdinateurr = await prismadb.headsetInterfaceAvecOrdinateur.findMany({
-        where: {
-            Headset: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-
-                select: {
-                    Headset: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
-
-    const headsetInterfaceAvecOrdinateur: Filter = {
-        title: "Interface Avec Ordinateur",
-        list: headsetInterfaceAvecOrdinateurr.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.Headset ?? 0,
-
-            }
-
-        }),
-    };
-    const markk = await prismadb.manufacturer.findMany({
-        where: {
-            Headset: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-
-                select: {
-                    Headset: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
-
-    const manufacturer: Filter = {
-        title: "Mark",
-        list: markk.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.Headset ?? 0,
-
-            }
-
-        }),
-    };
-
-    return {
-        title: "casque",
-        data: {
-            manufacturer, headsetSonSurround, headsetInterfaceAvecOrdinateur
-
-        }
-    }
-}
 export const keyboardFilters = async () => {
-   
-    const keyboarFormatt = await prismadb.keyboarFormat.findMany({
-        where: {
-            keyboards: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
+  const keyboarFormatt = await prismadb.keyboarFormat.findMany({
+    where: {
+      keyboards: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          keyboards: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-                select: {
-                    keyboards: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
+  const keyboarFormat: Filter = {
+    title: "Keyboard Format",
+    list: keyboarFormatt.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.keyboards ?? 0,
+    })),
+  };
 
-    const keyboarFormat: Filter = {
-        title: "Format de clavier",
-        list: keyboarFormatt.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.keyboards ?? 0,
+  const keyboarButtonsNumberr = await prismadb.keyboarButtonsNumber.findMany({
+    where: {
+      keyboards: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          keyboards: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-            }
+  const keyboarButtonsNumber: Filter = {
+    title: "Number of Keys",
+    list: keyboarButtonsNumberr.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.keyboards ?? 0,
+    })),
+  };
 
-        }),
-    };
-    const keyboarButtonsNumberr = await prismadb.keyboarButtonsNumber.findMany({
-        where: {
-            keyboards: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
+  const keyboarTouchTypee = await prismadb.keyboarTouchType.findMany({
+    where: {
+      keyboards: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          keyboards: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-                select: {
-                    keyboards: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
+  const keyboarTouchType: Filter = {
+    title: "Switch Type",
+    list: keyboarTouchTypee.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.keyboards ?? 0,
+    })),
+  };
 
-    const keyboarButtonsNumber: Filter = {
-        title: "Numéro de boutons du clavier",
-        list: keyboarButtonsNumberr.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.keyboards ?? 0,
+  const markk = await prismadb.manufacturer.findMany({
+    where: {
+      keyboard: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          keyboard: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-            }
+  const manufacturer: Filter = {
+    title: "Brand",
+    list: markk.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.keyboard ?? 0,
+    })),
+  };
 
-        }),
-    };
-    const keyboarTouchTypee = await prismadb.keyboarTouchType.findMany({
-        where: {
-            keyboards: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
+  return {
+    title: "keyboard",
+    data: {
+      manufacturer,
+      keyboarFormat,
+      keyboarTouchType,
+    },
+  };
+};
 
-                select: {
-                    keyboards: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
-
-    const keyboarTouchType: Filter = {
-        title: "Type tactile du clavier",
-        list: keyboarTouchTypee.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.keyboards ?? 0,
-
-            }
-
-        }),
-    };
-
-
-    const markk = await prismadb.manufacturer.findMany({
-        where: {
-            keyboard: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-
-                select: {
-                    keyboard: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
-
-    const manufacturer: Filter = {
-        title: "Mark",
-        list: markk.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.keyboard ?? 0,
-
-            }
-
-        }),
-    };
-
-    return {
-
-        title: "keyboard",
-        data: {
-            manufacturer, keyboarFormat, keyboarTouchType
-
-        }
-    }
-}
 export const MicFilters = async () => {
-    const micInterfaceAvecOrdinateurr = await prismadb.micInterfaceAvecOrdinateur.findMany({
-        where: {
+  const micInterfaceAvecOrdinateurr =
+    await prismadb.micInterfaceAvecOrdinateur.findMany({
+      where: {
+        Mic: {
+          some: {
+            product: { some: {} },
+          },
+        },
+      },
+      include: {
+        _count: {
+          select: {
             Mic: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
+              where: {
+                product: { some: {} },
+              },
+            },
+          },
+        },
+      },
+    });
 
-                select: {
-                    Mic: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
+  const micInterfaceAvecOrdinateur: Filter = {
+    title: "Interface With Computer",
+    list: micInterfaceAvecOrdinateurr.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.Mic ?? 0,
+    })),
+  };
 
-    const micInterfaceAvecOrdinateur: Filter = {
-        title: "Modél",
-        list: micInterfaceAvecOrdinateurr.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.Mic ?? 0,
+  const micSonSurroundd = await prismadb.micSonSurround.findMany({
+    where: {
+      Mic: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          Mic: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-            }
+  const micSonSurround: Filter = {
+    title: "Sound Surround",
+    list: micSonSurroundd.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.Mic ?? 0,
+    })),
+  };
 
-        }),
-    };
-    const micSonSurroundd = await prismadb.micSonSurround.findMany({
-        where: {
-            Mic: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
+  const MicModel = await prismadb.micModel.findMany({
+    where: {
+      Mic: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          Mic: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-                select: {
-                    Mic: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
+  const micModel: Filter = {
+    title: "Model",
+    list: MicModel.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.Mic ?? 0,
+    })),
+  };
 
-    const micSonSurround: Filter = {
-        title: "Son Surround",
-        list: micSonSurroundd.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.Mic ?? 0,
+  const markk = await prismadb.manufacturer.findMany({
+    where: {
+      Mic: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          Mic: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-            }
+  const manufacturer: Filter = {
+    title: "Brand",
+    list: markk.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.Mic ?? 0,
+    })),
+  };
 
-        }),
-    };
-    const MicModel = await prismadb.micModel.findMany({
-        where: {
-            Mic: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
+  return {
+    title: "microphone",
+    data: {
+      manufacturer,
+      micModel,
+      micInterfaceAvecOrdinateur,
+    },
+  };
+};
 
-                select: {
-                    Mic: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
-
-    const micModel: Filter = {
-        title: "Modél",
-        list: MicModel.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.Mic ?? 0,
-
-            }
-
-        }),
-    };
-    const markk = await prismadb.manufacturer.findMany({
-        where: {
-            Mic: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-
-                select: {
-                    Mic: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
-
-    const manufacturer: Filter = {
-        title: "Mark",
-        list: markk.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.Mic ?? 0,
-
-            }
-
-        }),
-    };
-
-    return {
-
-        title: "mic",
-        data: {
-            manufacturer, micModel, micInterfaceAvecOrdinateur
-
-        }
-    }
-}
 export const MouseFilters = async () => {
+  const SensorTypee = await prismadb.sensorType.findMany({
+    where: {
+      Mouse: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          Mouse: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-    const SensorTypee = await prismadb.sensorType.findMany({
-        where: {
-            Mouse: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
+  const SensorType: Filter = {
+    title: "Sensor Type",
+    list: SensorTypee.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.Mouse ?? 0,
+    })),
+  };
 
-                select: {
-                    Mouse: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
+  const markk = await prismadb.manufacturer.findMany({
+    where: {
+      Mouse: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          Mouse: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-    const SensorType: Filter = {
-        title: "Type de capteur",
-        list: SensorTypee.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.Mouse ?? 0,
+  const manufacturer: Filter = {
+    title: "Brand",
+    list: markk.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.Mouse ?? 0,
+    })),
+  };
 
-            }
+  return {
+    title: "mouse",
+    data: {
+      manufacturer,
+      SensorType,
+    },
+  };
+};
 
-        }),
-    };
-
-    const markk = await prismadb.manufacturer.findMany({
-        where: {
-            Mouse: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-
-                select: {
-                    Mouse: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
-
-    const manufacturer: Filter = {
-        title: "Mark",
-        list: markk.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.Mouse ?? 0,
-
-            }
-
-        }),
-    };
-
-    return {
-
-
-        title: "mouse",
-        data: {
-            manufacturer,
-            SensorType
-        }
-    }
-}
 export const MousepadFilters = async () => {
-    const mousepadSizee = await prismadb.mousepadSize.findMany({
-        where: {
-            Mousepad: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
+  const mousepadSizee = await prismadb.mousepadSize.findMany({
+    where: {
+      Mousepad: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          Mousepad: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-                select: {
-                    Mousepad: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
+  const mousepadSize: Filter = {
+    title: "Size",
+    list: mousepadSizee.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.Mousepad ?? 0,
+    })),
+  };
 
-    const mousepadSize: Filter = {
-        title: "Taille",
-        list: mousepadSizee.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.Mousepad ?? 0,
+  const mousepadModell = await prismadb.mousepadModel.findMany({
+    where: {
+      Mousepad: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          Mousepad: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-            }
+  const mousepadModel: Filter = {
+    title: "Model",
+    list: mousepadModell.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.Mousepad ?? 0,
+    })),
+  };
 
-        }),
-    };
-    const mousepadModell = await prismadb.mousepadModel.findMany({
-        where: {
-            Mousepad: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
+  const markk = await prismadb.manufacturer.findMany({
+    where: {
+      Mousepad: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          Mousepad: {
+            where: {
+              product: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-                select: {
-                    Mousepad: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
+  const manufacturer: Filter = {
+    title: "Brand",
+    list: markk.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.Mousepad ?? 0,
+    })),
+  };
 
-    const mousepadModel: Filter = {
-        title: "model",
-        list: mousepadModell.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.Mousepad ?? 0,
+  return {
+    title: "mousepad",
+    data: {
+      manufacturer,
+      mousepadModel,
+      mousepadSize,
+    },
+  };
+};
 
-            }
-
-        }),
-    };
-    const markk = await prismadb.manufacturer.findMany({
-        where: {
-            Mousepad: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-
-                select: {
-                    Mousepad: {
-                        where: {
-                            product: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
-
-    const manufacturer: Filter = {
-        title: "Mark",
-        list: markk.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.Mousepad ?? 0,
-
-            }
-
-        }),
-    };
-
-
-    return {
-
-
-        title: "mousePad",
-        data: {
-            manufacturer,
-            mousepadModel,
-            mousepadSize
-        }
-    }
-}
 export const screensFilters = async () => {
-    const markk = await prismadb.mark.findMany({
-        where: {
-            screens: {
-                some: {
-                    products: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
+  const markk = await prismadb.mark.findMany({
+    where: {
+      screens: {
+        some: {
+          products: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          screens: {
+            where: {
+              products: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-                select: {
-                    screens: {
-                        where: {
-                            products: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
+  const mark: Filter = {
+    title: "Brand",
+    list: markk.map((manufacturer: any) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.screens ?? 0,
+    })),
+  };
 
-    const mark: Filter = {
-        title: "Mark",
-        list: markk.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.screens ?? 0,
+  const poucee = await prismadb.pouce.findMany({
+    where: {
+      screens: {
+        some: {
+          products: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          screens: {
+            where: {
+              products: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-            }
+  const pouce: Filter = {
+    title: "Size",
+    list: poucee.map((manufacturer: any) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.screens ?? 0,
+    })),
+  };
 
-        }),
-    };
-    const poucee = await prismadb.pouce.findMany({
-        where: {
-            screens: {
-                some: {
-                    products: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: {
-                    screens: {
-                        where: {
-                            products: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
+  const refreshRatee = await prismadb.refreshRate.findMany({
+    where: {
+      screens: {
+        some: {
+          products: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          screens: {
+            where: {
+              products: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-    const pouce: Filter = {
-        title: "Pouce",
-        list: poucee.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.screens ?? 0,
+  const refreshRate: Filter = {
+    title: "Refresh Rate",
+    list: refreshRatee.map((manufacturer: any) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.screens ?? 0,
+    })),
+  };
 
-            }
+  const resolutionn = await prismadb.resolution.findMany({
+    where: {
+      screens: {
+        some: {
+          products: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          screens: {
+            where: {
+              products: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-        }),
-    };
-    const refreshRatee = await prismadb.refreshRate.findMany({
-        where: {
-            screens: {
-                some: {
-                    products: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: {
-                    screens: {
-                        where: {
-                            products: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
+  const resolution: Filter = {
+    title: "Resolution",
+    list: resolutionn.map((manufacturer: any) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.screens ?? 0,
+    })),
+  };
 
-    const refreshRate: Filter = {
-        title: "Refresh Rate",
-        list: refreshRatee.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.screens ?? 0,
+  // ✅ NEW: screen “type” using Category names (no new DB schema)
+  const screenCategories = await prismadb.category.findMany({
+    where: {
+      name: { in: ["Screen Gaming", "Screen Pro"] }, // adjust names if your categories differ
+      products: {
+        some: {
+          screens: {
+            some: {},
+          },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          products: {
+            where: {
+              screens: {
+                some: {},
+              },
+            },
+          },
+        },
+      },
+    },
+  });
 
-            }
+  const screenType: Filter = {
+    title: "Type",
+    list: screenCategories.map((cat: any) => ({
+      name: cat.name, // "Screen Gaming" / "Screen Pro"
+      number: cat._count?.products ?? 0,
+    })),
+  };
 
-        }),
-    };
-    const resolutionn = await prismadb.resolution.findMany({
-        where: {
-            screens: {
-                some: {
-                    products: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: {
-                    screens: {
-                        where: {
-                            products: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
+  return {
+    title: "screen",
+    data: {
+      mark,
+      pouce,
+      refreshRate,
+      resolution,
+      screenType, // 👈 appears as filter group “Type”
+    },
+  };
+};
 
-    const resolution: Filter = {
-        title: "Resolution",
-        list: resolutionn.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.screens ?? 0,
 
-            }
-
-        }),
-    };
-    return {
-
-        title: "screen",
-        data: {
-            mark,
-            pouce,
-            refreshRate,
-            resolution,
-        }
-    }
-}
 export const gpusFilters = async () => {
-    const graphiccardNamee = await prismadb.graphiccardName.findMany({
-        where: {
-            motherboards: {
-                some: {
-                    products: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: {
-                    motherboards: {
-                        where: {
-                            products: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
+  const graphiccardNamee = await prismadb.graphiccardName.findMany({
+    where: {
+      motherboards: {
+        some: {
+          products: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          motherboards: {
+            where: {
+              products: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-    const graphiccardName: Filter = {
-        title: "Carte graphique",
-        list: graphiccardNamee.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.motherboards ?? 0,
+  const graphiccardName: Filter = {
+    title: "Graphics Card",
+    list: graphiccardNamee.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.motherboards ?? 0,
+    })),
+  };
 
-            }
+  const gpuArchBrandd = await prismadb.gpuArchBrand.findMany({
+    where: {
+      motherboards: {
+        some: {
+          products: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          motherboards: {
+            where: {
+              products: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-        }),
-    };
-    const gpuArchBrandd = await prismadb.gpuArchBrand.findMany({
-        where: {
-            motherboards: {
-                some: {
-                    products: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: {
-                    motherboards: {
-                        where: {
-                            products: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
+  const gpuArchBrand: Filter = {
+    title: "Architecture Brand",
+    list: gpuArchBrandd.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.motherboards ?? 0,
+    })),
+  };
 
-    const gpuArchBrand: Filter = {
-        title: "Marque d'achitecture",
-        list: gpuArchBrandd.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.motherboards ?? 0,
+  const gpuBrandd = await prismadb.gpuBrand.findMany({
+    where: {
+      motherboards: {
+        some: {
+          products: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          motherboards: {
+            where: {
+              products: { some: {} },
+            },
+          },
+        },
+      },
+    },
+  });
 
-            }
+  const gpuBrand: Filter = {
+    title: "Brand",
+    list: gpuBrandd.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.motherboards ?? 0,
+    })),
+  };
 
-        }),
-    };
-    const gpuBrandd = await prismadb.gpuBrand.findMany({
-        where: {
-            motherboards: {
-                some: {
-                    products: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: {
-                    motherboards: {
-                        where: {
-                            products: { some: {} }
-                        }
-                    }
-                }
-            }
-        }
-    })
+  return {
+    title: "gpu",
+    data: {
+      gpuArchBrand,
+      gpuBrand,
+      graphiccardName,
+    },
+  };
+};
 
-    const gpuBrand: Filter = {
-        title: "Marque",
-        list: gpuBrandd.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.motherboards ?? 0,
-
-            }
-
-        }),
-    };
-    return {
-
-        title: "gpu",
-        data: {
-            gpuArchBrand,
-            gpuBrand,
-            graphiccardName,
-        }
-    }
-}
 export const coolingFilters = async () => {
-    const coolingcPUSupportt = await prismadb.cPUSupport.findMany({
-        where: {
-            cooling: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: { cooling: {} }
-            }
-        }
-    })
+  const coolingcPUSupportt = await prismadb.cPUSupport.findMany({
+    where: {
+      cooling: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: { cooling: {} },
+      },
+    },
+  });
 
-    const coolingcPUSupport: Filter = {
-        title: "Support du processeur",
-        list: coolingcPUSupportt.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.cooling ?? 0,
+  const coolingcPUSupport: Filter = {
+    title: "Processor Support",
+    list: coolingcPUSupportt.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.cooling ?? 0,
+    })),
+  };
 
-            }
+  const fansNumberr = await prismadb.fansNumber.findMany({
+    where: {
+      cooling: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: { cooling: {} },
+      },
+    },
+  });
 
-        }),
-    };
-    const fansNumberr = await prismadb.fansNumber.findMany({
-        where: {
-            cooling: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: { cooling: {} }
-            }
-        }
-    })
+  const fansNumber: Filter = {
+    title: "Pre-installed Fans Number",
+    list: fansNumberr.map((manufacturer) => ({
+      name: manufacturer.number.toString(),
+      number: manufacturer._count?.cooling ?? 0,
+    })),
+  };
 
-    const fansNumber: Filter = {
-        title: "Nombre de Ventilateurs Pré-installés",
-        list: fansNumberr.map((manufacturer) => {
-            return {
-                name: manufacturer.number.toString(),
-                number: manufacturer._count?.cooling ?? 0,
+  const coolingTypee = await prismadb.coolingType.findMany({
+    where: {
+      cooling: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: { cooling: {} },
+      },
+    },
+  });
 
-            }
+  const coolingType: Filter = {
+    title: "Cooling Type",
+    list: coolingTypee.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.cooling ?? 0,
+    })),
+  };
 
-        }),
-    };
-    const coolingTypee = await prismadb.coolingType.findMany({
-        where: {
-            cooling: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: { cooling: {} }
-            }
-        }
-    })
+  const coolingMarkk = await prismadb.coolingMark.findMany({
+    where: {
+      cooling: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: { cooling: {} },
+      },
+    },
+  });
 
-    const coolingType: Filter = {
-        title: "Type",
-        list: coolingTypee.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.cooling ?? 0,
+  const coolingMark: Filter = {
+    title: "Brand",
+    list: coolingMarkk.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.cooling ?? 0,
+    })),
+  };
 
-            }
+  return {
+    title: "cooling",
+    data: {
+      coolingMark,
+      coolingType,
+      coolingcPUSupport,
+      fansNumber,
+    },
+  };
+};
 
-        }),
-    };
-    const coolingMarkk = await prismadb.coolingMark.findMany({
-        where: {
-            cooling: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: { cooling: {} }
-            }
-        }
-    })
-
-    const coolingMark: Filter = {
-        title: "Marque",
-        list: coolingMarkk.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.cooling ?? 0,
-
-            }
-
-        }),
-    };
-    return {
-
-        title: "cooling",
-        data: {
-            coolingMark,
-            coolingType,
-            coolingcPUSupport,
-            fansNumber,
-        }
-    }
-}
 export const casesFilters = async () => {
-    const pCcaseRGBTypee = await prismadb.pCcaseRGBType.findMany({
-        where: {
-            pccase: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: { pccase: {} }
-            }
-        }
-    })
+  const pCcaseRGBTypee = await prismadb.pCcaseRGBType.findMany({
+    where: {
+      pccase: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: { pccase: {} },
+      },
+    },
+  });
 
-    const pCcaseRGBType: Filter = {
-        title: "RGB",
-        list: pCcaseRGBTypee.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.pccase ?? 0,
+  const pCcaseRGBType: Filter = {
+    title: "RGB",
+    list: pCcaseRGBTypee.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.pccase ?? 0,
+    })),
+  };
 
-            }
+  const pCcaseNumberofFansPreinstalledd =
+    await prismadb.pCcaseNumberofFansPreinstalled.findMany({
+      where: {
+        pccase: {
+          some: {
+            product: { some: {} },
+          },
+        },
+      },
+      include: {
+        _count: {
+          select: { pccase: {} },
+        },
+      },
+    });
 
-        }),
-    };
-    const pCcaseNumberofFansPreinstalledd = await prismadb.pCcaseNumberofFansPreinstalled.findMany({
-        where: {
-            pccase: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: { pccase: {} }
-            }
-        }
-    })
+  const pCcaseNumberofFansPreinstalled: Filter = {
+    title: "Pre-installed Fans Number",
+    list: pCcaseNumberofFansPreinstalledd.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.pccase ?? 0,
+    })),
+  };
 
-    const pCcaseNumberofFansPreinstalled: Filter = {
-        title: "Nombre de Ventilateurs Pré-installés",
-        list: pCcaseNumberofFansPreinstalledd.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.pccase ?? 0,
+  const pCcaseCaseformatt = await prismadb.pCcaseCaseformat.findMany({
+    where: {
+      pccase: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: { pccase: {} },
+      },
+    },
+  });
 
-            }
+  const pCcaseCaseformat: Filter = {
+    title: "Case Format",
+    list: pCcaseCaseformatt.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.pccase ?? 0,
+    })),
+  };
 
-        }),
-    };
-    const pCcaseCaseformatt = await prismadb.pCcaseCaseformat.findMany({
-        where: {
-            pccase: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: { pccase: {} }
-            }
-        }
-    })
+  const pCcaseBrandd = await prismadb.pCcaseBrand.findMany({
+    where: {
+      pccase: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: { pccase: {} },
+      },
+    },
+  });
 
-    const pCcaseCaseformat: Filter = {
-        title: "Format du boitier",
-        list: pCcaseCaseformatt.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.pccase ?? 0,
+  const pCcaseBrand: Filter = {
+    title: "Brand",
+    list: pCcaseBrandd.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.pccase ?? 0,
+    })),
+  };
 
-            }
+  return {
+    title: "case",
+    data: {
+      pCcaseBrand,
+      pCcaseCaseformat,
+      pCcaseNumberofFansPreinstalled,
+      pCcaseRGBType,
+    },
+  };
+};
 
-        }),
-    };
-    const pCcaseBrandd = await prismadb.pCcaseBrand.findMany({
-        where: {
-            pccase: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: { pccase: {} }
-            }
-        }
-    })
-
-    const pCcaseBrand: Filter = {
-        title: "Marque",
-        list: pCcaseBrandd.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.pccase ?? 0,
-
-            }
-
-        }),
-    };
-    return {
-        title: "case",
-        data: {
-            pCcaseBrand,
-            pCcaseCaseformat,
-            pCcaseNumberofFansPreinstalled,
-            pCcaseRGBType,
-        }
-
-    }
-}
 export const powersuppliesFilters = async () => {
-    const psCertificationn = await prismadb.psCertification.findMany({
-        where: {
-            powersupplies: {
-                some: {
-                    products: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: { powersupplies: {} }
-            }
-        }
-    })
+  const psCertificationn = await prismadb.psCertification.findMany({
+    where: {
+      powersupplies: {
+        some: {
+          products: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: { powersupplies: {} },
+      },
+    },
+  });
 
-    const psCertification: Filter = {
-        title: "Certification",
-        list: psCertificationn.map((manufacturer) => {
-            return {
+  const psCertification: Filter = {
+    title: "80+ Certification",
+    list: psCertificationn.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.powersupplies ?? 0,
+    })),
+  };
 
-                name: manufacturer.name,
-                number: manufacturer._count?.powersupplies ?? 0,
+  const powersupplyMarquee = await prismadb.powersupplyMarque.findMany({
+    where: {
+      powersupplies: {
+        some: {
+          products: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: { powersupplies: {} },
+      },
+    },
+  });
 
-            }
+  const powersupplyMarque: Filter = {
+    title: "Brand",
+    list: powersupplyMarquee.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.powersupplies ?? 0,
+    })),
+  };
 
-        }),
-    };
-    const powersupplyMarquee = await prismadb.powersupplyMarque.findMany({
-        where: {
-            powersupplies: {
-                some: {
-                    products: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: { powersupplies: {} }
-            }
-        }
-    })
+  return {
+    title: "power",
+    data: {
+      powersupplyMarque,
+      psCertification,
+    },
+  };
+};
 
-    const powersupplyMarque: Filter = {
-        title: "Certification 80+",
-        list: powersupplyMarquee.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.powersupplies ?? 0,
-
-            }
-
-        }),
-    };
-    return {
-
-        title: "power",
-        data: {
-            powersupplyMarque,
-            psCertification
-        }
-    }
-
-}
 export const storagesFilters = async () => {
+  const harddiskTypee = await prismadb.harddiskType.findMany({
+    where: {
+      harddisk: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: { harddisk: {} },
+      },
+    },
+  });
 
-    const harddiskTypee = await prismadb.harddiskType.findMany({
-        where: {
-            harddisk: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: { harddisk: {} }
-            }
-        }
-    })
+  const harddiskType: Filter = {
+    title: "Type",
+    list: harddiskTypee.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.harddisk ?? 0,
+    })),
+  };
 
-    const harddiskType: Filter = {
-        title: "Type",
-        list: harddiskTypee.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.harddisk ?? 0,
+  const harddiskComputerinterfacee =
+    await prismadb.harddiskComputerinterface.findMany({
+      where: {
+        harddisk: {
+          some: {
+            product: { some: {} },
+          },
+        },
+      },
+      include: {
+        _count: {
+          select: { harddisk: {} },
+        },
+      },
+    });
 
-            }
+  const harddiskComputerinterface: Filter = {
+    title: "Interface",
+    list: harddiskComputerinterfacee.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.harddisk ?? 0,
+    })),
+  };
 
-        }),
-    };
-    const harddiskComputerinterfacee = await prismadb.harddiskComputerinterface.findMany({
-        where: {
-            harddisk: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: { harddisk: {} }
-            }
-        }
-    })
+  const harddiskCapacityy = await prismadb.harddiskCapacity.findMany({
+    where: {
+      harddisk: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: { harddisk: {} },
+      },
+    },
+  });
 
-    const harddiskComputerinterface: Filter = {
-        title: "Interface",
-        list: harddiskComputerinterfacee.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.harddisk ?? 0,
+  const harddiskCapacity: Filter = {
+    title: "Capacity",
+    list: harddiskCapacityy.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.harddisk ?? 0,
+    })),
+  };
 
-            }
+  const harddiskBrandd = await prismadb.harddiskBrand.findMany({
+    where: {
+      harddisk: {
+        some: {
+          product: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: { harddisk: {} },
+      },
+    },
+  });
 
-        }),
-    };
+  const harddiskBrand: Filter = {
+    title: "Brand",
+    list: harddiskBrandd.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.harddisk ?? 0,
+    })),
+  };
 
-    const harddiskCapacityy = await prismadb.harddiskCapacity.findMany({
-        where: {
-            harddisk: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: { harddisk: {} }
-            }
-        }
-    })
+  return {
+    title: "hardDisk",
+    data: {
+      harddiskBrand,
+      harddiskCapacity,
+      harddiskComputerinterface,
+      harddiskType,
+    },
+  };
+};
 
-    const harddiskCapacity: Filter = {
-        title: "Capacité",
-        list: harddiskCapacityy.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.harddisk ?? 0,
-
-            }
-
-        }),
-    };
-
-    const harddiskBrandd = await prismadb.harddiskBrand.findMany({
-        where: {
-            harddisk: {
-                some: {
-                    product: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: { harddisk: {} }
-            }
-        }
-    })
-
-    const harddiskBrand: Filter = {
-        title: "Marque",
-        list: harddiskBrandd.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.harddisk ?? 0,
-
-            }
-
-        }),
-    };
-    return {
-        title: "hardDisk",
-        data: {
-            harddiskBrand,
-            harddiskCapacity,
-            harddiskComputerinterface,
-            harddiskType,
-        }
-
-
-    }
-}
+/**
+ * CPU FILTERS — fixed titles & cleaned list:
+ * - cPUSupport  -> "Processeur support"  (socket: AM4, AM5, LGA1700, …)
+ * - processorModel -> "Marque processeur" (AMD, Intel, …) — SAME KEY so backend keeps working
+ */
 export const cpusFilters = async () => {
+  const cPUSupportRaw = await prismadb.cPUSupport.findMany({
+    where: { processor: { some: { products: { some: {} } } } },
+    include: { _count: { select: { processor: {} } } },
+  });
 
-    const processorModell = await prismadb.processorModel.findMany({
-        where: {
-            processor: {
-                some: {
-                    products: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: { processor: {} }
-            }
-        }
-    })
+  const cPUSupport: Filter = {
+    title: "Processor Support",
+    list: cPUSupportRaw
+      .map((row) => ({
+        name: (row.name ?? "").toString().trim(),
+        number: row._count?.processor ?? 0,
+      }))
+      .filter((x) => x.name.length > 0)
+      .sort((a, b) =>
+        a.name.localeCompare(b.name, "fr", { numeric: true, sensitivity: "base" })
+      ),
+  };
 
-    const processorModel: Filter = {
-        title: "Processeur support",
-        list: processorModell.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.processor ?? 0,
+  const processorModelRaw = await prismadb.processorModel.findMany({
+    where: { processor: { some: { products: { some: {} } } } },
+    include: { _count: { select: { processor: {} } } },
+  });
 
-            }
+  const processorModel: Filter = {
+    title: "Processor Brand",
+    list: processorModelRaw
+      .map((row) => ({
+        name: (row.name ?? "").toString().trim(), // AMD, Intel, etc.
+        number: row._count?.processor ?? 0,
+      }))
+      .filter((x) => x.name.length > 0)
+      .sort((a, b) =>
+        a.name.localeCompare(b.name, "fr", { numeric: true, sensitivity: "base" })
+      ),
+  };
 
-        }),
-    };
-    const cPUSupportt = await prismadb.cPUSupport.findMany({
-        where: {
-            processor: {
-                some: {
-                    products: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: { processor: {} }
-            }
-        }
-    })
+  return {
+    title: "cpu",
+    data: {
+      cPUSupport,
+      processorModel, // <— DO NOT comment these out
+    },
+  };
+};
 
-    const cPUSupport: Filter = {
-        title: "Processeur support",
-        list: cPUSupportt.map((manufacturer) => {
-            return {
 
-                name: manufacturer.name,
-                number: manufacturer._count?.processor ?? 0,
-
-            }
-
-        }),
-    };
-    return {
-
-        title: "cpu",
-        data: {
-            cPUSupport,
-            processorModel
-        }
-    }
-}
 export const memoriesFilters = async () => {
-    const memoryFrequencyy = await prismadb.memoryFrequency.findMany({
-        where: {
-            memoryboards: {
-                some: {
-                    products: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: { memoryboards: {} }
-            }
-        }
-    })
+  const memoryFrequencyy = await prismadb.memoryFrequency.findMany({
+    where: {
+      memoryboards: {
+        some: {
+          products: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: { memoryboards: {} },
+      },
+    },
+  });
 
-    const memoryFrequency: Filter = {
-        title: "Frequence",
-        list: memoryFrequencyy.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.memoryboards ?? 0,
+  const memoryFrequency: Filter = {
+    title: "Frequency",
+    list: memoryFrequencyy.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.memoryboards ?? 0,
+    })),
+  };
 
-            }
+  const memoryMarquee = await prismadb.memoryMarque.findMany({
+    where: {
+      memoryboards: {
+        some: {
+          products: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: { memoryboards: {} },
+      },
+    },
+  });
 
-        }),
-    };
-    const memoryMarquee = await prismadb.memoryMarque.findMany({
-        where: {
-            memoryboards: {
-                some: {
-                    products: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: { memoryboards: {} }
-            }
-        }
-    })
-    const memoryMarque: Filter = {
-        title: "Marque",
-        list: memoryMarquee.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.memoryboards ?? 0,
+  const memoryMarque: Filter = {
+    title: "Brand",
+    list: memoryMarquee.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.memoryboards ?? 0,
+    })),
+  };
 
-            }
+  const memoryNumberr = await prismadb.memoryNumber.findMany({
+    where: {
+      memoryboards: {
+        some: {
+          products: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: { memoryboards: {} },
+      },
+    },
+  });
 
-        }),
-    };
-    const memoryNumberr = await prismadb.memoryNumber.findMany({
-        where: {
-            memoryboards: {
-                some: {
-                    products: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: { memoryboards: {} }
-            }
-        }
-    })
-    const memoryNumber: Filter = {
-        title: "Capacity",
-        list: memoryNumberr.map((manufacturer) => {
-            return {
-                name: manufacturer.number.toString() + " Gb",
-                number: manufacturer._count?.memoryboards ?? 0,
+  const memoryNumber: Filter = {
+    title: "Capacity",
+    list: memoryNumberr.map((manufacturer) => ({
+      name: manufacturer.number.toString() + " Gb",
+      number: manufacturer._count?.memoryboards ?? 0,
+    })),
+  };
 
-            }
+  const memoryTypee = await prismadb.memoryType.findMany({
+    where: {
+      memoryboards: {
+        some: {
+          products: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: { memoryboards: {} },
+      },
+    },
+  });
 
-        }),
-    };
-    const memoryTypee = await prismadb.memoryType.findMany({
-        where: {
-            memoryboards: {
-                some: {
-                    products: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: { memoryboards: {} }
-            }
-        }
-    })
-    const memoryType: Filter = {
-        title: "Type",
-        list: memoryTypee.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.memoryboards ?? 0,
+  const memoryType: Filter = {
+    title: "Type",
+    list: memoryTypee.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.memoryboards ?? 0,
+    })),
+  };
 
-            }
+  return {
+    title: "memory",
+    data: {
+      memoryFrequency,
+      memoryMarque,
+      memoryNumber,
+      memoryType,
+    },
+  };
+};
 
-        }),
-    };
-
-    return {
-
-        title: "ram",
-        data: {
-            memoryFrequency,
-            memoryMarque,
-            memoryNumber,
-            memoryType,
-        }
-    }
-
-}
 export const motherboardFilters = async () => {
+  const motherboardmanufacturerr = await prismadb.manufacturer.findMany({
+    where: {
+      motherboards: {
+        some: {
+          products: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: { motherboards: {} },
+      },
+    },
+  });
 
-    const motherboardmanufacturerr = await prismadb.manufacturer.findMany({
-        where: {
-            motherboards: {
-                some: {
-                    products: { some: {} }
-                }
-            }
-        }
-        , include: {
-            _count: {
-                select: { motherboards: {} }
-            }
-        }
-    })
-    const motherboardmanufacturer: Filter = {
-        title: "Marque",
-        list: motherboardmanufacturerr.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.motherboards ?? 0,
+  const motherboardmanufacturer: Filter = {
+    title: "Brand",
+    list: motherboardmanufacturerr.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.motherboards ?? 0,
+    })),
+  };
 
-            }
+  const motherboardramslotss = await prismadb.ramSlots.findMany({
+    where: {
+      motherboards: {
+        some: {
+          products: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: { motherboards: {} },
+      },
+    },
+  });
 
-        }),
-    };
-    const motherboardramslotss = await prismadb.ramSlots.findMany({
-        where: {
-            motherboards: {
-                some: {
-                    products: { some: {} }
-                }
+  const motherboardramslots: Filter = {
+    title: "RAM Slots Number",
+    list: motherboardramslotss.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.motherboards ?? 0,
+    })),
+  };
 
-            }
-        }, include: {
-            _count: {
-                select: { motherboards: {} }
-            }
-        }
-    })
-    const motherboardramslots: Filter = {
-        title: "Nombre de barrettes RAM",
-        list: motherboardramslotss.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.motherboards ?? 0,
+  const motherboardchipsett = await prismadb.motherboardChipset.findMany({
+    where: {
+      motherboards: {
+        some: {
+          products: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: { motherboards: {} },
+      },
+    },
+  });
 
-            }
+  const motherboardchipset: Filter = {
+    title: "Motherboard Chipset",
+    list: motherboardchipsett.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.motherboards ?? 0,
+    })),
+  };
 
-        }),
-    };
-    const motherboardchipsett = await prismadb.motherboardChipset.findMany({
-        where: {
-            motherboards: {
-                some: {
-                    products: { some: {} }
-                }
-            }
-        }, include: {
-            _count: {
-                select: { motherboards: {} }
-            }
-        }
-    })
-    const motherboardchipset: Filter = {
-        title: "Chipset de la carte mère",
-        list: motherboardchipsett.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.motherboards ?? 0,
+  const motherboardcpusupportt = await prismadb.cPUSupport.findMany({
+    where: {
+      motherboards: {
+        some: {
+          products: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: { motherboards: {} },
+      },
+    },
+  });
 
-            }
+  const motherboardcpusupport: Filter = {
+    title: "Processor Support",
+    list: motherboardcpusupportt.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.motherboards ?? 0,
+    })),
+  };
 
-        }),
-    };
-    const motherboardcpusupportt = await prismadb.cPUSupport.findMany({
-        where: {
-            motherboards: {
-                some: {
-                    products: { some: {} }
-                }
-            }
-        }, include: {
-            _count: {
-                select: { motherboards: {} }
-            }
-        }
-    })
-    const motherboardcpusupport: Filter = {
-        title: "Support du processeur",
-        list: motherboardcpusupportt.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.motherboards ?? 0,
+  const motherboardformatt = await prismadb.motherboardFormat.findMany({
+    where: {
+      motherboards: {
+        some: {
+          products: { some: {} },
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: { motherboards: {} },
+      },
+    },
+  });
 
-            }
+  const motherboardformat: Filter = {
+    title: "Motherboard Format",
+    list: motherboardformatt.map((manufacturer) => ({
+      name: manufacturer.name,
+      number: manufacturer._count?.motherboards ?? 0,
+    })),
+  };
 
-        }),
-    };
-    const motherboardformatt = await prismadb.motherboardFormat.findMany({
-        where: {
-            motherboards: {
-                some: {
-                    products: { some: {} }
-                }
-            }
-        }, include: {
-            _count: {
-                select: { motherboards: {} }
-            }
-        }
-    })
-    const motherboardformat: Filter = {
-        title: "Format de carte mère",
-        list: motherboardformatt.map((manufacturer) => {
-            return {
-                name: manufacturer.name,
-                number: manufacturer._count?.motherboards ?? 0,
-
-            }
-
-        }),
-    };
-
-    return {
-
-        title: "Carte Mére",
-        data: {
-            motherboardchipset,
-            motherboardcpusupport,
-            motherboardformat,
-            motherboardramslots,
-            motherboardmanufacturer,
-        }
-
-    }
-
-} 
+  return {
+    title: "motherboard",
+    data: {
+      motherboardchipset,
+      motherboardcpusupport,
+      motherboardformat,
+      motherboardramslots,
+      motherboardmanufacturer,
+    },
+  };
+};

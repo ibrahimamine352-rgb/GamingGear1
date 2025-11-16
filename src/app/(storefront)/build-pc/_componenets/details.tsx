@@ -72,7 +72,7 @@ const Details = (props: {
                 const uniqueId = generateHashId();
                 const pc: CartItem = {
                     idd: uniqueId,
-                    Title:"PC sur mesure",
+                    Title:"Custom PC",
                     motherboard: props.motherboardId,
                     processor: props.processorId,
                     gpu: props.gpuId,
@@ -113,7 +113,7 @@ const Details = (props: {
                 const pc: CartItem = {
                     reduction:0,
                     idd: uniqueId,
-                    Title:"PC sur mesure",
+                    Title:"Custom PC",
                     motherboard: props.motherboardId,
                     processor: props.processorId,
                     gpu: props.gpuId,
@@ -138,7 +138,7 @@ const Details = (props: {
 <AlertDialog open={openAleert} onOpenChange={(v) => setOpenAleert(v)}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Vous avez un ou plusieur problem</AlertDialogTitle>
+          <AlertDialogTitle>You have one or more problems</AlertDialogTitle>
           <AlertDialogDescription>
             <ul>
             {findAllErrorCompatibilities(props.allProductCompatibility.Compatibility).map((e,k)=>(
@@ -150,7 +150,7 @@ const Details = (props: {
         </AlertDialogHeader>
         <AlertDialogFooter>
         
-        <AlertDialogAction onClick={() => setOpenAleert(false)}>Fermer</AlertDialogAction>
+        <AlertDialogAction onClick={() => setOpenAleert(false)}>Close</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
@@ -166,7 +166,7 @@ const Details = (props: {
                         <div className="space-y-2">
                             <p>
 
-                                <div className='text-sm'>  <span className='font-bold text-lg'>Mon PC </span>sur mesure, l&apos;outil parfait, conçu exactement pour moi !</div>
+                                <div className='text-sm'>  <span className='font-bold text-lg'>My Custom PC </span>the perfect tool tailored just for me!</div>
                             </p>
 
                         </div>
@@ -177,7 +177,7 @@ const Details = (props: {
                             <Card>
                                 <CardContent className='p-0 flex align-middle  '>
                                     <div className=' p-2 text-sm font-semibold flex-shrink-1'>
-                                        Carte mére
+                                    Motherboard
                                     </div>
                                     {props.motherboardId ? <>
                                         <div className='text-sm p-2 h-full border-l-1'>
@@ -187,7 +187,7 @@ const Details = (props: {
 
                                     </> : <>
                                         <div className='text-xs m-auto'>
-                                            Veuillez choisir une carte mère
+                                        Please select a motherboard
                                         </div>
                                     </>}
 
@@ -196,7 +196,7 @@ const Details = (props: {
                             <Card>
                                 <CardContent className='p-0 flex align-middle '>
                                     <div className=' p-2 text-sm font-semibold'>
-                                        Processuer
+                                    Processor
                                     </div>
                                     {props.processorId ? <>
                                         <div className='text-sm p-2 h-full border-l-1'>
@@ -206,7 +206,7 @@ const Details = (props: {
 
                                     </> : <>
                                         <div className='text-xs m-auto'>
-                                            Veuillez choisir un processeur
+                                        Please select a processor
                                         </div>
                                     </>}
 
@@ -215,7 +215,7 @@ const Details = (props: {
                             <Card>
                                 <CardContent className='p-0 flex align-middle '>
                                     <div className=' p-2 text-sm font-semibold'>
-                                        Carte graphiqe
+                                    Graphics card
                                     </div>
                                     {props.gpuId ? <>
                                         <div className='text-sm p-2 h-full border-l-1'>
@@ -225,7 +225,7 @@ const Details = (props: {
 
                                     </> : <>
                                         <div className='text-xs m-auto'>
-                                        Veuillez vérifier si une carte graphique est déjà intégrée.
+                                        Please check if a graphics card is already integrated.
                                         </div>
                                     </>}
 
@@ -234,7 +234,7 @@ const Details = (props: {
                             <Card>
                                 <CardContent className='p-0  flex align-middle  '>
                                     <div className=' p-2 my-auto text-sm font-semibold'>
-                                        Ram
+                                        RAM
                                     </div>
                                     {props.ramId && props.ramId.findIndex((e) => e != null) != -1 ? <>
                                         <div className='flex flex-col'>
@@ -260,7 +260,7 @@ const Details = (props: {
 
                                     </> : <>
                                         <div className='text-xs m-auto'>
-                                            Veuillez choisir une barette memoire
+                                        Please select a RAM
                                         </div>
                                     </>}
 
@@ -269,7 +269,7 @@ const Details = (props: {
                             <Card>
                                 <CardContent className='p-0 flex align-middle '>
                                     <div className=' p-2 text-sm font-semibold'>
-                                        Stockage Principal
+                                    Primary Storage
                                     </div>
                                     {props.hardDiskPrimaireId ? <>
                                         <div className='text-sm p-2 h-full border-l-1'>
@@ -279,7 +279,7 @@ const Details = (props: {
 
                                     </> : <>
                                         <div className='text-xs m-auto'>
-                                            Veuillez choisir un disque dur
+                                        Please select a hard drive
                                         </div>
                                     </>}
 
@@ -289,7 +289,7 @@ const Details = (props: {
                                 <Card>
                                     <CardContent className='p-0 flex align-middle '>
                                         <div className=' p-2 text-sm font-semibold'>
-                                            Stockage Secondaire
+                                        Secondary Storage
                                         </div>
 
                                         <div className='text-sm p-2 h-full border-l-1'>
@@ -306,7 +306,7 @@ const Details = (props: {
                             <Card>
                                 <CardContent className='p-0 flex align-middle '>
                                     <div className=' p-2 text-sm font-semibold'>
-                                        Boitier
+                                        Case
                                     </div>
                                     {props.caseId ? <>
                                         <div className='text-sm p-2 h-full border-l-1'>
@@ -316,7 +316,7 @@ const Details = (props: {
 
                                     </> : <>
                                         <div className='text-xs m-auto'>
-                                            Veuillez choisir une boitier
+                                        Please select a case
                                         </div>
                                     </>}
 
@@ -325,7 +325,7 @@ const Details = (props: {
                             <Card>
                                 <CardContent className='p-0 flex align-middle '>
                                     <div className=' p-2 text-sm font-semibold'>
-                                        Bloc d&apos;alimentation
+                                    Power Supply
                                     </div>
                                     {props.powerId ? <>
                                         <div className='text-sm p-2 h-full border-l-1'>
@@ -335,7 +335,7 @@ const Details = (props: {
 
                                     </> : <>
                                         <div className='text-xs m-auto'>
-                                            Veuillez choisir un bloc d&apos;alimentation
+                                        Please select a power supply
                                         </div>
                                     </>}
 
@@ -345,7 +345,7 @@ const Details = (props: {
                                 <Card>
                                     <CardContent className='p-0 flex align-middle '>
                                         <div className=' p-2 text-sm font-semibold'>
-                                            Refroidisseur CPU
+                                            CPU Cooler
                                         </div>
 
                                         <div className='text-sm p-2 h-full border-l-1'>
@@ -362,7 +362,7 @@ const Details = (props: {
                                 <Card>
                                     <CardContent className='p-0 flex align-middle '>
                                         <div className=' p-2 text-sm font-semibold'>
-                                            Ecran
+                                            Screen
                                         </div>
 
                                         <div className='text-sm p-2 h-full border-l-1'>
@@ -382,13 +382,13 @@ const Details = (props: {
                     </div>
                     <div className='w-full mt-3 flex justify-end'>
                         <div className='ml-auto'>
-                            <Button variant={'outline'} className='bg-transparent' onClick={() => sendTocart()} >Ajouter au panier <Shopcard /></Button>
+                            <Button variant={'outline'} className='bg-transparent' onClick={() => sendTocart()} >Add To Cart <Shopcard /></Button>
 
 
                             <Button onClick={() => {
 sendTocart2()
 
-                            }}>Commander</Button>
+                            }}>Order</Button>
 
                         </div>
 

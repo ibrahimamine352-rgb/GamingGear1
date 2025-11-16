@@ -63,7 +63,7 @@ export async function PATCH(
 
     const body = await req.json();
 
-    const { name, price, categoryId, images, isFeatured, isArchived } = body;
+    const { name, price, categoryId, images, isFeatured, isArchived, comingSoon, outOfStock } = body;
 
  
 
@@ -105,6 +105,8 @@ export async function PATCH(
         },
         isFeatured,
         isArchived,
+        comingSoon,
+        outOfStock,
       },
     });
 

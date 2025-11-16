@@ -2,11 +2,23 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Gaming Gear TN - Custom Gaming PCs & Full Setup Bundles",
-  description: "Build your dream gaming PC with Gaming Gear TN. Custom builds, full setup bundles, and expert consultation in Tunisia. From budget beasts to liquid-cooled monsters.",
-  keywords: ["gaming pc", "custom pc", "gaming gear", "tunisia", "pc builder", "gaming setup", "rtx", "ryzen", "intel"],
+  description:
+    "Build your dream gaming PC with Gaming Gear TN. Custom builds, full setup bundles, and expert consultation in Tunisia. From budget beasts to liquid-cooled monsters.",
+  keywords: [
+    "gaming pc",
+    "custom pc",
+    "gaming gear",
+    "tunisia",
+    "pc builder",
+    "gaming setup",
+    "rtx",
+    "ryzen",
+    "intel",
+  ],
   openGraph: {
     title: "Gaming Gear TN - Custom Gaming PCs",
-    description: "Build your dream gaming PC with Gaming Gear TN. Custom builds and full setup bundles in Tunisia.",
+    description:
+      "Build your dream gaming PC with Gaming Gear TN. Custom builds and full setup bundles in Tunisia.",
     url: "https://gaminggeartn.tn/landing",
     siteName: "Gaming Gear TN",
     type: "website",
@@ -18,11 +30,6 @@ export default function LandingLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <html lang="en">
-      <body>
-        {children}
-      </body>
-    </html>
-  );
+  // 👇 just render children – global layout (with LanguageProvider) will wrap this
+  return <>{children}</>;
 }

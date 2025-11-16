@@ -45,6 +45,9 @@ const formSchema = z.object({
   categoryId: z.string().min(1),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
+  comingSoon: z.boolean().default(false).optional(),
+outOfStock: z.boolean().default(false).optional(),
+
 
   CameraTypeId:z.string().min(1),
   manufacturerId:z.string().min(1),
@@ -113,6 +116,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     categoryId: '',
     isFeatured: false,
     isArchived: false,
+    comingSoon: false,
+    outOfStock: false,
     additionalDetails:[],
 
   }
@@ -314,28 +319,40 @@ console.log(initialData)
               )}
             />
            
-            <FormField
-              control={form.control}
-              name="categoryId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category</FormLabel>
-                  <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue defaultValue={field.value} placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+           <FormField
+  control={form.control}
+  name="categoryId"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Category</FormLabel>
+      <Select disabled={loading} onValueChange={field.onChange} value={field.value}>
+        <FormControl>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a category" />
+          </SelectTrigger>
+        </FormControl>
+
+        {/* Scrollable dropdown */}
+        <SelectContent
+          position="popper"
+          sideOffset={4}
+          className="max-h-64 p-0"
+        >
+          <div className="max-h-64 overflow-y-auto">
+            {categories.map((c) => (
+              <SelectItem key={c.id} value={c.id}>
+                {c.name}
+              </SelectItem>
+            ))}
+          </div>
+        </SelectContent>
+      </Select>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+
              <FormField
               control={form.control}
               name="description"
@@ -436,6 +453,36 @@ console.log(initialData)
                 </FormItem>
               )}
             />
+            <FormField
+  control={form.control}
+  name="comingSoon"
+  render={({ field }) => (
+    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+      <FormControl>
+        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+      </FormControl>
+      <div className="space-y-1 leading-none">
+        <FormLabel>Coming Soon</FormLabel>
+        <FormDescription>Mark this product as coming soon</FormDescription>
+      </div>
+    </FormItem>
+  )}
+/>
+<FormField
+  control={form.control}
+  name="outOfStock"
+  render={({ field }) => (
+    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+      <FormControl>
+        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+      </FormControl>
+      <div className="space-y-1 leading-none">
+        <FormLabel>Out of Stock</FormLabel>
+        <FormDescription>Mark this product as out of stock</FormDescription>
+      </div>
+    </FormItem>
+  )}
+/>
          
           </div>
           <Separator />

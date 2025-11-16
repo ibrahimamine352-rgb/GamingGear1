@@ -22,6 +22,8 @@ const formSchema = z.object({
   categoryId: z.string().min(1),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
+  comingSoon: z.boolean().default(false).optional(),
+  outOfStock: z.boolean().default(false).optional(),
   GpuBrandId: z.string().min(1),
   graphiccardNameId:  z.string().min(1),
   gpuArchBrandId:  z.string().min(1),
@@ -143,12 +145,16 @@ export const PopFormModal: React.FC<PopUpProps> = ({
                       <SelectValue defaultValue={field.value ? String(field.value) : ''} placeholder={'Select a ' + label} />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
-                      {data.map((category) => (
-                     <SelectItem key={category.id} value={category.id}>
-                     {category[fieldaAfficher as keyof typeof category.TypeOf]}
-                   </SelectItem>    ))}
-                    </SelectContent>
+                    <SelectContent position="popper" sideOffset={4} className="max-h-64 p-0">
+                      <div className="max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent">
+                       {data.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category[fieldaAfficher as keyof typeof category]}
+                      </SelectItem>
+                                        ))}
+                       </div>
+                     </SelectContent>
+
                   </Select>
           
           

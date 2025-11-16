@@ -51,18 +51,18 @@ const Invoice = (props: { invoiceData: CartItem[] ,order:Order|null}) => {
   
   return (
     <div  className='container bg-card border border-border py-5 rounded-lg my-5'>
-      <div ref={invoiceRef} id='your-invoice-element-id' className='bg-card p-3'  >   <h1 className='text-3xl font-bold text-[hsl(var(--accent))]'>Facture</h1>
+      <div ref={invoiceRef} id='your-invoice-element-id' className='bg-card p-3'  >   <h1 className='text-3xl font-bold text-[hsl(var(--accent))]'>Invoice</h1>
       <button onClick={generatePDF} className="mt-2 rounded-md bg-gradient-to-r from-[#38BDF8] to-[#0EA5E9] px-4 py-2 text-black font-semibold hover:shadow-[0_0_20px_rgba(56,189,248,0.35)] transition">Export as PDF</button>
 
       {order?<>
         <div>
-        <div className='font-extrabold mt-3'>Vendeur</div>
+        <div className='font-extrabold mt-3'>Seller</div>
       <div className='flex items-center font-bold text-lg'>  <Image className='mr-3' alt='logo' width={50} height={50} src={'/images/logo (3).png'}/> Gaming Gear TN</div>
         </div>
         <div className='font-extrabold mt-3'>Client</div>
-         <div className='flex items-center '>nom & prénom   : {order.name} {order.lastName}</div>
-      <div className='flex items-center'>Adresse E-mail : {order.email}</div>
-      <div className='flex items-center'>Numéro telephone : {order.phone}</div>
+         <div className='flex items-center '>firstname & lastname   : {order.name} {order.lastName}</div>
+      <div className='flex items-center'>E-mail address : {order.email}</div>
+      <div className='flex items-center'>Phone number : {order.phone}</div>
       <div className='flex items-center'>Address : {order.address}</div>
         <div>
         Date: <br /> {order.createdAt.toLocaleString()}
@@ -76,10 +76,10 @@ const Invoice = (props: { invoiceData: CartItem[] ,order:Order|null}) => {
           <thead className='  text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400'>
           <tr className=' border-b text-lg'>
                     
-              <th  scope="col" className="px-6 py-3 " >Nom de produit</th>
-              <th  scope="col" className="px-6 py-3" >Quantité</th>
-              <th  scope="col" className="px-6 py-3" >Prix unitaire</th>
-              <th  scope="col" className="px-6 py-3">Total (en TND)</th>
+              <th  scope="col" className="px-6 py-3 " >Product Name</th>
+              <th  scope="col" className="px-6 py-3" >Quantity</th>
+              <th  scope="col" className="px-6 py-3" >Unit price</th>
+              <th  scope="col" className="px-6 py-3">Total (in TND)</th>
             </tr>
           </thead>
           <tbody>
@@ -98,7 +98,7 @@ const Invoice = (props: { invoiceData: CartItem[] ,order:Order|null}) => {
 
   <tr className='bg-card border-b border-border hover:bg-[hsl(var(--card)/0.08)]' >
                     
-                     <td className='px-6 py-4'><b>Clavier:</b> {item.defaultKeyboard.name} </td>
+                     <td className='px-6 py-4'><b>Keyboard:</b> {item.defaultKeyboard.name} </td>
                      <td className='px-6 py-4'>X1</td>
                      <td className='px-6 py-4'>{item.defaultKeyboard.price} </td>
                      <td className='px-6 py-4'></td>
@@ -110,7 +110,7 @@ const Invoice = (props: { invoiceData: CartItem[] ,order:Order|null}) => {
 
 <tr className='bg-card border-b border-border hover:bg-[hsl(var(--card)/0.08)]' >
                   
-                   <td className='px-6 py-4'><b>Souris:</b> {item.defaultMouse.name} </td>
+                   <td className='px-6 py-4'><b>Mouse:</b> {item.defaultMouse.name} </td>
                    <td className='px-6 py-4'>X1</td>
                    <td className='px-6 py-4'>{item.defaultMouse.price} </td>
                    <td className='px-6 py-4'></td>
@@ -122,7 +122,7 @@ const Invoice = (props: { invoiceData: CartItem[] ,order:Order|null}) => {
 
 <tr className='bg-card border-b border-border hover:bg-[hsl(var(--card)/0.08)]' >
                   
-                   <td className='px-6 py-4'><b>Casque:</b> {item.defaultHeadset.name} </td>
+                   <td className='px-6 py-4'><b>Headset:</b> {item.defaultHeadset.name} </td>
                    <td className='px-6 py-4'>X1</td>
                    <td className='px-6 py-4'>{item.defaultHeadset.price} </td>
                    <td className='px-6 py-4'></td>
@@ -134,7 +134,7 @@ const Invoice = (props: { invoiceData: CartItem[] ,order:Order|null}) => {
 
 <tr className='bg-card border-b border-border hover:bg-[hsl(var(--card)/0.08)]' >
                   
-                   <td className='px-6 py-4'><b>Tapi:</b> {item.defaultMousePad.name} </td>
+                   <td className='px-6 py-4'><b>Mousepad:</b> {item.defaultMousePad.name} </td>
                    <td className='px-6 py-4'>X1</td>
                    <td className='px-6 py-4'>{item.defaultMousePad.price} </td>
                    <td className='px-6 py-4'></td>
@@ -170,7 +170,7 @@ const Invoice = (props: { invoiceData: CartItem[] ,order:Order|null}) => {
 
 <tr className='bg-card border-b border-border hover:bg-[hsl(var(--card)/0.08)]' >
                   
-                   <td className='px-6 py-4'><b>Ecran:</b> {item.defaultScreen.name} </td>
+                   <td className='px-6 py-4'><b>Screen:</b> {item.defaultScreen.name} </td>
                    <td className='px-6 py-4'>X1</td>
                    <td className='px-6 py-4'>{item.defaultScreen.price} </td>
                    <td className='px-6 py-4'></td>
@@ -182,7 +182,7 @@ const Invoice = (props: { invoiceData: CartItem[] ,order:Order|null}) => {
 
 <tr className='bg-card border-b border-border hover:bg-[hsl(var(--card)/0.08)]' >
                   
-                   <td className='px-6 py-4'><b>Chaise Gaming:</b> {item.DefaultChair.name} </td>
+                   <td className='px-6 py-4'><b>Gaming Chair:</b> {item.DefaultChair.name} </td>
                    <td className='px-6 py-4'>X1</td>
                    <td className='px-6 py-4'>{item.DefaultChair.price} </td>
                    <td className='px-6 py-4'></td>
@@ -194,7 +194,7 @@ const Invoice = (props: { invoiceData: CartItem[] ,order:Order|null}) => {
 
 <tr className='bg-card border-b border-border hover:bg-[hsl(var(--card)/0.08)]' >
                   
-                   <td className='px-6 py-4'><b>Manette :</b> {item.DefaultManette.name} </td>
+                   <td className='px-6 py-4'><b>Conroller :</b> {item.DefaultManette.name} </td>
                    <td className='px-6 py-4'>X1</td>
                    <td className='px-6 py-4'>{item.DefaultManette.price} </td>
                    <td className='px-6 py-4'></td>
@@ -206,7 +206,7 @@ const Invoice = (props: { invoiceData: CartItem[] ,order:Order|null}) => {
 
 <tr className='bg-card border-b border-border hover:bg-[hsl(var(--card)/0.08)]' >
                   
-                   <td className='px-6 py-4'><b>Haut-Parleur:</b> {item.DefaultSpeaker.name} </td>
+                   <td className='px-6 py-4'><b>Speaker:</b> {item.DefaultSpeaker.name} </td>
                    <td className='px-6 py-4'>X1</td>
                    <td className='px-6 py-4'>{item.DefaultSpeaker.price} </td>
                    <td className='px-6 py-4'></td>
@@ -237,42 +237,42 @@ const Invoice = (props: { invoiceData: CartItem[] ,order:Order|null}) => {
 
                   <tr className='bg-card border-b border-border hover:bg-[hsl(var(--card)/0.08)]' >
                     
-                     <td className='px-6 py-4'><b>Carte Mére:</b> {item.motherboard.name} </td>
+                     <td className='px-6 py-4'><b>Motherboard:</b> {item.motherboard.name} </td>
                      <td className='px-6 py-4'>X1</td>
                      <td className='px-6 py-4'>{item.motherboard.price} </td>
                      <td className='px-6 py-4'></td>
                     </tr>
                   <tr className='bg-card border-b border-border hover:bg-[hsl(var(--card)/0.08)]' >
                     
-                     <td className='px-6 py-4'><b>Processeur:</b>{item.processor.name} </td>
+                     <td className='px-6 py-4'><b>Processor:</b>{item.processor.name} </td>
                      <td className='px-6 py-4'>X1</td>
                      <td className='px-6 py-4'>{item.processor.price} </td>
                      <td className='px-6 py-4'></td>
                     </tr>
                   <tr className='bg-card border-b border-border hover:bg-[hsl(var(--card)/0.08)]' >
                     
-                     <td className='px-6 py-4'><b>Carte Grapfique:</b>{item.gpu?.name || 'N/A'} </td>
+                     <td className='px-6 py-4'><b>Graphics Card:</b>{item.gpu?.name || 'N/A'} </td>
                      <td className='px-6 py-4'>X1</td>
                      <td className='px-6 py-4'>{item.gpu?.price || 0} </td>
                      <td className='px-6 py-4'></td>
                     </tr>
                   <tr className='bg-card border-b border-border hover:bg-[hsl(var(--card)/0.08)]' >
                     
-                     <td className='px-6 py-4'><b>Boitier:</b>{item.case.name} </td>
+                     <td className='px-6 py-4'><b>Case:</b>{item.case.name} </td>
                      <td className='px-6 py-4'>X1</td>
                      <td className='px-6 py-4'>{item.case.price} </td>
                      <td className='px-6 py-4'></td>
                     </tr>
                   <tr className='bg-card border-b border-border hover:bg-[hsl(var(--card)/0.08)]' >
                     
-                     <td className='px-6 py-4'><b>Bloc d&apos;alimentation:</b>{item.power.name} </td>
+                     <td className='px-6 py-4'><b>power supply:</b>{item.power.name} </td>
                      <td className='px-6 py-4'>X1</td>
                      <td className='px-6 py-4'>{item.power.price} </td>
                      <td className='px-6 py-4'></td>
                     </tr>
                   <tr className='bg-card border-b border-border hover:bg-[hsl(var(--card)/0.08)]' >
                     
-                     <td className='px-6 py-4'><b>Ram:</b><br />
+                     <td className='px-6 py-4'><b>RAM:</b><br />
                         {item.ram.map((e) => <>{e.name}<br /></>)} </td>
                      <td className='px-6 py-4'><br />
                         {item.ram.map((e) => <>X1<br /></>)}
@@ -284,7 +284,7 @@ const Invoice = (props: { invoiceData: CartItem[] ,order:Order|null}) => {
                     </tr>
                   <tr className='bg-card border-b border-border hover:bg-[hsl(var(--card)/0.08)]' >
                     
-                     <td className='px-6 py-4'><b>Stockage Principal:</b>{item.disk.name} </td>
+                     <td className='px-6 py-4'><b>Primary Storage:</b>{item.disk.name} </td>
                      <td className='px-6 py-4'>X1</td>
                      <td className='px-6 py-4'>{item.disk.price} </td>
                      <td className='px-6 py-4'></td>
@@ -293,7 +293,7 @@ const Invoice = (props: { invoiceData: CartItem[] ,order:Order|null}) => {
                       item.disk2 ? <>
                       <tr className='bg-card border-b border-border hover:bg-[hsl(var(--card)/0.08)]' >
                     
-                         <td className='px-6 py-4'><b>Stockage Secondaire:</b>{item.disk2.name} </td>
+                         <td className='px-6 py-4'><b>Secondary Storage:</b>{item.disk2.name} </td>
                          <td className='px-6 py-4'>X1</td>
                          <td className='px-6 py-4'>{item.disk2.price} </td>
                          <td className='px-6 py-4'></td>
@@ -304,7 +304,7 @@ const Invoice = (props: { invoiceData: CartItem[] ,order:Order|null}) => {
                       item.cooling ? <>
                       <tr className='bg-card border-b border-border hover:bg-[hsl(var(--card)/0.08)]' >
                     
-                         <td className='px-6 py-4'><b>Refroidisseur CPU:</b>{item.cooling.name} </td>
+                         <td className='px-6 py-4'><b>CPU cooler:</b>{item.cooling.name} </td>
                          <td className='px-6 py-4'>X1</td>
                          <td className='px-6 py-4'>{item.cooling.price} </td>
                          <td className='px-6 py-4'></td>
@@ -315,7 +315,7 @@ const Invoice = (props: { invoiceData: CartItem[] ,order:Order|null}) => {
                       item.screen ? <>
                       <tr className='bg-card border-b border-border hover:bg-[hsl(var(--card)/0.08)]' >
                     
-                         <td className='px-6 py-4'><b>Ecran:</b>{item.screen.name} </td>
+                         <td className='px-6 py-4'><b>Screen:</b>{item.screen.name} </td>
                          <td className='px-6 py-4'>X1</td>
                          <td className='px-6 py-4'>{item.screen.price} </td>
                          <td className='px-6 py-4'></td>

@@ -9,6 +9,9 @@ import {
 import { Product } from '@/types';
 import ProductCard from "@/components/ui/product-card";
 import Link from "next/link";
+import { UI_TEXT } from "@/i18n/ui-text";
+import { translateFilterTitle } from "@/i18n/filter-titles";
+import { useLanguage } from "@/context/language-context";
 
 // ✅ NEW: dynamic grid for Featured Builds
 import FeaturedPrebuiltClient from "@/components/front/featured-prebuilt.client";
@@ -17,6 +20,7 @@ const WA_NUMBER = "21627477075";
 const EMAIL = "contact@gaminggear.tn";
 
 const ROUTES = {
+  
   base: "https://gaminggeartn.tn",
   shop: "https://gaminggeartn.tn/shop",
   build: "https://gaminggeartn.tn/build-pc",
@@ -83,6 +87,7 @@ function BatteryIcon() {
 }
 
 const NAV = {
+  
   Laptops: [
     { label: "All Laptops", href: ROUTES.laptops },
     { label: "Gaming 15\"", href: ROUTES.laptops },
@@ -110,6 +115,7 @@ const NAV = {
     { label: "Mouse", href: ROUTES.mouse, icon: <Mouse className="h-4 w-4" /> },
     { label: "Headsets", href: ROUTES.headsets, icon: <Headphones className="h-4 w-4" /> },
   ],
+  
 };
 
 function MenuItem({ label, children, open, setOpen, id }: { label: string; children: React.ReactNode; open: string | null; setOpen: (id: string | null) => void; id: string }) {
@@ -142,6 +148,8 @@ function MenuCol({ title, items, icon }: { title: string; items: any[]; icon: Re
 }
 
 function Hero() {
+const { lang } = useLanguage();
+const ui = UI_TEXT[lang];
   return (
     <section className="relative isolate" style={{ background: theme.bg }}>
       <Glow />
@@ -167,19 +175,19 @@ function Hero() {
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <Button className="bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:shadow-[0_0_20px_hsl(var(--primary)/0.25)]" as="a" href="/build-pc">
-          <Cpu className="h-5 w-5" /> Configure My PC <ArrowRight className="h-4 w-4" />
+          <Cpu className="h-5 w-5" /> {ui.landingHeroCtaBuild} <ArrowRight className="h-4 w-4" />
         </Button>
         <Button as={Link} href="/full-setup" className="bg-transparent border border-[hsl(var(--promo))] text-foreground hover:text-[hsl(var(--promo))] hover:shadow-[0_0_0_1px_hsl(var(--promo)/0.25),_0_0_20px_hsl(var(--promo)/0.12)]">
-          <Monitor className="h-5 w-5" /> Full Setup Bundles
+          <Monitor className="h-5 w-5" /> {ui.landingfullsetupbundles}
         </Button>
       </div>
 
       <div className="mt-6 flex items-center gap-6 text-sm text-foreground/60">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="h-4 w-4 text-[hsl(var(--promo))]" /> 1 Year Warranty
+          <ShieldCheck className="h-4 w-4 text-[hsl(var(--promo))]" /> {ui.landingHeroWarranty}
         </div>
         <div className="flex items-center gap-2">
-          <Truck className="h-4 w-4 text-[hsl(var(--promo))]" /> Delivery in Tunisia
+          <Truck className="h-4 w-4 text-[hsl(var(--promo))]" /> {ui.landingHeroDelivery}
         </div>
         <div className="flex items-center gap-2">
           <Gauge className="h-4 w-4 text-[hsl(var(--promo))]" /> <span className="text-[hsl(var(--promo))]">Stress-Tested</span>
@@ -204,8 +212,11 @@ function Hero() {
           muted
           playsInline
           preload="auto"
-          controls  // <-- TEMP for debugging; remove once you see it play
-          onError={(e) => console.error('VIDEO ERROR', (e.target as HTMLVideoElement).error)}
+          controls={false}
+  controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"// <-- TEMP for debugging; remove once you see it play
+  disablePictureInPicture
+
+  onError={(e) => console.error('VIDEO ERROR', (e.target as HTMLVideoElement).error)}
         >
           {/* H.264 source first (Chrome/Edge/Safari compatible) */}
           <source src="/videos/featured-ryzen7-4070super.mp4" type="video/mp4" />

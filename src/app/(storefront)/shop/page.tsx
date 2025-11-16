@@ -1,236 +1,325 @@
+// app/(storefront)/page.tsx
 import prismadb from '@/lib/prismadb'
-import PaginationControls from './_componenets/PaginationControls'
-import Image from 'next/image'
-import React, { useEffect } from 'react'
-import ProductList from '@/components/product-list'
-import { Product } from '@/types'
-import { Pagination } from "@nextui-org/pagination";
 import Sidebar from './_componenets/sideBar'
-import { HeadsetFilters, LaptopFilters, MicFilters, MouseFilters, MousepadFilters, casesFilters, coolingFilters, cpusFilters, gpusFilters, keyboardFilters, memoriesFilters, motherboardFilters, powersuppliesFilters, screensFilters, storagesFilters } from './_componenets/Filters'
-import { addCaseFitlters, addCoolingFitlters, addHardDiskFitlters, addHeadsetFitlters, addKeyboardFitlters, addLaptopFitlters, addMicFitlters, addMouseFitlters, addMousepadFitlters, addPowerFitlters, addRamFitlters, addScreenFitlters, addcpuFitlters, addgpuitlters, addmotherboardFitlters } from './_componenets/FilterFunctions'
 import { Metadata } from 'next'
+import { Product } from '@/types' // keep this import
 
-interface Props{
-  searchParams: {  [key: string]: string | string[] | undefined  }
+import {
+  HeadsetFilters,
+  LaptopFilters,
+  MicFilters,
+  MouseFilters,
+  MousepadFilters,
+  casesFilters,
+  coolingFilters,
+  cpusFilters,
+  gpusFilters,
+  keyboardFilters,
+  memoriesFilters,
+  motherboardFilters,
+  powersuppliesFilters,
+  screensFilters,
+  storagesFilters,
+  
+} from './_componenets/Filters'
+
+import {
+  addCaseFitlters,
+  addCoolingFitlters,
+  addHardDiskFitlters,
+  addHeadsetFitlters,
+  addKeyboardFitlters,
+  addLaptopFitlters,
+  addMicFitlters,
+  addMouseFitlters,
+  addMousepadFitlters,
+  addPowerFitlters,
+  addRamFitlters,
+  addScreenFitlters,
+  addcpuFitlters,
+  addgpuitlters,
+  addmotherboardFitlters,
+  addCameraFitlters,
+  addControllerFitlters,
+} from './_componenets/FilterFunctions'
+
+
+interface Props {
+  searchParams: { [key: string]: string | string[] | undefined }
 }
-export async function generateMetadata({searchParams}:Props):Promise< Metadata> {
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   try {
     const search = searchParams['search'] ?? ''
     const categoryy = searchParams['categorie'] ?? ''
-    if(search.length>0)
-      return { title: search.toString(), description:"" };
-    if(categoryy.length>0)
-      return { title: categoryy.toString() };
-    return { title: '' };
+    if (search.length > 0) return { title: search.toString(), description: '' }
+    if (categoryy.length > 0) return { title: categoryy.toString() }
+    return { title: '' }
   } catch {
-    return { title: '' };
+    return { title: '' }
   }
-};
+}
 
 export type HomeFilter = {
-  title: String
+  title: string
   data: any[]
 }
 
-export interface compFilter{
-  type:string,
-  data:FilterList
+export interface compFilter {
+  type: string
+  data: FilterList
 }
 
 export interface FilterList {
-  [key: string]: { id: number; searchKey: string }[];
+  [key: string]: { id: number; searchKey: string }[]
 }
 
-const Home = async ({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined }
-}) => {
-  const whereClause: Record<string, any> = {
-    isArchived:false 
-  };
+const stripAccents = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+const norm = (s: string) => stripAccents(s).toLowerCase().trim()
+
+const resolveCategoryKey = (label: string): string => {
+  const k = norm(label)
+  if (['gpu', 'gpus', 'graphics cards (gpu)'].includes(k)) return 'gpu'
+  if (['cpu', 'cpus', 'processor', 'processors (cpu)'].includes(k)) return 'cpu'
+  if (['ram', 'memory', 'memories', 'memory (ram)'].includes(k)) return 'ram'
+  if (['storage', 'storages', 'disk', 'disks', 'harddisk', 'hard disk'].includes(k)) return 'hardDisk'
+  if (['motherboard', 'motherboards', 'carte mere', 'carte mére'].includes(k)) return 'motherboard'
+  if (['cases', 'case', 'pc case', 'pccase'].includes(k)) return 'case'
+  if (['power', 'powersupply', 'power supply', 'power supplies', 'psu', 'psus'].includes(k)) return 'power'
+  if (['cooling', 'cooler', 'coolers'].includes(k)) return 'cooling'
+  if (['monitor', 'monitors', 'screen', 'screens', 'display', 'displays'].includes(k)) return 'screen'
+  if (['laptop', 'laptops', 'all laptops'].includes(k)) return 'laptop'
+  if (['keyboard', 'keyboards'].includes(k)) return 'keyboard'
+  if (['headset', 'headsets', 'casque', 'casques'].includes(k)) return 'casque'
+  if (['mouse', 'mice'].includes(k)) return 'mouse'
+  if (['mousepad', 'mousepads', 'mouse pad', 'mouse pads'].includes(k)) return 'mousePad'
+  if (['mic', 'microphone', 'microphones'].includes(k)) return 'mic'
+  if (['camera', 'cameras', 'webcam', 'webcams'].includes(k)) return 'camera'
+  if (['controller', 'controllers', 'gamepad', 'joystick'].includes(k)) return 'controller'
+  return ''
+}
+
+const Home = async ({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) => {
+  const whereClause: Record<string, any> = { isArchived: false }
 
   const page = searchParams['page'] ?? '1'
-  const categoryy = searchParams['categorie'] ?? ''
+  const categoryy = (searchParams['categorie'] ?? '').toString()
   const search = searchParams['search'] ?? ''
 
-  const sort = searchParams['sort'] ?? 'Prix : Croissant';
-  const maxDt = searchParams['maxDt'] ?? '';
-  const minDt = searchParams['minDt'] ?? '';
-  const filterListParam = searchParams['filterList'] ?? '';
+  const sort = searchParams['sort'] ?? 'Prix : Croissant'
+  const maxDt = searchParams['maxDt'] ?? ''
+  const minDt = searchParams['minDt'] ?? ''
+  const filterListParam = searchParams['filterList'] ?? ''
 
   // Prebuilt flag
-  const prebuilt = (searchParams['prebuilt'] ?? '').toString().toLowerCase();
+  const prebuilt = (searchParams['prebuilt'] ?? '').toString().toLowerCase()
   if (prebuilt && prebuilt !== '0' && prebuilt !== 'false' && prebuilt !== 'off') {
-    // For optional 1-to-1 relation, Prisma supports isNot: null
-    whereClause.PreBuiltPcmodel = { isNot: null };
+    whereClause.PreBuiltPcmodel = { isNot: null }
   }
 
-  // Featured flag — ✅ close the block immediately
-  const featured = (searchParams['featured'] ?? '').toString().toLowerCase();
+  // Featured flag
+  const featured = (searchParams['featured'] ?? '').toString().toLowerCase()
   if (featured && featured !== '0' && featured !== 'false' && featured !== 'off') {
-    whereClause.isFeatured = true;
+    whereClause.isFeatured = true
   }
 
-  // ✅ fList must be outside so it’s available later
-  let fList: FilterList | undefined = undefined;
-
-  const wordList = search.toString().split(' ');
-  if (filterListParam.length > 0) {
-    const decodedFilterList = JSON.parse(decodeURIComponent(filterListParam.toString())) as compFilter;
-
-    const typee = decodedFilterList.type as unknown as string
-    if (decodedFilterList.data) {
-      fList = decodedFilterList.data 
-      
-      if (typee == 'Carte Mére') {
-        whereClause.motherboard = addmotherboardFitlters(fList).data
-      }
-      if (typee === "cpu") {
-        whereClause.cpus = addcpuFitlters(fList).data
-      }
-      if (typee === "gpu") {
-        whereClause.gpus = addgpuitlters(fList).data
-      }
-      if (typee === "ram") {
-        whereClause.memories = addRamFitlters(fList).data
-      }
-      if (typee == "hardDisk") {
-        whereClause.storages = addHardDiskFitlters(fList).data
-      }
-      if (typee == "cooling") {
-        whereClause.cooling = addCoolingFitlters(fList).data
-      }
-      if (typee == "case") {
-        whereClause.cases = addCaseFitlters(fList).data
-      }
-      if (typee == "power") {
-        whereClause.powersupplies = addPowerFitlters(fList).data
-      }
-      if (typee == "screen") {
-        whereClause.screens = addScreenFitlters(fList).data
-      }
-      if (typee == "laptop") {
-        whereClause.Laptop = addLaptopFitlters(fList).data
-      }
-      if (typee == "keyboard") {
-        whereClause.keyboard = addKeyboardFitlters(fList).data
-      } 
-      if (typee == "mic") {
-        whereClause.Mic = addMicFitlters(fList).data
-      }
-      if (typee == "casque") {
-        whereClause.Headset = addHeadsetFitlters(fList).data
-      }
-      if (typee == "mouse") {
-        whereClause.Mouse = addMouseFitlters(fList).data
-      }
-      if (typee == "mousePad") {
-        whereClause.Mousepad = addMousepadFitlters(fList).data
-      }
-    }
-  }
-
-  let orderByClause: Record<string, 'asc' | 'desc'> = {};
-  if (sort && sort.length > 0) {
-    switch (sort) {
-      case 'Les plus populaires':
-        orderByClause = { soldnumber: 'desc' }; break;
-      case 'Les plus récents':
-        orderByClause = { price: 'desc' }; break;
-      case 'Prix : Croissant':
-        orderByClause = { price: 'asc' }; break;
-      case 'Prix : Décroissant':
-        orderByClause = { price: 'desc' }; break;
-      default:
-        orderByClause = { price: 'asc' };
-    }
-  } else {
-    orderByClause = { price: 'asc' };
-  }
-
-  // ✅ Make NaN-safe
-  function isNumber(value: any): boolean { 
-    return typeof value === 'number' && !Number.isNaN(value); 
-  }
-
-  let pageIndex = 1
-  const perpage = 12
-  let totalprod = 0
-  if (isNumber(parseInt(page.toString()))) {
-    const p = parseInt(page.toString())
-    pageIndex = p > 0 ? p : 1
-  } else {
-    pageIndex = 1
-  }
-  let prods
-
+  // --- text search ---
+  const wordList = search.toString().split(' ')
   if (search.length > 0) {
-    if (wordList.filter((i) => i != ' ').length > 0) {
-      whereClause.AND = wordList.filter((i) => i != ' ').map((word) => ({
-        name: { contains: word, mode: 'insensitive' },
-      }));
+    const words = wordList.map(w => w.trim()).filter(Boolean)
+    if (words.length > 0) {
+      whereClause.AND = (whereClause.AND ?? []).concat(
+        words.map((word) => ({ name: { contains: word, mode: 'insensitive' } }))
+      )
     } else {
-      whereClause.name = { contains: search.toString(), mode: 'insensitive' };
+      whereClause.name = { contains: search.toString(), mode: 'insensitive' }
     }
   }
 
-  if (maxDt.length > 0 && maxDt.length) {
-    whereClause.price = { lte: parseInt(maxDt.toString()) };
-    if (minDt.length > 0 && minDt.length) {
-      whereClause.price = { ...(whereClause.price || {}), gte: parseInt(minDt.toString()) };
-    }
-  }
+  // --- price range (merge, don’t overwrite) ---
+  const price: any = {}
+  if (maxDt.length > 0) price.lte = parseInt(maxDt.toString(), 10)
+  if (minDt.length > 0) price.gte = parseInt(minDt.toString(), 10)
+  if (Object.keys(price).length) whereClause.price = { ...(whereClause.price || {}), ...price }
 
-  // ====== resolve category OR map to relation (incl. Monitors -> screens) ======
-  if (categoryy.toString().length > 0) {
-    const label = categoryy.toString().trim();
-    const key = label.toLowerCase();
+  // --- category mapping / categoryId resolve ---
+  let catKey = ''
+  if (categoryy.length > 0) {
+    const label = categoryy.trim()
+    const k = norm(label)
 
-    const cat = await prismadb.category.findFirst({
-      where: { name: { equals: label, mode: 'insensitive' } },
-      select: { id: true, name: true },
-    });
-    console.log('SHOP categorie =', label, ' -> matched category:', cat);
+    // Which labels should be handled via relations instead of categoryId?
+    const RELATION_ONLY_KEYS = [
+      'mouse', 'mice',
+      'keyboard', 'keyboards',
+      'headset', 'headsets', 'casque', 'casques',
+      'mousepad', 'mousepads', 'mouse pad', 'mouse pads',
+      'mic', 'microphone', 'microphones',
+      'camera', 'cameras', 'webcam', 'webcams',
+      'controller', 'controllers', 'gamepad', 'joystick', 'manette', 'manettes',
+    ]
 
-    if (cat) {
-      whereClause.categoryId = cat.id;
-    } else {
-      let mapped = false;
+    const isRelationOnly = RELATION_ONLY_KEYS.includes(k)
 
-      // existing
-      if (['mouse','mice'].includes(key))           { whereClause.Mouse = { some: {} }; mapped = true; }
-      if (['keyboard','keyboards'].includes(key))   { whereClause.keyboard = { some: {} }; mapped = true; }
-      if (['headset','headsets'].includes(key))     { whereClause.Headset = { some: {} }; mapped = true; }
-      if (['gpu','gpus'].includes(key))             { whereClause.gpus = { some: {} }; mapped = true; }
-      if (['motherboard','motherboards'].includes(key)) { whereClause.motherboard = { some: {} }; mapped = true; }
-      if (['storage','storages','harddisk','hard disk','hard disks','hard-disks'].includes(key)) {
-        whereClause.storages = { some: {} }; mapped = true;
-      }
-      if (['power supplies','power-supplies','power supply','powersupply','powersupplies','psu','psus'].includes(key)) {
-        whereClause.powersupplies = { some: {} }; mapped = true;
-      }
-      if (['case','cases','pc case','pc cases','pccase'].includes(key)) {
-        whereClause.cases = { some: {} }; mapped = true;
-      }
-      if (['cooling','cooler','coolers'].includes(key)) {
-        whereClause.cooling = { some: {} }; mapped = true;
-      }
-      // NEW for Monitors -> screens
-      if (['monitor','monitors','screen','screens','display','displays'].includes(key)) {
-        whereClause.screens = { some: {} }; mapped = true;
-      }
-
-      if (!mapped) {
-        whereClause.categoryId = '__no_such_id__';
+    // 1) If it's NOT a relation-only label, use categoryId
+    if (!isRelationOnly) {
+      const cat = await prismadb.category.findFirst({
+        where: { name: { equals: label, mode: 'insensitive' } },
+        select: { id: true, name: true },
+      })
+      if (cat) {
+        whereClause.categoryId = cat.id
       }
     }
 
-    console.log('SHOP whereClause =', JSON.stringify(whereClause, null, 2));
-  }
-  // ===========================================================================
+    // 2) Always apply the relation mapping for our "virtual" categories
+    if (['mouse', 'mice'].includes(k))
+      whereClause.Mouse = { some: {} }
+    else if (['keyboard', 'keyboards'].includes(k))
+      whereClause.keyboard = { some: {} }
+    else if (['headset', 'headsets', 'casque', 'casques'].includes(k))
+      whereClause.Headset = { some: {} }
+    else if (['gpu', 'gpus'].includes(k))
+      whereClause.gpus = { some: {} }
+    else if (['motherboard', 'motherboards'].includes(k))
+      whereClause.motherboard = { some: {} }
+    else if (['storage', 'storages', 'harddisk', 'hard disk', 'hard-disks'].includes(k))
+      whereClause.storages = { some: {} }
+    else if ([
+      'power supplies',
+      'power-supplies',
+      'power supply',
+      'powersupply',
+      'powersupplies',
+      'psu',
+      'psus',
+    ].includes(k))
+      whereClause.powersupplies = { some: {} }
+    else if (['case', 'cases', 'pc case', 'pc cases', 'pccase'].includes(k))
+      whereClause.cases = { some: {} }
+    else if (['cooling', 'cooler', 'coolers'].includes(k))
+      whereClause.cooling = { some: {} }
+    else if (['monitor', 'monitors', 'screen', 'screens', 'display', 'displays'].includes(k))
+      whereClause.screens = { some: {} }
 
-  prods = await prismadb.product.findMany({
+    // Mousepads
+    else if (['mousepad', 'mousepads', 'mouse pad', 'mouse pads'].includes(k))
+      whereClause.Mousepad = { some: {} }
+
+    // Mics
+    else if (['mic', 'microphone', 'microphones'].includes(k))
+      whereClause.Mic = { some: {} }
+
+    // Cameras
+    else if (['camera', 'cameras', 'webcam', 'webcams'].includes(k))
+      whereClause.Camera = { some: {} }
+
+    // Controllers (Prisma relation is Manette)
+    else if (['controller', 'controllers', 'gamepad', 'joystick', 'manette', 'manettes'].includes(k))
+      whereClause.Manette = { some: {} }
+
+    // finally, decide which filter branch to use
+    catKey = resolveCategoryKey(label)
+  }
+
+
+
+  // --- decode & apply FILTERS coming from UI (route param “filterList”) ---
+  let fList: FilterList | undefined = undefined
+
+  if (filterListParam && filterListParam.toString().length > 0) {
+    const decoded = JSON.parse(decodeURIComponent(filterListParam.toString())) as compFilter
+    fList = decoded.data
+
+    const activeKey = catKey || resolveCategoryKey(categoryy)
+
+    switch (activeKey) {
+      case 'motherboard':
+        whereClause.motherboard = addmotherboardFitlters(fList).data
+        break
+      case 'cpu':
+        whereClause.cpus = addcpuFitlters(fList).data
+        break
+      case 'gpu':
+        whereClause.gpus = addgpuitlters(fList).data
+        break
+      case 'ram':
+        whereClause.memories = addRamFitlters(fList).data
+        break
+      case 'hardDisk':
+        whereClause.storages = addHardDiskFitlters(fList).data
+        break
+      case 'cooling':
+        whereClause.cooling = addCoolingFitlters(fList).data
+        break
+      case 'case':
+        whereClause.cases = addCaseFitlters(fList).data
+        break
+      case 'power':
+        whereClause.powersupplies = addPowerFitlters(fList).data
+        break
+      case 'screen':
+        whereClause.screens = addScreenFitlters(fList).data
+        break
+      case 'laptop':
+        whereClause.Laptop = addLaptopFitlters(fList).data
+        break
+      case 'keyboard':
+        whereClause.keyboard = addKeyboardFitlters(fList).data
+        break
+      case 'mic':
+        whereClause.Mic = addMicFitlters(fList).data
+        break
+      case 'casque':
+        whereClause.Headset = addHeadsetFitlters(fList).data
+        break
+      case 'mouse':
+        whereClause.Mouse = addMouseFitlters(fList).data
+        break
+      case 'mousePad':
+        whereClause.Mousepad = addMousepadFitlters(fList).data
+        break
+        case 'camera':
+          whereClause.Camera = addCameraFitlters(fList).data
+          break
+        case 'controller':
+          // use the Manette relation, NOT Controller
+          whereClause.Manette = addControllerFitlters(fList).data
+          break
+  
+  
+
+      default:
+        break
+    }
+  }
+
+  // ---- sorting ----
+  let orderByClause: Record<string, 'asc' | 'desc'> = {}
+  switch (sort) {
+    case 'Les plus populaires':
+      orderByClause = { soldnumber: 'desc' }
+      break
+    case 'Les plus récents':
+      orderByClause = { price: 'desc' }
+      break
+    case 'Prix : Croissant':
+      orderByClause = { price: 'asc' }
+      break
+    case 'Prix : Décroissant':
+      orderByClause = { price: 'desc' }
+      break
+    default:
+      orderByClause = { price: 'asc' }
+  }
+
+  // ---- paging ----
+  const perpage = 12
+  const p = parseInt((page ?? '1').toString(), 10)
+  const pageIndex = Number.isFinite(p) && p > 0 ? p : 1
+
+  // ---- main query ----
+  const prods = await prismadb.product.findMany({
     where: whereClause,
     include: {
       motherboard: true,
@@ -252,164 +341,77 @@ const Home = async ({
       images: true,
       category: true,
       additionalDetails: true,
+      Camera: true,
+      Manette: true,
+
     },
-    skip: (perpage * (pageIndex - 1)),
+    skip: perpage * (pageIndex - 1),
     take: perpage,
     orderBy: orderByClause,
   })
 
-  console.log('SHOP prods length =', prods.length, 'whereClause =', JSON.stringify(whereClause));
+  const totalprod = await prismadb.product.count({ where: whereClause })
 
-  totalprod = await prismadb.product.count({ where: whereClause });
-
-  console.log(whereClause)
+  // ---- categories box (left) ----
   const categorie = await prismadb.category.findMany({
     where: { products: { some: whereClause } },
-    include:{ _count:{ select:{ products:true } } },
-    orderBy:{ products:{ _count:'desc' } }
+    include: { _count: { select: { products: true } } },
+    orderBy: { products: { _count: 'desc' } },
   })
 
-  let filters: any[] = []
-  let i = 0
+  // ---- compute filters to display on the left (based on present relations) ----
+  const filterPromises: Array<Promise<HomeFilter>> = []
+  if (prods.findIndex((e) => (e.motherboard?.length ?? 0) > 0) > -1) filterPromises.push(motherboardFilters() as unknown as Promise<HomeFilter>)
+  if (prods.findIndex((e) => (e.cpus?.length ?? 0) > 0) > -1)        filterPromises.push(cpusFilters() as unknown as Promise<HomeFilter>)
+  if (prods.findIndex((e) => (e.gpus?.length ?? 0) > 0) > -1)        filterPromises.push(gpusFilters() as unknown as Promise<HomeFilter>)
+  if (prods.findIndex((e) => (e.Headset?.length ?? 0) > 0) > -1)     filterPromises.push(HeadsetFilters() as unknown as Promise<HomeFilter>)
+  if (prods.findIndex((e) => (e.Laptop?.length ?? 0) > 0) > -1)      filterPromises.push(LaptopFilters() as unknown as Promise<HomeFilter>)
+  if (prods.findIndex((e) => (e.Mic?.length ?? 0) > 0) > -1)         filterPromises.push(MicFilters() as unknown as Promise<HomeFilter>)
+  if (prods.findIndex((e) => (e.Mouse?.length ?? 0) > 0) > -1)       filterPromises.push(MouseFilters() as unknown as Promise<HomeFilter>)
+  if (prods.findIndex((e) => (e.Mousepad?.length ?? 0) > 0) > -1)    filterPromises.push(MousepadFilters() as unknown as Promise<HomeFilter>)
+  if (prods.findIndex((e) => (e.cases?.length ?? 0) > 0) > -1)       filterPromises.push(casesFilters() as unknown as Promise<HomeFilter>)
+  if (prods.findIndex((e) => (e.cooling?.length ?? 0) > 0) > -1)     filterPromises.push(coolingFilters() as unknown as Promise<HomeFilter>)
+  if (prods.findIndex((e) => (e.keyboard?.length ?? 0) > 0) > -1)    filterPromises.push(keyboardFilters() as unknown as Promise<HomeFilter>)
+  if (prods.findIndex((e) => (e.memories?.length ?? 0) > 0) > -1)    filterPromises.push(memoriesFilters() as unknown as Promise<HomeFilter>)
+  if (prods.findIndex((e) => (e.powersupplies?.length ?? 0) > 0) > -1) filterPromises.push(powersuppliesFilters() as unknown as Promise<HomeFilter>)
+  if (prods.findIndex((e) => (e.screens?.length ?? 0) > 0) > -1)     filterPromises.push(screensFilters() as unknown as Promise<HomeFilter>)
+  if (prods.findIndex((e) => (e.storages?.length ?? 0) > 0) > -1)    filterPromises.push(storagesFilters() as unknown as Promise<HomeFilter>)
 
-  // ====== fallback probe mirrors the same mapping (incl. Monitors) ======
-  if (categoryy.toString().length > 0 && prods.length === 0) {
-    const label = categoryy.toString().trim();
-    const key = label.toLowerCase();
+  const filters = await Promise.all(filterPromises)
 
-    const cat = await prismadb.category.findFirst({
-      where: { name: { equals: label, mode: 'insensitive' } },
-      select: { id: true },
-    });
-
-    let prouWhere: any;
-    if (cat) {
-      prouWhere = { categoryId: cat.id };
-    } else if (['mouse','mice'].includes(key)) {
-      prouWhere = { Mouse: { some: {} } };
-    } else if (['keyboard','keyboards'].includes(key)) {
-      prouWhere = { keyboard: { some: {} } };
-    } else if (['headset','headsets'].includes(key)) {
-      prouWhere = { Headset: { some: {} } };
-    } else if (['gpu','gpus'].includes(key)) {
-      prouWhere = { gpus: { some: {} } };
-    } else if (['motherboard','motherboards'].includes(key)) {
-      prouWhere = { motherboard: { some: {} } };
-    } else if (['storage','storages','harddisk','hard disk','hard disks','hard-disks'].includes(key)) {
-      prouWhere = { storages: { some: {} } };
-    } else if (['power supplies','power-supplies','power supply','powersupply','powersupplies','psu','psus'].includes(key)) {
-      prouWhere = { powersupplies: { some: {} } };
-    } else if (['case','cases','pc case','pc cases','pccase'].includes(key)) {
-      prouWhere = { cases: { some: {} } };
-    } else if (['cooling','cooler','coolers'].includes(key)) {
-      prouWhere = { cooling: { some: {} } };
-    } else if (['monitor','monitors','screen','screens','display','displays'].includes(key)) {
-      prouWhere = { screens: { some: {} } };
-    } else {
-      prouWhere = { id: '__no_match__' };
-    }
-
-    const prou = await prismadb.product.findMany({
-      where: prouWhere,
-      include:{  
-        motherboard: true,
-        cases: true,
-        cooling: true,
-        Headset: true,
-        keyboard: true,
-        Laptop: true,
-        memories: true,
-        Mic: true,
-        Mouse: true,
-        Mousepad: true,
-        powersupplies: true,
-        PreBuiltPcmodel: true,
-        screens: true,
-        storages: true,
-        cpus: true,
-        gpus: true,
-        images: true,
-        category: true,
-        additionalDetails: true,
-      },
-      orderBy: orderByClause,
-      take: 1
-    })
-    console.log('SHOP fallback prou length =', prou.length);
-
-    if (prou.findIndex((e) => e.motherboard.length == 1) > -1) { filters[i] = await motherboardFilters() as unknown as HomeFilter; i++ }
-    if (prou.findIndex((e) => e.cpus.length == 1) > -1)       { filters[i] = await cpusFilters() as unknown as HomeFilter; i++ }
-    if (prou.findIndex((e) => e.gpus.length == 1) > -1)       { filters[i] = await gpusFilters() as unknown as HomeFilter; i++ }
-    if (prou.findIndex((e) => e.Headset.length == 1) > -1)    { filters[i] = await HeadsetFilters() as unknown as HomeFilter; i++ }
-    if (prou.findIndex((e) => e.Laptop.length == 1) > -1)     { filters[i] = await LaptopFilters() as unknown as HomeFilter; i++ }
-    if (prou.findIndex((e) => e.Mic.length == 1) > -1)        { filters[i] = await MicFilters() as unknown as HomeFilter; i++ }
-    if (prou.findIndex((e) => e.Mouse.length == 1) > -1)      { filters[i] = await MouseFilters() as unknown as HomeFilter; i++ }
-    if (prou.findIndex((e) => e.Mousepad.length == 1) > -1)   { filters[i] = await MousepadFilters() as unknown as HomeFilter; i++ }
-    if (prou.findIndex((e) => e.cases.length == 1) > -1)      { filters[i] = await casesFilters() as unknown as HomeFilter; i++ }
-    if (prou.findIndex((e) => e.cooling.length == 1) > -1)    { filters[i] = await coolingFilters() as unknown as HomeFilter; i++ }
-    if (prou.findIndex((e) => e.keyboard.length == 1) > -1)   { filters[i] = await keyboardFilters() as unknown as HomeFilter; i++ }
-    if (prou.findIndex((e) => e.memories.length == 1) > -1)   { filters[i] = await memoriesFilters() as unknown as HomeFilter; i++ }
-    if (prou.findIndex((e) => e.powersupplies.length == 1) > -1){ filters[i] = await powersuppliesFilters() as unknown as HomeFilter; i++ }
-    if (prou.findIndex((e) => e.screens.length == 1) > -1)    { filters[i] = await screensFilters() as unknown as HomeFilter; i++ }
-    if (prou.findIndex((e) => e.storages.length == 1) > -1)   { filters[i] = await storagesFilters() as unknown as HomeFilter; i++ }
-  }
-  // =====================================================================
-
-  if (prods.findIndex((e) => e.motherboard.length == 1) > -1) { filters[i] = await motherboardFilters() as unknown as HomeFilter; i++ }
-  if (prods.findIndex((e) => e.cpus.length == 1) > -1)        { filters[i] = await cpusFilters() as unknown as HomeFilter; i++ }
-  if (prods.findIndex((e) => e.gpus.length == 1) > -1)        { filters[i] = await gpusFilters() as unknown as HomeFilter; i++ }
-  if (prods.findIndex((e) => e.Headset.length == 1) > -1)     { filters[i] = await HeadsetFilters() as unknown as HomeFilter; i++ }
-  if (prods.findIndex((e) => e.Laptop.length == 1) > -1)      { filters[i] = await LaptopFilters() as unknown as HomeFilter; i++ }
-  if (prods.findIndex((e) => e.Mic.length == 1) > -1)         { filters[i] = await MicFilters() as unknown as HomeFilter; i++ }
-  if (prods.findIndex((e) => e.Mouse.length == 1) > -1)       { filters[i] = await MouseFilters() as unknown as HomeFilter; i++ }
-  if (prods.findIndex((e) => e.Mousepad.length == 1) > -1)    { filters[i] = await MousepadFilters() as unknown as HomeFilter; i++ }
-  if (prods.findIndex((e) => e.cases.length == 1) > -1)       { filters[i] = await casesFilters() as unknown as HomeFilter; i++ }
-  if (prods.findIndex((e) => e.cooling.length == 1) > -1)     { filters[i] = await coolingFilters() as unknown as HomeFilter; i++ }
-  if (prods.findIndex((e) => e.keyboard.length == 1) > -1)    { filters[i] = await keyboardFilters() as unknown as HomeFilter; i++ }
-  if (prods.findIndex((e) => e.memories.length == 1) > -1)    { filters[i] = await memoriesFilters() as unknown as HomeFilter; i++ }
-  if (prods.findIndex((e) => e.powersupplies.length == 1) > -1){ filters[i] = await powersuppliesFilters() as unknown as HomeFilter; i++ }
-  if (prods.findIndex((e) => e.screens.length == 1) > -1)     { filters[i] = await screensFilters() as unknown as HomeFilter; i++ }
-  if (prods.findIndex((e) => e.storages.length == 1) > -1)    { filters[i] = await storagesFilters() as unknown as HomeFilter; i++ }
-
-  const formattedproducts: Product[] = prods.map((item) => ({
+  // ✅ type as Product[] (shape made robust)
+  const formattedproducts: Product[] = prods.map((item: any) => ({
     id: item.id,
-    name: item.name,
-    images: item.images,
-    dicountPrice: parseInt(item.dicountPrice.toString()),
-    stock: parseInt(item.stock.toString()),
-    price: parseFloat(item.price.toString()),
-    category: item.category,
-    description: item.description,
-    additionalDetails: item?.additionalDetails
-  }));
+    name: item.name ?? '',
+    images: item.images ?? [],
+    // include BOTH spellings to satisfy whichever your Product/Sidebar uses
+    discountPrice: Number(item.discountPrice ?? item.dicountPrice ?? 0),
+    dicountPrice: Number(item.dicountPrice ?? item.discountPrice ?? 0),
+    stock: Number(item.stock ?? 0),
+    price: Number(item.price ?? 0),
+    category: item.category ?? null,
+    description: item.description ?? '',
+    additionalDetails: item.additionalDetails ?? null,
+  })) as unknown as Product[]
 
   const total = Math.ceil(totalprod / perpage)
 
-  let ski = total * (pageIndex - 1)
-  if (ski < 0) {
-    ski = 0
-  }
   let header = 'Store'
   if (categoryy.length > 0) {
     header = categoryy.toString()
-  } else {
-    // Otherwise, if ?prebuilt=1 (or any truthy value), show "Builds"
-    const prebuilt = (searchParams?.prebuilt ?? '').toString().toLowerCase()
-    if (prebuilt && !['0', 'false', 'off', 'no'].includes(prebuilt)) {
-      header = 'Builds'
-    }
+  } else if (prebuilt && !['0', 'false', 'off', 'no'].includes(prebuilt)) {
+    header = 'Builds'
   }
 
-  const lfilters = filters
-
   return (
-    <div className='bg-background min-h-screen'>
-      <div className='container mx-auto px-6 py-8'>
-        <div className='rounded-2xl border border-border bg-card/70 backdrop-blur-sm shadow-[0_0_0_1px_rgba(255,255,255,0.02)] glass-card p-6'>
-          <Sidebar hasNextPage={pageIndex < total}
+    <div className="bg-background min-h-screen">
+      <div className="container mx-auto px-6 py-8">
+        <div className="rounded-2xl border border-border bg-card/70 backdrop-blur-sm shadow-[0_0_0_1px_rgba(255,255,255,0.02)] glass-card p-6">
+          <Sidebar
+            hasNextPage={pageIndex < total}
             hasPrevPage={pageIndex > 1}
             pagetotal={total}
-            perpage={perpage}
+            perpage={12}
             selectfilterList={fList}
             pageindex={pageIndex}
             totalprod={totalprod}
@@ -419,10 +421,13 @@ const Home = async ({
             isloadingg={false}
             categories={categorie}
             titlee={search.toString()}
-            items={formattedproducts} sort={sort.toString()} />
+            items={formattedproducts}
+            sort={sort.toString()}
+          />
         </div>
       </div>
     </div>
   )
 }
+
 export default Home

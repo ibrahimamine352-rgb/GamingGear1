@@ -1,6 +1,8 @@
 "use client"
 import Gallery from '@/components/gallery';
 import Info from '@/components/info';
+import type { Field } from '@/types'; // make sure Field is imported
+
 import { Product, Case, Cooling, Cpu, Gpu, HDD, Motherboard, Power, PreCustmizedPc, Prod, RAM, ProdCol } from '@/types';
 import {
     Table,
@@ -93,12 +95,15 @@ const CustomPackTemplate: React.FC<ProductFormProps> = ({ initialData }) => {
         stock: parseInt(initialData.stock.toString()),
         price: calculePrix(),
         description: initialData.description,
-        additionalDetails: [],
+        additionalDetails: [] as Field[],   // avoid `never[]`
         category: {
-            id: '',
-            name: ''
-        }
-    }
+          id: '',
+          name: ''
+        },
+        // ✅ add the required flags (fallback to false if not present)
+        comingSoon: Boolean((initialData as any)?.comingSoon),
+        outOfStock: Boolean((initialData as any)?.outOfStock),
+      };
     const [TableData, setTableData] = useState<TableData[]>([]);
 
     const [keyboardList, setkeyboardList] = useState<ProdCol[]>(initialData && initialData.PackProduct && initialData.PackProduct[0].Clavier
@@ -222,7 +227,7 @@ const CustomPackTemplate: React.FC<ProductFormProps> = ({ initialData }) => {
         const uniqueId = generateHashId();
         const pc: CartItem = {
             idd: uniqueId,
-            Title: "Pack Personalisé",
+            Title: "Custom Pack",
             price: total,
             packId: initialData.id,
             packTitle: initialData.name,
@@ -295,12 +300,12 @@ const CustomPackTemplate: React.FC<ProductFormProps> = ({ initialData }) => {
                     </div>
                     {
                         initialData?.PackProduct[0].discountOnPack && parseInt(initialData?.PackProduct[0].discountOnPack.toString()) ? <>
-                            <div className='text-xs mb-2'>Cette prix est sous une réduction </div>
+                            <div className='text-xs mb-2'>This price is discounted </div>
                         </> : <></>
                     }
                     <div className=" mb-7 flex items-center gap-x-3">
                         <Button variant={"default"} onClick={onAddToCart} className="flex items-center bg-gradient-to-r from-[#38BDF8] to-[#0EA5E9] text-black font-semibold hover:shadow-[0_0_20px_rgba(56,189,248,0.35)] gap-x-2">
-                            Ajouter au panier
+                            Add To Cart
                             <ShoppingCart size={20} />
                         </Button>
                     </div>
@@ -314,7 +319,7 @@ const CustomPackTemplate: React.FC<ProductFormProps> = ({ initialData }) => {
                 {defaultKeyboard ? <>
                     <div className='border p-3 rounded-lg mb-3 border-[hsl(var(--accent))]'>
                         <div className='flex flex-col h-full justify-between'>
-                            <div className='w-full text-center font-bold mb-3'>Clavier</div>
+                            <div className='w-full text-center font-bold mb-3'>Keyboard</div>
 
                             <NormalComp2 item={defaultKeyboard} motherboards={keyboardList} setItem={setDefaultKeyboard} />
 
@@ -328,7 +333,7 @@ const CustomPackTemplate: React.FC<ProductFormProps> = ({ initialData }) => {
                 {defaultMouse ? <>
                     <div className='border p-3 rounded-lg mb-3 border-[hsl(var(--accent))]'>
                         <div className='flex flex-col h-full justify-between'>
-                            <div className='w-full text-center font-bold mb-3'>Souris</div>
+                            <div className='w-full text-center font-bold mb-3'>Mouse</div>
 
                             <NormalComp2 item={defaultMouse} motherboards={MouseList} setItem={setDefaultMouse} />
 
@@ -342,7 +347,7 @@ const CustomPackTemplate: React.FC<ProductFormProps> = ({ initialData }) => {
                 {defaultMousePad ? <>
                     <div className='border p-3 rounded-lg mb-3 border-[hsl(var(--accent))]'>
                         <div className='flex flex-col h-full justify-between'>
-                            <div className='w-full text-center font-bold mb-3'>Tapi</div>
+                            <div className='w-full text-center font-bold mb-3'>Mousepad</div>
 
                             <NormalComp2 item={defaultMousePad} motherboards={MousepadsList} setItem={setDefaultMousePad} />
 
@@ -356,7 +361,7 @@ const CustomPackTemplate: React.FC<ProductFormProps> = ({ initialData }) => {
                 {defaultMics ? <>
                     <div className='border p-3 rounded-lg mb-3 border-[hsl(var(--accent))]'>
                         <div className='flex flex-col h-full justify-between'>
-                            <div className='w-full text-center font-bold mb-3'>Micro</div>
+                            <div className='w-full text-center font-bold mb-3'>Microphone                            </div>
 
                             <NormalComp2 item={defaultMics} motherboards={MicsList} setItem={setDefaultMics} />
 
@@ -370,7 +375,7 @@ const CustomPackTemplate: React.FC<ProductFormProps> = ({ initialData }) => {
                 {defaultHeadset ? <>
                     <div className='border p-3 rounded-lg mb-3 border-[hsl(var(--accent))]'>
                         <div className='flex flex-col h-full justify-between'>
-                            <div className='w-full text-center font-bold mb-3'>Casque</div>
+                            <div className='w-full text-center font-bold mb-3'>Headset</div>
 
                             <NormalComp2 item={defaultHeadset} motherboards={HeadsetsList} setItem={setDefaultHeadset} />
 
@@ -384,7 +389,7 @@ const CustomPackTemplate: React.FC<ProductFormProps> = ({ initialData }) => {
                 {defaultCamera ? <>
                     <div className='border p-3 rounded-lg mb-3 border-[hsl(var(--accent))]'>
                         <div className='flex flex-col h-full justify-between'>
-                            <div className='w-full text-center font-bold mb-3'>Caméra</div>
+                            <div className='w-full text-center font-bold mb-3'>Camera</div>
 
                             <NormalComp2 item={defaultCamera} motherboards={CamerasList} setItem={setDefaultCamera} />
 
@@ -398,7 +403,7 @@ const CustomPackTemplate: React.FC<ProductFormProps> = ({ initialData }) => {
                 {defaultScreen ? <>
                     <div className='border p-3 rounded-lg mb-3 border-[hsl(var(--accent))]'>
                         <div className='flex flex-col h-full justify-between'>
-                            <div className='w-full text-center font-bold mb-3'>Ecran</div>
+                            <div className='w-full text-center font-bold mb-3'>Screen</div>
 
                             <NormalComp2 item={defaultScreen} motherboards={screensList} setItem={setDefaultScreen} />
 
@@ -412,7 +417,7 @@ const CustomPackTemplate: React.FC<ProductFormProps> = ({ initialData }) => {
                 {DefaultSpeaker ? <>
                     <div className='border p-3 rounded-lg mb-3 border-[hsl(var(--accent))]'>
                         <div className='flex flex-col h-full justify-between'>
-                            <div className='w-full text-center font-bold mb-3'>Haut-Parleur</div>
+                            <div className='w-full text-center font-bold mb-3'>Speaker</div>
 
                             <NormalComp2 item={DefaultSpeaker} motherboards={HautparleursList} setItem={setDefaultSpeDefaultSpeaker} />
 
@@ -426,7 +431,7 @@ const CustomPackTemplate: React.FC<ProductFormProps> = ({ initialData }) => {
                 {DefaultManette ? <>
                     <div className='border p-3 rounded-lg mb-3border-[hsl(var(--accent))]'>
                         <div className='flex flex-col h-full justify-between'>
-                            <div className='w-full text-center font-bold mb-3'>Manette</div>
+                            <div className='w-full text-center font-bold mb-3'>Controller</div>
 
                             <NormalComp2 item={DefaultManette} motherboards={ManettesList} setItem={setDefaultSpeDefaultManette} />
 
@@ -440,7 +445,7 @@ const CustomPackTemplate: React.FC<ProductFormProps> = ({ initialData }) => {
                 {DefaultChair ? <>
                     <div className='border p-3 rounded-lg mb-3 border-[hsl(var(--accent))]'>
                         <div className='flex flex-col h-full justify-between'>
-                            <div className='w-full text-center font-bold mb-3'>Chaise</div>
+                            <div className='w-full text-center font-bold mb-3'>Gaming Chair</div>
 
                             <NormalComp2 item={DefaultChair} motherboards={ChaisegamingsList} setItem={setDefaultSpeDefaultChair} />
 

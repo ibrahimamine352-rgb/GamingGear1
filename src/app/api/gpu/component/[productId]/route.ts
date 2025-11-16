@@ -72,6 +72,8 @@ export async function PATCH(
       images,
       isFeatured,
       isArchived,
+      comingSoon,
+      outOfStock,
       GpuBrandId,
       graphiccardNameId,
       gpuArchBrandId,
@@ -152,6 +154,8 @@ export async function PATCH(
         price: price,
         isFeatured: isFeatured,
         isArchived: isArchived,
+        comingSoon,     // include it
+    outOfStock, 
         description,
         categoryId: categoryId,
         stock:stock,

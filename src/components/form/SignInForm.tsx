@@ -1,45 +1,54 @@
-'use client';
+"use client";
 
-import { useForm } from 'react-hook-form';
+import { useForm } from "react-hook-form";
 import {
-  Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
-} from '../ui/form';
-import * as z from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Input } from '../ui/input';
-import { Button } from '../ui/button';
-import Link from 'next/link';
-import GoogleSignInButton from '../custom/GoogleSignInButton';
-import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../ui/form";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import Link from "next/link";
+import GoogleSignInButton from "../custom/GoogleSignInButton";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const FormSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Invalid email'),
-  password: z.string().min(1, 'Password is required').min(8, 'Password must have more than 8 characters'),
+  email: z.string().min(1, "Email is required").email("Invalid email"),
+  password: z
+    .string()
+    .min(1, "Password is required")
+    .min(8, "Password must have more than 8 characters"),
 });
 
-type Props = { asModal?: boolean; onSwitch?: () => void; onSuccess?: () => void }
-const SignInForm = ({ asModal = false, onSwitch, onSuccess }: Props) => {
+type Props = { asModal?: boolean; onSwitch?: () => void; onSuccess?: () => void };
 
+const SignInForm = ({ asModal = false, onSwitch, onSuccess }: Props) => {
   const router = useRouter();
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: "", password: "" },
   });
 
   const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-    const signInData = await signIn('credentials', {
+    const signInData = await signIn("credentials", {
       email: values.email,
       password: values.password,
       redirect: false,
     });
+
     if (signInData?.ok === true) {
       if (asModal && onSuccess) {
-        onSuccess();           // closes modal in Header
+        onSuccess(); // closes modal in Header
       } else {
         router.refresh();
-        router.push('/');      // absolute home
+        router.push("/"); // absolute home
       }
     } else {
       console.log(signInData?.error);
@@ -89,34 +98,42 @@ const SignInForm = ({ asModal = false, onSwitch, onSuccess }: Props) => {
               )}
             />
           </div>
-  
-          <Button className="w-full mt-6 rounded-2xl bg-gradient-to-r from-[#38BDF8] to-[#0EA5E9] text-black font-semibold hover:shadow-[0_0_20px_rgba(56,189,248,0.35)]" type="submit">
+
+          <Button
+            className="w-full mt-6 rounded-2xl bg-gradient-to-r from-[#38BDF8] to-[#0EA5E9] text-black font-semibold hover:shadow-[0_0_20px_rgba(56,189,248,0.35)]"
+            type="submit"
+          >
             Sign in
           </Button>
         </form>
       </Form>
-  
+
       <div className="mx-auto my-4 flex w-full items-center justify-evenly text-muted-foreground before:mr-4 before:block before:h-px before:flex-grow before:bg-border after:ml-4 after:block after:h-px after:flex-grow after:bg-border">
         or
       </div>
-  
+
       <GoogleSignInButton>Sign in with Google</GoogleSignInButton>
-  
+
       <p className="text-center text-sm text-muted-foreground mt-2">
         If you Don&apos;t have an account, please{" "}
         {onSwitch ? (
-          <button type="button" onClick={onSwitch} className="text-[hsl(var(--accent))] underline underline-offset-4">
+          <button
+            type="button"
+            onClick={onSwitch}
+            className="text-[hsl(var(--accent))] underline underline-offset-4"
+          >
             Sign up
           </button>
         ) : (
-          <Link className="text-[hsl(var(--accent))] underline underline-offset-4" href="/sign-up">
-            Sign up
-          </Link>
+          // ⛔ if your sign-up URL is /auth/sign-up, update this:
+          <Link className="text-[hsl(var(--accent))] underline underline-offset-4" href="/auth/sign-up">
+  Sign up
+</Link>
         )}
       </p>
     </>
-  )
-  
+  );
+
   return asModal ? (
     <div className="w-full max-w-md">{Body}</div>
   ) : (

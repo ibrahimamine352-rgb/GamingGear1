@@ -67,14 +67,14 @@ const PcCartItem: React.FC<CartItemProps> = ({
         const item = da as Product;
         
         return <>
-         {filterKey=='motherboard'?(<div className="font-semibold m-2">Carte mére :</div>):<></>}
-         {filterKey=='processor'?(<div className="font-semibold m-2">Processeur :</div>):<></>}
-         {filterKey=='gpu'?(<div className="font-semibold m-2">Carte Graphique :</div>):<></>}
+         {filterKey=='motherboard'?(<div className="font-semibold m-2">Motherboard:</div>):<></>}
+         {filterKey=='processor'?(<div className="font-semibold m-2">Processor:</div>):<></>}
+         {filterKey=='gpu'?(<div className="font-semibold m-2">Graphics card:</div>):<></>}
          {filterKey=='disk'?(<div className="font-semibold m-2">Disque dure :</div>):<></>}
          {filterKey=='power'?(<div className="font-semibold m-2">Bloc d&apos;alimentation :</div>):<></>}
-         {filterKey=='case'?(<div className="font-semibold m-2">Boitier :</div>):<></>}
-         {filterKey=='screen'?(<div className="font-semibold m-2">Ecran :</div>):<></>}
-         {filterKey=='cooling'?(<div className="font-semibold m-2">Refroidisseur CPU :</div>):<></>}
+         {filterKey=='case'?(<div className="font-semibold m-2">Case :</div>):<></>}
+         {filterKey=='screen'?(<div className="font-semibold m-2">Screen :</div>):<></>}
+         {filterKey=='cooling'?(<div className="font-semibold m-2">CPU cooler :</div>):<></>}
         
         
         <It className={'flex py-6 border-b border-border'} item={item} key={item.id} /></>;

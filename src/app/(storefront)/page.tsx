@@ -183,8 +183,9 @@ export default async function Home() {
     dicountPrice:parseInt(item.dicountPrice.toString()),
     category: item.category,
     description:item.description,
-    additionalDetails: item?.additionalDetails
-
+    additionalDetails: item?.additionalDetails,
+    comingSoon: item.comingSoon,                       // <- required by type
+  outOfStock: item.outOfStock,  
   }));
  
 

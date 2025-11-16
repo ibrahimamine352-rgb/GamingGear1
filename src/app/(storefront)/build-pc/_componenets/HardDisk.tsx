@@ -33,6 +33,8 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid'
 import { Menu, Transition } from '@headlessui/react'
 import { Pagination } from '@nextui-org/pagination'
 import { AllProductsCompatibility} from './comps'
+import { useLanguage } from "@/context/language-context";
+import { UI_TEXT } from "@/i18n/ui-text";
 
 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -60,6 +62,8 @@ export const HardDisk = (props: {
   harddiskBrand: Filter
   motherboardId: Product | undefined,
 }) => {
+  const { lang } = useLanguage();
+  const ui = UI_TEXT[lang];
   const [data, setData] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -158,13 +162,13 @@ export const HardDisk = (props: {
   // ✅ Narrow selectedCompatibility once and map safely
   const comp = props.selectedCompatibility?.Compatibility;
   const compatRows = [
-    { key: 'motherboardCompatibility', label: 'Carte mére :' },
-    { key: 'processorCompatibility', label: 'Processeur :' },
-    { key: 'gpuCompatibility', label: 'Carte graphique :' },
-    { key: 'ramCompatibility', label: 'Ram :' },
-    { key: 'hardDiskCompatibility', label: 'Disque dur compatibilité :' },
+    { key: 'motherboardCompatibility', label: 'Motherboard:' },
+    { key: 'processorCompatibility', label: 'Processor:' },
+    { key: 'gpuCompatibility', label: 'Graphics card:' },
+    { key: 'ramCompatibility', label: 'RAM :' },
+    { key: 'hardDiskCompatibility', label: 'Hard drive compatibility:' },
     { key: 'powerCompatibility', label: 'Boîte d’alimentation compatibilité :' },
-    { key: 'caseCompatibility', label: 'Boîtier compatibilité :' },
+    { key: 'caseCompatibility', label: 'Case compatibility:' },
   ] as const;
 
   return (
@@ -179,7 +183,7 @@ export const HardDisk = (props: {
               <Card className="build-selector">
                 <CardHeader>
                   <CardTitle className='text-center'>
-                    <div>Stockage {props.role}</div>
+                    <div>{ui.navStorage} {props.role}</div>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -223,7 +227,7 @@ export const HardDisk = (props: {
                     {/* Compatibilité */}
                     {comp ? (
                       <div className="w-4/5">
-                        <div className='font-bold my-2 text-sm'>Compatibilité:</div>
+                        <div className='font-bold my-2 text-sm'>Compatibility:</div>
                         <div className="text-left grid text-xs max-w-screen-md mx-auto border border-border rounded mb-3 mr-3">
                           {compatRows.map(({ key, label }) => {
                             const item = (comp as any)[key];
@@ -253,8 +257,8 @@ export const HardDisk = (props: {
                         >
                           <Trash className="h-4 w-4" />
                         </Button>
-                        <Button onClick={() => steOpenDialog(!openDialog)} className="btn-primary-blue">Changer</Button>
-                        <a href="zz" className='underline mt-2 text-[#007bff]' target='_blank'>Voir en store</a>
+                        <Button onClick={() => steOpenDialog(!openDialog)} className="btn-primary-blue">{ui.builderBtnChange}</Button>
+                        <a href="zz" className='underline mt-2 text-[#007bff]' target='_blank'>{ui.builderLinkSeeInStore}</a>
                       </div>
                     </div>
                   </div>
@@ -288,7 +292,7 @@ export const HardDisk = (props: {
           <DialogHeader className="sticky top-0 z-10 bg-[#101218] border-b border-border px-4 py-3">
             <DialogTitle>
               <div className='flex justify-between items-center'>
-                <h1>Stockage store</h1>
+                <h1>Storage store</h1>
                 <Menu as="div" className="relative inline-block text-left">
                   <div className='flex'>
                     <Menu.Button className="group inline-flex items-center text-sm font-medium">
@@ -360,7 +364,7 @@ export const HardDisk = (props: {
                           checked={compatible}
                           onChange={(e) => setcompatible(e.target.checked)}
                         />
-                        Compatible avec Carte mère
+                        Compatible with Motherboard
                       </label>
                     </div>
                   ) : null}
@@ -400,10 +404,10 @@ export const HardDisk = (props: {
                 </div>
               ) : (
                 <>
-                  {data.length === 0 && <p className="text-[#a6adc8]">No results found.</p>}
+                  {data.length === 0 && <p className="text-[#a6adc8]">{ui.builderNoResults}.</p>}
                   {data.length > 0 && (
                     <>
-                      <div className='text-xs text-[#a6adc8] mb-2'>({totalPages}) Résultats en {searchTime.toFixed(2)} seconds</div>
+                      <div className='text-xs text-[#a6adc8] mb-2'>({totalPages}) {ui.builderResultsSummary(totalPages, searchTime)}</div>
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                         {data.map((item, key) => (
                           <div key={key} className={`bg-[#12141b] hover:bg-[#101218] transition flex flex-col justify-between group cursor-pointer rounded-xl border border-white/5 p-3 space-y-1 ${checkcompatibility(item) ? 'ring-1 ring-[#00e0ff]/50' : 'ring-1 ring-red-500/40'}`}>
@@ -433,7 +437,7 @@ export const HardDisk = (props: {
                                 onClick={() => { props.setProcessorId(item); steOpenDialog(false) }}
                                 className='w-full btn-primary-blue'
                               >
-                                Ajouter
+                                {ui.builderBtnAdd}
                               </Button>
                             </div>
                           </div>
@@ -450,12 +454,13 @@ export const HardDisk = (props: {
           <DialogFooter className="sticky bottom-0 bg-[#101218] border-t border-border px-4 py-3">
             <div className='grid grid-cols-12 gap-4 w-full items-center'>
               <div className='col-span-12 md:col-span-4 lg:col-span-3'>
-                <Button
-                  className='w-full px-6 py-2 bg-[#00a2ff] hover:bg-[#0092e6] text-foreground'
-                  onClick={() => { setCurrentPage(0); fetchData(); }}
-                >
-                  Filter
-                </Button>
+              <Button
+  className='w-full px-6 py-2 bg-[#00a2ff] hover:bg-[#0092e6] text-foreground'
+  onClick={() => { setCurrentPage(0); fetchData(); }}
+>
+  {ui.filterButton}
+</Button>
+
               </div>
 
               <div className='col-span-12 md:col-span-8 lg:col-span-9 flex justify-end'>

@@ -48,7 +48,7 @@ const FormSchema = z
   const router = useRouter();
 
   const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-    const response = await fetch('api/user', {
+    const response = await fetch('/api/user', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -61,7 +61,7 @@ const FormSchema = z
       if (asModal && onSuccess) {
         onSuccess();           // Header can switch to signin or just close
       } else {
-      router.push('/sign-in');
+      router.push('/auth/sign-in');
     }
     } else {
       console.error('Registration failed');
@@ -130,7 +130,7 @@ const FormSchema = z
         or
       </div>
   
-      <GoogleSignInButton>Sign up with Google</GoogleSignInButton>
+ <GoogleSignInButton>Sign up with Google</GoogleSignInButton> 
   
       <p className="text-center text-sm text-muted-foreground mt-2">
         Already have an account?{" "}
@@ -139,7 +139,7 @@ const FormSchema = z
             Sign in
           </button>
         ) : (
-          <Link className="text-[hsl(var(--accent))] underline underline-offset-4" href="/sign-in">
+          <Link className="text-[hsl(var(--accent))] underline underline-offset-4" href="/auth/sign-in">
             Sign in
           </Link>
         )}

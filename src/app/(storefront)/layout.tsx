@@ -4,14 +4,11 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { ToastProvider } from '@/providers/toast-provider';
 import Header from '@/components/front/Header';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-const inter = Inter({ subsets: ['latin'] });
 import './globals.css'
 import prismadb from '@/lib/prismadb';
 import Footer from '@/components/front/Footer';
 import { LocalCathegoryCollection } from '../(admin)/admin/(routes)/mainpage/components/Navbar';
-
+const inter = Inter({ subsets: ['latin'] });
 const keywords = [
   // Arabic
   "أجهزة كمبيوتر",
@@ -140,9 +137,9 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
+  
 
-  const cathegories = await prismadb.category.findMany({
+  const cathegories =await prismadb.category.findMany({
     where: { products: { some: {} } },
     include: {
       _count: { select: { products: { where: { category: {} } } } },
@@ -201,8 +198,7 @@ export default async function RootLayout({
 
   return (
     <>
-      <Provider>
-  <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      
     <div className="h-[var(--header-h,80px)]" aria-hidden="true" />
 
     {/* PAGE WRAPPER */}
@@ -215,16 +211,15 @@ export default async function RootLayout({
     {/* HEADER OUTSIDE OverlayS (paints above everything) */}
     <div className="fixed inset-x-0 top-0 z-[2147483647] isolate pointer-events-auto">
       <Header
-        linkMobile={linkMobile}
-        noscategyMobile={noscategyMobile}
-        links={links}
-        noscategy={noscategy}
-        session={session}
-        cathegories={cathegories}
+         linkMobile={linkMobile}
+         noscategyMobile={noscategyMobile}
+         links={links}
+         noscategy={noscategy}
+         cathegories={cathegories}
       />
     </div>
-   </ThemeProvider>
-       </Provider>
+   
+       
 
     </>
   );

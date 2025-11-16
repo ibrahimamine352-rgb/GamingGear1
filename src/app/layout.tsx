@@ -8,9 +8,10 @@ import Provider from "@/components/custom/Provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import ClientProviders from "./ClientProviders";
 
+import { LanguageProvider } from "@/context/language-context";
 const inter = Inter({ subsets: ["latin"] });
-
 export const metadata: Metadata = {
   title: "Gaming Gear TN",
   description: "Your exclusive destination for high-end PCs and gaming peripherals",
@@ -36,13 +37,17 @@ export default async function RootLayout({
   return (
     <html lang="en" className="dark">
       {/* data-auth just prevents "unused variable" errors; harmless to keep */}
-      <body data-auth={session ? "1" : "0"} className={`${inter.className} bg-background text-foreground`}>
-        <Provider>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-            {children}
-          </ThemeProvider>
-        </Provider>
+      <body className={`${inter.className} bg-background text-foreground`}>
+      <ClientProviders>
+  <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+    <LanguageProvider>
+      {children}
+    </LanguageProvider>
+  </ThemeProvider>
+  </ClientProviders>
       </body>
     </html>
+    
   );
+  
 }

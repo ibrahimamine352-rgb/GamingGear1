@@ -23,6 +23,8 @@ const formSchema = z.object({
   categoryId: z.string().min(1),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
+  comingSoon: z.boolean().default(false).optional(),
+  outOfStock: z.boolean().default(false).optional(),
   manufacturerId: z.string().min(1),
   ramslotsId: z.string().min(1),
   chipsetId: z.string().min(1),
@@ -143,20 +145,28 @@ export const PopFormModal: React.FC<PopUpProps> = ({
               <FormLabel>{label}</FormLabel>
               <div className="md:grid md:grid-cols-2 align-top items-center gap-8">
                 <div>
-                  <Select disabled={loading} onValueChange={ field.onChange } value={field.value ? String(field.value) : ''} defaultValue={field.value ? String(field.value) : ''}>
-                    <FormControl>
-                      <SelectTrigger>
-                      <SelectValue defaultValue={field.value ? String(field.value) : ''} placeholder={'Select a ' + label} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {data.map((category) => (
-                     <SelectItem key={category.id} value={category.id}>
-                     {category[fieldaAfficher as keyof typeof category.TypeOf]}
-                   </SelectItem>    ))}
-                    </SelectContent>
-                  </Select>
-          
+                <Select
+  value={form1.getValues(formLab as any) as string}
+  onValueChange={(v) => form1.setValue(formLab as any, v)}
+>
+  <FormControl>
+    <SelectTrigger>
+      <SelectValue placeholder={`Select ${String(formCControlName)}`} />
+    </SelectTrigger>
+  </FormControl>
+
+  {/* Scrollable menu */}
+  <SelectContent position="popper" sideOffset={4} className="max-h-64 p-0">
+    <div className="max-h-64 overflow-y-auto">
+      {data.map((row: any) => (
+        <SelectItem key={row.id} value={row.id}>
+          {row[String(fieldaAfficher)]}
+        </SelectItem>
+      ))}
+    </div>
+  </SelectContent>
+</Select>
+
           
                   <FormMessage />
                 </div>

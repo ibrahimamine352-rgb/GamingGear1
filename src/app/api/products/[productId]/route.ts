@@ -64,7 +64,9 @@ export async function PATCH(
 
     const body = await req.json();
 
-    const { name, price, categoryId,  images, isFeatured, isArchived ,description,stock,additionalDetails} = body;
+    const { name, price, categoryId,  images, isFeatured, isArchived ,comingSoon,
+      outOfStock,
+      description,stock,additionalDetails} = body;
 
  
 
@@ -108,7 +110,9 @@ export async function PATCH(
           deleteMany: {},
         },
         isFeatured,
-        isArchived,
+        isArchived,comingSoon,
+        outOfStock,
+        
       },
     });
 

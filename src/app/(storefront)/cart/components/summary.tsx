@@ -9,12 +9,14 @@ import useCart from "@/hooks/use-cart";
 import { toast } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import Adressdetails from "./adress-details";
-
+import { useLanguage } from "@/context/language-context";
+import { UI_TEXT } from "@/i18n/ui-text";
 const Summary = () => {
   const searchParams = useSearchParams();
   const items = useCart((state) => state.items);
   const removeAll = useCart((state) => state.removeAll);
-
+  const { lang } = useLanguage();
+  const ui = UI_TEXT[lang];
   useEffect(() => {
     if (searchParams.get('success')) {
       toast.success('Payment completed.');
@@ -44,11 +46,11 @@ const Summary = () => {
       className="mt-16 rounded-2xl border border-border bg-card backdrop-blur-sm shadow-[0_0_0_1px_rgba(255,255,255,0.02)] glass-card px-4 py-6 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8"
     >
       <h2 className="text-lg font-medium text-foreground">
-        Order Summary
+      {ui.cartSummaryTitle}
       </h2>
       <div className="mt-6 space-y-4">
         <div className="flex items-center justify-between border-t border-border pt-4">
-          <div className="text-base font-medium text-foreground">Total</div>
+          <div className="text-base font-medium text-foreground">{ui.cartTotalLabel}</div>
           <div className="text-2xl font-bold text-[hsl(var(--accent))]">
             <Currency value={totalPrice} />
           </div>

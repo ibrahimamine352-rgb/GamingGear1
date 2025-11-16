@@ -37,7 +37,8 @@ import { Menu, Transition } from '@headlessui/react'
 import { Pagination } from '@nextui-org/pagination'
 import { AllProductsCompatibility } from './comps'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-
+import { useLanguage } from "@/context/language-context";
+import { UI_TEXT } from "@/i18n/ui-text";
 type checkItem = { id: number, searchKey: string }
 
 function classNames(...classes: (string | boolean)[]): string {
@@ -61,7 +62,10 @@ export const Case = (props: {
   pCcaseCaseformat: Filter
   pCcaseBrand: Filter
   motherboardId: Product | undefined,
+  
 }) => {
+  const { lang } = useLanguage();
+  const ui = UI_TEXT[lang];
   const [data, setData] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -161,8 +165,8 @@ export const Case = (props: {
               <Card className="build-selector">
                 <CardHeader>
                   <CardTitle className='text-center'>
-                    Boitier
-                    <p className='text-xs text-muted-foreground p-1'>(*Obligatoire)</p>
+                  {ui.navCases}
+                    <p className='text-xs text-muted-foreground p-1'>{ui.builderRequiredTag}</p>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -202,46 +206,46 @@ export const Case = (props: {
                       {/* Compatibilité */}
                       {props.selectedCompatibility ? (
                         <div className="w-4/5">
-                          <div className='font-bold my-2 text-sm'>Compatibilité:</div>
+                          <div className='font-bold my-2 text-sm'>Compatibility:</div>
                           <div className="text-left grid text-xs max-w-screen-md mx-auto border border-gray-300 rounded mb-3 mr-3">
                             <div className="p-1 pl-3 border-b border-gray-300 hover:dark:bg-slate-950 hover:bg-amber-50 hover:bg-opacity-40 hover:font-bold cursor-pointer">
-                              <p className={`mb-1 ${props.selectedCompatibility.Compatibility.motherboardCompatibility.error ? 'text-red-600' : 'text-primary'}`}>Carte mére :</p>
+                              <p className={`mb-1 ${props.selectedCompatibility.Compatibility.motherboardCompatibility.error ? 'text-red-600' : 'text-primary'}`}>Motherboard :</p>
                               <p className={props.selectedCompatibility.Compatibility.motherboardCompatibility.error ? 'text-red-600' : 'text-primary'}>
                                 {props.selectedCompatibility.Compatibility.motherboardCompatibility.message}
                               </p>
                             </div>
                             <div className="p-1 pl-3 border-b border-gray-300 hover:dark:bg-slate-950 hover:bg-amber-50 hover:bg-opacity-40 hover:font-bold cursor-pointer">
-                              <p className={`mb-1 ${props.selectedCompatibility.Compatibility.processorCompatibility.error ? 'text-red-600' : 'text-primary'}`}>Processeur :</p>
+                              <p className={`mb-1 ${props.selectedCompatibility.Compatibility.processorCompatibility.error ? 'text-red-600' : 'text-primary'}`}>Processor :</p>
                               <p className={props.selectedCompatibility.Compatibility.processorCompatibility.error ? 'text-red-600' : 'text-primary'}>
                                 {props.selectedCompatibility.Compatibility.processorCompatibility.message}
                               </p>
                             </div>
                             <div className="p-1 pl-3 border-b border-gray-300 hover:dark:bg-slate-950 hover:bg-amber-50 hover:bg-opacity-40 hover:font-bold cursor-pointer">
-                              <p className={`mb-1 ${props.selectedCompatibility.Compatibility.gpuCompatibility.error ? 'text-red-600' : 'text-primary'}`}>Carte graphique :</p>
+                              <p className={`mb-1 ${props.selectedCompatibility.Compatibility.gpuCompatibility.error ? 'text-red-600' : 'text-primary'}`}>Graphics Card :</p>
                               <p className={props.selectedCompatibility.Compatibility.gpuCompatibility.error ? 'text-red-600' : 'text-primary'}>
                                 {props.selectedCompatibility.Compatibility.gpuCompatibility.message}
                               </p>
                             </div>
                             <div className="p-1 pl-3 border-b border-gray-300 hover:dark:bg-slate-950 hover:bg-amber-50 hover:bg-opacity-40 hover:font-bold cursor-pointer">
-                              <p className={`mb-1 ${props.selectedCompatibility.Compatibility.ramCompatibility.error ? 'text-red-600' : 'text-primary'}`}>Ram :</p>
+                              <p className={`mb-1 ${props.selectedCompatibility.Compatibility.ramCompatibility.error ? 'text-red-600' : 'text-primary'}`}>RAM :</p>
                               <p className={props.selectedCompatibility.Compatibility.ramCompatibility.error ? 'text-red-600' : 'text-primary'}>
                                 {props.selectedCompatibility.Compatibility.ramCompatibility.message}
                               </p>
                             </div>
                             <div className="p-1 pl-3 border-b border-gray-300 hover:dark:bg-slate-950 hover:bg-amber-50 hover:bg-opacity-40 hover:font-bold cursor-pointer">
-                              <p className={`mb-1 ${props.selectedCompatibility.Compatibility.hardDiskCompatibility.error ? 'text-red-600' : 'text-primary'}`}>Disque dur compatibilité :</p>
+                              <p className={`mb-1 ${props.selectedCompatibility.Compatibility.hardDiskCompatibility.error ? 'text-red-600' : 'text-primary'}`}>Hard drive compatibility: </p>
                               <p className={props.selectedCompatibility.Compatibility.hardDiskCompatibility.error ? 'text-red-600' : 'text-primary'}>
                                 {props.selectedCompatibility.Compatibility.hardDiskCompatibility.message}
                               </p>
                             </div>
                             <div className="p-1 pl-3 border-b border-gray-300 hover:dark:bg-slate-950 hover:bg-amber-50 hover:bg-opacity-40 hover:font-bold cursor-pointer">
-                              <p className={`mb-1 ${props.selectedCompatibility.Compatibility.powerCompatibility.error ? 'text-red-600' : 'text-primary'}`}>Boîte d&apos;alimentation compatibilité :</p>
+                              <p className={`mb-1 ${props.selectedCompatibility.Compatibility.powerCompatibility.error ? 'text-red-600' : 'text-primary'}`}>Power supply box compatibility:</p>
                               <p className={props.selectedCompatibility.Compatibility.powerCompatibility.error ? 'text-red-600' : 'text-primary'}>
                                 {props.selectedCompatibility.Compatibility.powerCompatibility.message}
                               </p>
                             </div>
                             <div className="p-1 pl-3 hover:dark:bg-slate-950 hover:bg-amber-50 hover:bg-opacity-40 hover:font-bold cursor-pointer">
-                              <p className={`mb-1 ${props.selectedCompatibility.Compatibility.caseCompatibility.error ? 'text-red-600' : 'text-primary'}`}>Boîtier compatibilité :</p>
+                              <p className={`mb-1 ${props.selectedCompatibility.Compatibility.caseCompatibility.error ? 'text-red-600' : 'text-primary'}`}>Case compatibility:</p>
                               <p className={props.selectedCompatibility.Compatibility.caseCompatibility.error ? 'text-red-600' : 'text-primary'}>
                                 {props.selectedCompatibility.Compatibility.caseCompatibility.message}
                               </p>
@@ -265,9 +269,10 @@ export const Case = (props: {
                           >
                             <Trash className="h-4 w-4" />
                           </Button>
-                          <Button onClick={() => steOpenDialog(true)} className="btn-primary-blue">Changer</Button>
+                          <Button onClick={() => steOpenDialog(true)} className="btn-primary-blue">{ui.builderBtnChange}</Button>
                           <a href="zz" className='underline mt-2 text-[#007bff]' target='_blank'>
-                            Voir en store
+                          {ui.builderLinkSeeInStore}
+
                           </a>
                         </div>
                       </div>
@@ -305,7 +310,7 @@ export const Case = (props: {
             <DialogHeader className="sticky top-0 z-10 bg-card border-b border-border px-4 py-3">
               <DialogTitle>
                 <div className='flex justify-between items-center'>
-                  <h1>Boîtier store</h1>
+                  <h1>Case store</h1>
                   <Menu as="div" className="relative inline-block text-left">
                     <div className='flex'>
                       <Menu.Button className="group inline-flex justify-center text-sm font-medium text-foreground">
@@ -378,7 +383,7 @@ export const Case = (props: {
                             checked={compatible}
                             onChange={(e) => setcompatible(e.target.checked)}
                           />
-                          <label className='text-sm'>Compatible avec Carte mére</label>
+                          <label className='text-sm'>Compatible with Motherboard  </label>
                         </div>
                       </div>
                     ) : null}
@@ -419,11 +424,11 @@ export const Case = (props: {
                 ) : (
                   <>
                     {loading && <p>Loading...</p>}
-                    {!loading && data && data.length === 0 && <p>No results found.</p>}
+                    {!loading && data && data.length === 0 && <p>{ui.builderNoResults}.</p>}
 
                     {!loading && data.length > 0 && (
                       <>
-                        <div className='text-sm text-muted-foreground'>({totalPages}) Résultats en {searchTime.toFixed(2)} seconds</div>
+                        <div className='text-sm text-muted-foreground'>({totalPages}) {ui.builderResultsSummary(totalPages, searchTime)}</div>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                           {data.map((item, key) => (
                             <div key={key} className={`bg-[#12141b] hover:bg-[#101218] transition flex flex-col justify-between group cursor-pointer rounded-xl border border-white/5 p-3 space-y-1 ${
@@ -449,7 +454,7 @@ export const Case = (props: {
                                   onClick={() => { props.setProcessorId(item); steOpenDialog(false) }}
                                   className='w-full btn-primary-blue'
                                 >
-                                  Ajouter
+                                 {ui.builderBtnAdd}
                                 </Button>
                               </div>
                             </div>
@@ -466,12 +471,12 @@ export const Case = (props: {
             <DialogFooter className="sticky bottom-0 bg-[#101218] border-t border-border px-4 py-3">
             <div className='grid grid-cols-12 gap-4 w-full items-center'>
               <div className='col-span-12 md:col-span-4 lg:col-span-3'>
-                <Button
-                  className='w-full px-6 py-2 bg-[#00a2ff] hover:bg-[#0092e6] text-foreground'
-                  onClick={() => { setCurrentPage(0); fetchData(); }}
-                >
-                  Filter
-                </Button>
+              <Button
+  className='w-full px-6 py-2 bg-[#00a2ff] hover:bg-[#0092e6] text-foreground'
+  onClick={() => { setCurrentPage(0); fetchData(); }}>
+     {ui.filterButton}
+</Button>
+
               </div>
 
                 <div className='col-span-12 md:col-span-8 lg:col-span-9 flex justify-end'>

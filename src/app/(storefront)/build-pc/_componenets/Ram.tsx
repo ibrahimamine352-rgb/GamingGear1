@@ -26,6 +26,8 @@ import { Pagination } from '@nextui-org/pagination'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Trash } from 'lucide-react'
 import { toast } from "react-hot-toast"
+import { useLanguage } from "@/context/language-context";
+import { UI_TEXT } from "@/i18n/ui-text";
 
 import { AllProductsCompatibility } from './comps'
 import { MemoryFrequency, MemoryNumber, MemoryType } from '@prisma/client'
@@ -75,6 +77,8 @@ type YourComponentProps = {
 }
 
 export const Ram: React.FC<YourComponentProps> = (props) => {
+  const { lang } = useLanguage();
+  const ui = UI_TEXT[lang];
   const [data, setData] = useState<Memory[]>([])
   const [currentPage, setCurrentPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
@@ -178,7 +182,7 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
         ? { message: 'Compatible', error: false }
         : { message: messages.join(""), error: true }
     } else {
-      updates['ramCompatibility'] = { message: 'Veuillez sélectionner au moins une barrette RAM', error: true }
+      updates['ramCompatibility'] = { message: 'Please select at least one RAM module', error: true }
     }
     props.setCompatibility(updates)
   }, [props.rams, props.motherboardId, props.ramSlotType, props.setCompatibility])
@@ -234,7 +238,7 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
         if (props.rams.filter((e) => e === null).length >= 2) {
           updatewithremove2case(index, newValue); toast.success('Ce produit a 2 barrettes RAM')
         } else {
-          toast.error('Ce produit a 2 barrettes RAM, veuillez libérer un autre emplacement RAM.1')
+          toast.error('This product has 2 RAM slots, please free up another RAM slot.1')
         }
       } else { updateCase(index, newValue) }
     } else {
@@ -247,7 +251,7 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
           updateCase(index, newValue)
         } else {
           if (!is2caseProduct(prvprod) && !is2caseProduct(newValue)) updateCase(index, newValue)
-          else toast.error('Ce produit a 2 barrettes RAM, veuillez libérer un autre emplacement RAM.2')
+          else toast.error('This product has 2 RAM slots, please free up another RAM slot.2')
         }
       }
     }
@@ -276,7 +280,7 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
 
   const ramCompatibility = (mem: Memory, index: number) => {
     let comp = false
-    let message = "Veuillez sélectionner au moins une barrette RAM"
+    let message = "Please select at least one RAM module"
     const motherboardId = props.motherboardId
     if (motherboardId) {
       const MProfiles = props.profiles.filter((e) => e.motherboards.find((ee) => ee.productId == motherboardId.id))
@@ -306,8 +310,8 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
                   <Card className="build-selector">
                     <CardHeader>
                       <CardTitle className='text-center'>
-                        Ram
-                        <p className='text-xs text-muted-foreground p-1'>(*Obligatoire)</p>
+                      {ui.navRam}
+                        <p className='text-xs text-muted-foreground p-1'>{ui.builderRequiredTag}</p>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -347,11 +351,11 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
 
                         {props.selectedCompatibility ? (
                           <div className="w-4/5">
-                            <div className='font-bold my-2 text-sm'>Compatibilité:</div>
+                            <div className='font-bold my-2 text-sm'>Compatibility:</div>
                             <div className="text-left grid text-xs max-w-screen-md mx-auto border border-border rounded mb-3 mr-3">
                               <div className="p-2 pl-3 border-b border-border hover:bg-[hsl(var(--card)/0.08)] hover:font-bold cursor-pointer">
                                 <p className={`mb-1 ${props.selectedCompatibility.Compatibility.processorCompatibility.error ? 'text-red-400' : 'text-primary'}`}>
-                                  Processeur :
+                                  Processor:
                                 </p>
                                 <p className={props.selectedCompatibility.Compatibility.processorCompatibility.error ? 'text-red-400' : 'text-primary'}>
                                   {props.selectedCompatibility.Compatibility.processorCompatibility.message}
@@ -367,7 +371,8 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
                               </div>
                               <div className="p-2 pl-3 border-b border-border hover:bg-[hsl(var(--card)/0.08)] hover:font-bold cursor-pointer">
                                 <p className={`mb-1 ${props.selectedCompatibility.Compatibility.hardDiskCompatibility.error ? 'text-red-400' : 'text-primary'}`}>
-                                  Disque dur compatibilité :
+                                  Hard drive compatibility:
+
                                 </p>
                                 <p className={props.selectedCompatibility.Compatibility.hardDiskCompatibility.error ? 'text-red-400' : 'text-primary'}>
                                   {props.selectedCompatibility.Compatibility.hardDiskCompatibility.message}
@@ -375,7 +380,8 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
                               </div>
                               <div className="p-2 pl-3 border-b border-border hover:bg-[hsl(var(--card)/0.08)] hover:font-bold cursor-pointer">
                                 <p className={`mb-1 ${props.selectedCompatibility.Compatibility.powerCompatibility.error ? 'text-red-400' : 'text-primary'}`}>
-                                  Boîte d&apos;alimentation compatibilité :
+                                  Power supply box compatibility:
+
                                 </p>
                                 <p className={props.selectedCompatibility.Compatibility.powerCompatibility.error ? 'text-red-400' : 'text-primary'}>
                                   {props.selectedCompatibility.Compatibility.powerCompatibility.message}
@@ -383,7 +389,8 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
                               </div>
                               <div className="p-2 pl-3 hover:bg-card/70 hover:font-bold cursor-pointer">
                                 <p className={`mb-1 ${props.selectedCompatibility.Compatibility.caseCompatibility.error ? 'text-red-400' : 'text-primary'}`}>
-                                  Boîtier compatibilité :
+                                  Case compatibility:
+
                                 </p>
                                 <p className={props.selectedCompatibility.Compatibility.caseCompatibility.error ? 'text-red-400' : 'text-primary'}>
                                   {props.selectedCompatibility.Compatibility.caseCompatibility.message}
@@ -402,10 +409,10 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
                               <Trash className="h-4 w-4" />
                             </Button>
                             <Button onClick={() => steOpenDialog(true)}>
-                              Changer
+                              {ui.builderBtnChange}
                             </Button>
                             <a href="zz" className='underline mt-2 text-[#00e0ff]' target='_blank'>
-                              Voir en store
+                            {ui.builderLinkSeeInStore}
                             </a>
                           </div>
                         </div>
@@ -435,7 +442,7 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
                         <CardTitle className='text-center'>
                           Emplacement Ram ({k + 1})
                           {props.rams.findIndex((e) => e !== null) != -1 ? null : (
-                            <p className='text-xs text-muted-foreground p-1'>(*Obligatoire au moin 1)</p>
+                            <p className='text-xs text-muted-foreground p-1'>{ui.builderRequiredTag}</p>
                           )}
                         </CardTitle>
                       </CardHeader>
@@ -472,7 +479,7 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
                   <Card className="lg:w-4/5 w-full m-3 build-container">
                     <CardContent className='p-0 w-full h-full'>
                       <div className='p-3 font-semibold text-foreground'>
-                        {props.motherboardId ? <>Carte mére choisi accepte ( {props.ramSlotNumber} {props.ramSlotType} ) barette Ram</> : null}
+                        {props.motherboardId ? <>The chosen motherboard has been accepted. ( {props.ramSlotNumber} {props.ramSlotType} ) barette Ram</> : null}
                       </div>
 
                       {prod ? (
@@ -502,11 +509,11 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
 
                           {props.selectedCompatibility ? (
                             <div className="w-4/5">
-                              <div className='font-bold my-2 text-sm'>Compatibilité:</div>
+                              <div className='font-bold my-2 text-sm'>Compatibility:</div>
                               <div className="text-left grid text-xs max-w-screen-md mx-auto border border-border rounded mb-3 mr-3">
                                 <div className="p-2 pl-3 border-b border-border hover:bg-[hsl(var(--card)/0.08)] hover:font-bold cursor-pointer">
                                   <p className={`mb-1 ${props.selectedCompatibility.Compatibility.processorCompatibility.error ? 'text-red-400' : 'text-primary'}`}>
-                                    Processeur :
+                                    Processor:
                                   </p>
                                   <p className={props.selectedCompatibility.Compatibility.processorCompatibility.error ? 'text-red-400' : 'text-primary'}>
                                     {props.selectedCompatibility.Compatibility.processorCompatibility.message}
@@ -524,7 +531,8 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
 
                                 <div className="p-2 pl-3 border-b border-border hover:bg-[hsl(var(--card)/0.08)] hover:font-bold cursor-pointer">
                                   <p className={`mb-1 ${props.selectedCompatibility.Compatibility.hardDiskCompatibility.error ? 'text-red-400' : 'text-primary'}`}>
-                                    Disque dur compatibilité :
+                                    Hard drive compatibility:
+
                                   </p>
                                   <p className={props.selectedCompatibility.Compatibility.hardDiskCompatibility.error ? 'text-red-400' : 'text-primary'}>
                                     {props.selectedCompatibility.Compatibility.hardDiskCompatibility.message}
@@ -533,7 +541,8 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
 
                                 <div className="p-2 pl-3 border-b border-border hover:bg-[hsl(var(--card)/0.08)] hover:font-bold cursor-pointer">
                                   <p className={`mb-1 ${props.selectedCompatibility.Compatibility.powerCompatibility.error ? 'text-red-400' : 'text-primary'}`}>
-                                    Boîte d&apos;alimentation compatibilité :
+                                    Power supply box compatibility:
+
                                   </p>
                                   <p className={props.selectedCompatibility.Compatibility.powerCompatibility.error ? 'text-red-400' : 'text-primary'}>
                                     {props.selectedCompatibility.Compatibility.powerCompatibility.message}
@@ -542,7 +551,8 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
 
                                 <div className="p-2 pl-3 hover:bg-card/70 hover:font-bold cursor-pointer">
                                   <p className={`mb-1 ${props.selectedCompatibility.Compatibility.caseCompatibility.error ? 'text-red-400' : 'text-primary'}`}>
-                                    Boîtier compatibilité :
+                                    Case compatibility:
+
                                   </p>
                                   <p className={props.selectedCompatibility.Compatibility.caseCompatibility.error ? 'text-red-400' : 'text-primary'}>
                                     {props.selectedCompatibility.Compatibility.caseCompatibility.message}
@@ -561,10 +571,10 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
                                 <Trash className="h-4 w-4" />
                               </Button>
                               <Button onClick={() => steOpenDialog(true)} >
-                                Changer
+                                {ui.builderBtnChange}
                               </Button>
                               <a href="zz" className='underline mt-2 text-[#00e0ff]' target='_blank'>
-                                Voir en store
+                              {ui.builderLinkSeeInStore}
                               </a>
                             </div>
                           </div>
@@ -602,7 +612,7 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
           <DialogHeader className="sticky top-0 z-10 bg-[#101218] border-b border-border px-4 py-3">
             <DialogTitle>
               <div className='flex justify-between items-center'>
-                <h1>Barette Ram store</h1>
+                <h1>RAM module store</h1>
                 <Menu as="div" className="relative inline-block text-left">
                   <div className='flex'>
                     <Menu.Button className="group inline-flex items-center text-sm font-medium">
@@ -674,7 +684,7 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
                           checked={compatible}
                           onChange={(e) => setcompatible(e.target.checked)}
                         />
-                        Compatible avec Carte mére
+                        Compatible with Motherboard
                       </label>
                     </div>
                   ) : null}
@@ -714,10 +724,10 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
                 </div>
               ) : (
                 <>
-                  {data.length === 0 && <p className="text-[#a6adc8]">No results found.</p>}
+                  {data.length === 0 && <p className="text-[#a6adc8]">{ui.builderNoResults}.</p>}
                   {data.length > 0 && (
                     <>
-                      <div className='text-xs text-[#a6adc8] mb-2'>({totalPages}) Résultats en {searchTime.toFixed(2)} seconds</div>
+                      <div className='text-xs text-[#a6adc8] mb-2'>({totalPages}) {ui.builderResultsSummary(totalPages, searchTime)}</div>
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                         {data.map((item, key) => (
                           <div
@@ -727,7 +737,7 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
                             {/* Recommended badge */}
                             {extractNumber(item.memories[0].frequency.name) === recommendedram && (
                               <span className="bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] px-2 py-0.5 rounded-full text-xs font-semibold w-fit">
-                                Recommandé par AI
+                                Recommended by AI
                               </span>
                             )}
 
@@ -758,7 +768,7 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
                                 onClick={() => { updateElementAtIndex(openedramSlot, item); steOpenDialog(false) }}
                                 className='w-full btn-primary-blue'
                               >
-                                {item.stock == 0 ? 'Hors Stock' : 'Ajouter'}
+                                {item.stock == 0 ? 'Hors Stock' : ui.builderBtnAdd}
                               </Button>
                             </div>
                           </div>
@@ -775,12 +785,13 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
           <DialogFooter className="sticky bottom-0 bg-[#101218] border-t border-border px-4 py-3">
             <div className='grid grid-cols-12 gap-4 w-full items-center'>
               <div className='col-span-12 md:col-span-4 lg:col-span-3'>
-                <Button
-                  className='w-full px-6 py-2 bg-[#00a2ff] hover:bg-[#0092e6] text-foreground'
-                  onClick={() => { setCurrentPage(0); fetchData(); }}
-                >
-                  Filter
-                </Button>
+              <Button
+  className='w-full px-6 py-2 bg-[#00a2ff] hover:bg-[#0092e6] text-foreground'
+  onClick={() => { setCurrentPage(0); fetchData(); }}
+>
+  {ui.filterButton}
+</Button>
+
               </div>
 
               <div className='col-span-12 md:col-span-8 lg:col-span-9 flex justify-end'>

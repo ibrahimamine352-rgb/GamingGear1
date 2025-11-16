@@ -21,6 +21,8 @@ export async function POST(
       images,
       isFeatured,
       isArchived,
+      comingSoon,
+      outOfStock,
       GpuBrandId,
       graphiccardNameId,
       gpuArchBrandId,
@@ -69,6 +71,8 @@ export async function POST(
     price: price,
     isFeatured: isFeatured,
     isArchived: isArchived,
+    comingSoon,      // include it
+     outOfStock,  
     description:description,
     categoryId: categoryId,
     stock:stock,

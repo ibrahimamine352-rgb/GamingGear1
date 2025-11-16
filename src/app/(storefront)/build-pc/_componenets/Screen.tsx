@@ -22,6 +22,8 @@ import { Search } from '@/components/ui/search'
 import Container from '@/components/ui/container'
 import Skeleton from '@/components/ui/skeleton'
 import SearchComponent from '@/components/search-filters/motherboard/motherboard-search'
+import { useLanguage } from "@/context/language-context";
+import { UI_TEXT } from "@/i18n/ui-text";
 
 import { Filter, ProfileType, filterItem } from '../page'
 import ProductCard from '@/components/ui/product-card'
@@ -67,6 +69,8 @@ export const Screen = (props: {
   resolution: Filter
   motherboardId: Product | undefined,
 }) => {
+  const { lang } = useLanguage();
+  const ui = UI_TEXT[lang];
   const [data, setData] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -163,7 +167,7 @@ export const Screen = (props: {
             <button onClick={() => steOpenDialog(true)} className='lg:w-1/5 w-full min-w-md:max-w-lg m-3 bg-transparent border-transparent hover:bg-[hsl(var(--card)/0.08)] rounded-xl'>
               <Card className="build-selector">
                 <CardHeader>
-                  <CardTitle className='text-center'>Ecran</CardTitle>
+                  <CardTitle className='text-center'>{ui.navMonitors}</CardTitle>
                 </CardHeader>
                 <CardContent>
                 <div className="flex items-center justify-center text-[hsl(var(--accent))]">
@@ -222,9 +226,9 @@ export const Screen = (props: {
                           >
                             <Trash className="h-4 w-4" />
                           </Button>
-                          <Button onClick={() => steOpenDialog(true)} className="btn-primary-blue">Changer</Button>
+                          <Button onClick={() => steOpenDialog(true)} className="btn-primary-blue">{ui.builderBtnChange}</Button>
                           <a href="zz" className='underline mt-2' target='_blank'>
-                            Voir en store
+                          {ui.builderLinkSeeInStore}
                           </a>
                         </div>
                       </div>
@@ -262,7 +266,7 @@ export const Screen = (props: {
           <DialogHeader className="sticky top-0 z-10 bg-card border-b border-border px-4 py-3">
             <DialogTitle>
               <div className='flex justify-between pt-1 items-center'>
-                <h1>Ecran store</h1>
+                <h1>Screen store</h1>
                 <Menu as="div" className="relative inline-block text-left">
                   <div className='flex'>
                     <Menu.Button className="group inline-flex justify-center text-sm font-medium text-foreground">
@@ -364,11 +368,11 @@ export const Screen = (props: {
               ) : (
                 <>
                   {loading && <p>Loading...</p>}
-                  {!loading && data && data.length === 0 && <p>No results found.</p>}
+                  {!loading && data && data.length === 0 && <p>{ui.builderNoResults}.</p>}
 
                   {!loading && data.length > 0 && (
                     <>
-                      <div className='text-sm'>({totalPages}) Résultats en {searchTime.toFixed(2)} seconds</div>
+                      <div className='text-sm'>({totalPages}) {ui.builderResultsSummary(totalPages, searchTime)}</div>
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                         {data.map((item, key) => (
                           <div key={key} className={`bg-[#12141b] hover:bg-[#101218] transition flex flex-col justify-between group cursor-pointer rounded-xl border border-white/5 p-3 space-y-1 ${
@@ -398,7 +402,7 @@ export const Screen = (props: {
                                 onClick={() => { props.setProcessorId(item); steOpenDialog(false) }}
                                 className='w-full btn-primary-blue'
                               >
-                                Ajouter
+                                {ui.builderBtnAdd}
                               </Button>
                             </div>
                           </div>
@@ -415,12 +419,13 @@ export const Screen = (props: {
           <DialogFooter className="sticky bottom-0 bg-[#101218] border-t border-border px-4 py-3">
             <div className='grid grid-cols-12 gap-4 w-full items-center'>
               <div className='col-span-12 md:col-span-4 lg:col-span-3'>
-                <Button
-                  className='w-full px-6 py-2 bg-[#00a2ff] hover:bg-[#0092e6] text-foreground'
-                  onClick={() => { setCurrentPage(0); fetchData(); }}
-                >
-                  Filter
-                </Button>
+              <Button
+  className='w-full px-6 py-2 bg-[#00a2ff] hover:bg-[#0092e6] text-foreground'
+  onClick={() => { setCurrentPage(0); fetchData(); }}
+>
+  {ui.filterButton}
+</Button>
+
               </div>
 
               <div className='col-span-12 md:col-span-8 lg:col-span-9 flex justify-end'>

@@ -260,3 +260,25 @@ main > section::after,
 :is(main, .page) :is([class*="bg-white/"]) {
   background-color: transparent !important;
 }
+/* ===== CUSTOM CLEAN SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 6px;          /* thin */
+}
+
+::-webkit-scrollbar-track {
+  background: transparent !important; /* remove track background */
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25); /* light thumb */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.45); /* hover effect */
+}
+
+/* remove scrollbar arrows in some browsers */
+::-webkit-scrollbar-button {
+  display: none !important;
+}

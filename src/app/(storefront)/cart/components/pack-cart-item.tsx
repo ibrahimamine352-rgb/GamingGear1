@@ -70,16 +70,16 @@ const PackCartItem: React.FC<CartItemProps> = ({
         const item = da as Product;
         
         return <>
-         {filterKey=='defaultKeyboard'?(<div className="font-semibold m-2">Clavier :</div>):<></>}
-         {filterKey=='defaultMouse'?(<div className="font-semibold m-2">Souris :</div>):<></>}
-         {filterKey=='defaultMousePad'?(<div className="font-semibold m-2">Tapi :</div>):<></>}
+         {filterKey=='defaultKeyboard'?(<div className="font-semibold m-2">Keyboard :</div>):<></>}
+         {filterKey=='defaultMouse'?(<div className="font-semibold m-2">Mouse :</div>):<></>}
+         {filterKey=='defaultMousePad'?(<div className="font-semibold m-2">Mousepad :</div>):<></>}
          {filterKey=='defaultMics'?(<div className="font-semibold m-2"> Microphone :</div>):<></>}
-         {filterKey=='defaultHeadset'?(<div className="font-semibold m-2">Casque :</div>):<></>}
-         {filterKey=='defaultCamera'?(<div className="font-semibold m-2">Caméra :</div>):<></>}
-         {filterKey=='defaultScreen'?(<div className="font-semibold m-2">Ecran :</div>):<></>}
-         {filterKey=='DefaultSpeaker'?(<div className="font-semibold m-2">Haut-Parleur :</div>):<></>}
-         {filterKey=='DefaultManette'?(<div className="font-semibold m-2">Manette :</div>):<></>}
-         {filterKey=='DefaultChair'?(<div className="font-semibold m-2">Chaise gaming :</div>):<></>}
+         {filterKey=='defaultHeadset'?(<div className="font-semibold m-2">Headset :</div>):<></>}
+         {filterKey=='defaultCamera'?(<div className="font-semibold m-2">Camera :</div>):<></>}
+         {filterKey=='defaultScreen'?(<div className="font-semibold m-2">Screen :</div>):<></>}
+         {filterKey=='DefaultSpeaker'?(<div className="font-semibold m-2">Speaker :</div>):<></>}
+         {filterKey=='DefaultManette'?(<div className="font-semibold m-2">Controller :</div>):<></>}
+         {filterKey=='DefaultChair'?(<div className="font-semibold m-2">Gaming chair :</div>):<></>}
         
         
         <It className={'flex py-6 border-b'} item={item} key={item.id} /></>;
@@ -88,7 +88,7 @@ const PackCartItem: React.FC<CartItemProps> = ({
       if (Array.isArray(da)) {
         return (
           <>
-          {filterKey=='ram'?(<div className="font-semibold m-2">Barette Ram :</div>):<></>}
+          {filterKey=='ram'?(<div className="font-semibold m-2">RAM module :</div>):<></>}
             {da.map((e, k) => (
             <>  
               <It className={k==da.length?'flex py-6 border-b':'flex py-6 '} item={e} key={e.id} />

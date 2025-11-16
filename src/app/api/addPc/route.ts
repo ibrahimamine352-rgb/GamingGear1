@@ -11,7 +11,9 @@ export async function POST(
 
     const body = await req.json();
 
-    const { name, price, categoryId,  images, isFeatured, isArchived ,description,stock,additionalDetails,  caseId,
+    const { name, price, categoryId,  images, isFeatured, isArchived ,comingSoon,
+      outOfStock,
+       description,stock,additionalDetails,  caseId,
         graphicCardId,
         motherBoardId,
         powerSupplyId,
@@ -61,6 +63,8 @@ export async function POST(
                 price,
                 isFeatured,
                 isArchived,
+                comingSoon,
+                outOfStock,
                 categoryId,
                 description,
                 
@@ -173,21 +177,21 @@ export async function DELETE(
 };
 
 
-export async function GET(
-  req: Request,
-) {
+export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url)
+    const { searchParams } = new URL(req.url);
     const categoryId = searchParams.get('categoryId') || undefined;
     const isFeatured = searchParams.get('isFeatured');
-
+    // NEW: allow caller to hide unavailable if they want
+    const hideUnavailable = searchParams.get('hideUnavailable') === 'true';
 
     const products = await prismadb.product.findMany({
       where: {
-       
         categoryId,
         isFeatured: isFeatured ? true : undefined,
         isArchived: false,
+        // Only filter by these if the caller asked to hide them
+        ...(hideUnavailable ? { comingSoon: false, outOfStock: false } : {}),
       },
       include: {
         images: true,
@@ -197,10 +201,11 @@ export async function GET(
         createdAt: 'desc',
       }
     });
-  
+
     return NextResponse.json(products);
   } catch (error) {
     console.log('[PRODUCTS_GET]', error);
     return new NextResponse("Internal error", { status: 500 });
   }
-};
+}
+;

@@ -32,6 +32,8 @@ import { Menu, Transition } from '@headlessui/react'
 import { Pagination } from '@nextui-org/pagination'
 import { AllProductsCompatibility } from './comps'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { useLanguage } from "@/context/language-context";
+import { UI_TEXT } from "@/i18n/ui-text";
 
 type checkItem = { id: number, searchKey: string }
 
@@ -59,6 +61,8 @@ export const Motherboard = (props: {
   cpuId: Product | undefined,
   motherboardramslots: Filter,
 }) => {
+  const { lang } = useLanguage();
+  const ui = UI_TEXT[lang];
   const [data, setData] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -198,8 +202,8 @@ export const Motherboard = (props: {
               <Card className="build-selector">
                 <CardHeader>
                   <CardTitle className='text-center'>
-                    Carte mère
-                    <p className='text-xs text-muted-foreground p-1'>(*Obligatoire)</p>
+                  {ui.navMotherboards}
+                    <p className='text-xs text-muted-foreground p-1'>{ui.builderRequiredTag}</p>
                     
                   </CardTitle>
                 </CardHeader>
@@ -244,12 +248,12 @@ export const Motherboard = (props: {
                     {/* Compatibility */}
                     {props.selectedCompatibility ? (
                       <div className="w-4/5">
-                        <div className='font-bold my-2 text-sm text-foreground'>Compatibilité:</div>
+                        <div className='font-bold my-2 text-sm text-foreground'>Compatibility:</div>
 
                         <div className="text-left grid text-xs max-w-screen-md mx-auto border border-border rounded mb-3 mr-3">
                           <div className="p-1 pl-3 border-b border-border hover:bg-muted hover:font-bold cursor-pointer">
                             <p className={`mb-1 ${props.selectedCompatibility.Compatibility.motherboardCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}`}>
-                              Carte mère :
+                              Motherboard :
                             </p>
                             <p className={props.selectedCompatibility.Compatibility.motherboardCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}>
                               {props.selectedCompatibility.Compatibility.motherboardCompatibility.message}
@@ -257,7 +261,7 @@ export const Motherboard = (props: {
                           </div>
                           <div className="p-1 pl-3 border-b border-border hover:bg-muted hover:font-bold cursor-pointer">
                             <p className={`mb-1 ${props.selectedCompatibility.Compatibility.processorCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}`}>
-                              Processeur :
+                              Processor:
                             </p>
                             <p className={props.selectedCompatibility.Compatibility.processorCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}>
                               {props.selectedCompatibility.Compatibility.processorCompatibility.message}
@@ -265,7 +269,7 @@ export const Motherboard = (props: {
                           </div>
                           <div className="p-1 pl-3 border-b border-border hover:bg-muted hover:font-bold cursor-pointer">
                             <p className={`mb-1 ${props.selectedCompatibility.Compatibility.gpuCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}`}>
-                              Carte graphique :
+                              Graphics card:
                             </p>
                             <p className={props.selectedCompatibility.Compatibility.gpuCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}>
                               {props.selectedCompatibility.Compatibility.gpuCompatibility.message}
@@ -273,7 +277,7 @@ export const Motherboard = (props: {
                           </div>
                           <div className="p-1 pl-3 border-b border-border hover:bg-muted hover:font-bold cursor-pointer">
                             <p className={`mb-1 ${props.selectedCompatibility.Compatibility.ramCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}`}>
-                              Ram :
+                              RAM :
                             </p>
                             <p className={props.selectedCompatibility.Compatibility.ramCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}>
                               {props.selectedCompatibility.Compatibility.ramCompatibility.message}
@@ -281,7 +285,8 @@ export const Motherboard = (props: {
                           </div>
                           <div className="p-1 pl-3 border-b border-border hover:bg-muted hover:font-bold cursor-pointer">
                             <p className={`mb-1 ${props.selectedCompatibility.Compatibility.hardDiskCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}`}>
-                              Disque dur compatibilité :
+                              Hard drive compatibility:
+
                             </p>
                             <p className={props.selectedCompatibility.Compatibility.hardDiskCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}>
                               {props.selectedCompatibility.Compatibility.hardDiskCompatibility.message}
@@ -289,7 +294,8 @@ export const Motherboard = (props: {
                           </div>
                           <div className="p-1 pl-3 border-b border-border hover:bg-muted hover:font-bold cursor-pointer">
                             <p className={`mb-1 ${props.selectedCompatibility.Compatibility.powerCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}`}>
-                              Boîte d&apos;alimentation compatibilité :
+                              Power supply box compatibility:
+
                             </p>
                             <p className={props.selectedCompatibility.Compatibility.powerCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}>
                               {props.selectedCompatibility.Compatibility.powerCompatibility.message}
@@ -297,7 +303,8 @@ export const Motherboard = (props: {
                           </div>
                           <div className="p-1 pl-3 hover:bg-muted hover:font-bold cursor-pointer">
                             <p className={`mb-1 ${props.selectedCompatibility.Compatibility.caseCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}`}>
-                              Boîtier compatibilité :
+                              Case compatibility:
+
                             </p>
                             <p className={props.selectedCompatibility.Compatibility.caseCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}>
                               {props.selectedCompatibility.Compatibility.caseCompatibility.message}
@@ -326,10 +333,10 @@ export const Motherboard = (props: {
                           onClick={() => steOpenDialog(!openDialog)}
                           className="btn-primary-blue"
                         >
-                          Changer
+                          {ui.builderBtnChange}
                         </Button>
                         <a href={"product/" + props.motherboardId.id} className='underline mt-2 text-[#007bff]' target='_blank'>
-                          Voir en store
+                        {ui.builderLinkSeeInStore}
                         </a>
                       </div>
                     </div>
@@ -365,7 +372,7 @@ export const Motherboard = (props: {
           <DialogHeader className="sticky top-0 z-10 bg-[#101218] border-b border-border px-4 py-3">
             <DialogTitle>
               <div className='flex items-center justify-between gap-3'>
-                <h1 className="text-lg font-semibold">Carte mère store</h1>
+                <h1 className="text-lg font-semibold">Motherboard store</h1>
 
                 <Menu as="div" className="relative inline-block text-left">
                   <div className='flex'>
@@ -438,7 +445,7 @@ export const Motherboard = (props: {
                           checked={compatible}
                           onChange={(e) => setcompatible(e.target.checked)}
                         />
-                        Compatible processeur
+                        Compatible Processor
                       </label>
                     </div>
                   ) : null}
@@ -478,10 +485,10 @@ export const Motherboard = (props: {
                 </div>
               ) : (
                 <>
-                  {data.length === 0 && <p className="text-[#a6adc8]">No results found.</p>}
+                  {data.length === 0 && <p className="text-[#a6adc8]">{ui.builderNoResults}.</p>}
                   {data.length > 0 && (
                     <>
-                      <div className='text-xs text-[#a6adc8] mb-2'>({totalPages}) Résultats en {searchTime.toFixed(2)} seconds</div>
+                      <div className='text-xs text-[#a6adc8] mb-2'>({totalPages}) {ui.builderResultsSummary(totalPages, searchTime)}</div>
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                         {data.map((item, key) => (
                           <div
@@ -514,7 +521,7 @@ export const Motherboard = (props: {
                                 onClick={() => { props.setMotherboardId(item); steOpenDialog(false) }}
                                 className={'w-full ' + (checkcompatibility(item) ? 'bg-[#00a2ff] hover:bg-[#0092e6] text-foreground' : 'bg-red-500 hover:bg-red-600 text-foreground')}
                               >
-                                Ajouter
+                                {ui.builderBtnAdd}
                               </Button>
                             </div>
                           </div>
@@ -531,12 +538,13 @@ export const Motherboard = (props: {
           <DialogFooter className="sticky bottom-0 bg-[#101218] border-t border-border px-4 py-3">
             <div className='grid grid-cols-12 gap-4 w-full items-center'>
               <div className='col-span-12 md:col-span-4 lg:col-span-3'>
-                <Button
-                  className='w-full px-6 py-2 bg-[#00a2ff] hover:bg-[#0092e6] text-foreground'
-                  onClick={() => { setCurrentPage(0); fetchData(); }}
-                >
-                  Filter
-                </Button>
+              <Button
+  className='w-full px-6 py-2 bg-[#00a2ff] hover:bg-[#0092e6] text-foreground'
+  onClick={() => { setCurrentPage(0); fetchData(); }}
+>
+  {ui.filterButton}
+</Button>
+
               </div>
 
               <div className='col-span-12 md:col-span-8 lg:col-span-9 flex justify-end'>

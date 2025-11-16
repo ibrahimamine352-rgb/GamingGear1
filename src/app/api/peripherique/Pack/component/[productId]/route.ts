@@ -64,7 +64,7 @@ export async function DELETE(
       const body = await req.json();
 
   
-      const { name, price, categoryId,  images, isFeatured, isArchived ,     
+      const { name, price, categoryId,  images, isFeatured, isArchived , comingSoon, outOfStock,                     
         manufacturerId,additionalDetails
   } = body;
   
@@ -128,6 +128,8 @@ export async function DELETE(
           },
           isFeatured,
           isArchived,
+          comingSoon,
+          outOfStock,
         },
       });
   

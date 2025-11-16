@@ -71,6 +71,8 @@ export async function PATCH(
       images,
       isFeatured,
       isArchived,
+      comingSoon,
+      outOfStock,
       chipsetId,
       cpusupportId,
       formatId,
@@ -157,6 +159,8 @@ export async function PATCH(
         price: price,
         isFeatured: isFeatured,
         isArchived: isArchived,
+        comingSoon,     // include it
+        outOfStock,
         description,
         categoryId: categoryId,
         stock:stock,

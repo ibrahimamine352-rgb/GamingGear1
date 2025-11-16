@@ -19,6 +19,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Container from '@/components/ui/container'
 import Skeleton from '@/components/ui/skeleton'
 import SearchComponent from '@/components/search-filters/motherboard/motherboard-search' // ✅ keep your current path
+import { useLanguage } from "@/context/language-context";
+import { UI_TEXT } from "@/i18n/ui-text";
 
 import { Filter, ProfileType, filterItem } from '../page'
 import Image from 'next/image'
@@ -65,6 +67,8 @@ export const GraphicCard = (props: {
   gpuBrand: Filter
   motherboardId: Product | undefined,
 }) => {
+  const { lang } = useLanguage();
+  const ui = UI_TEXT[lang];
   const [data, setData] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -108,7 +112,9 @@ export const GraphicCard = (props: {
       setLoading(false);
 
       const res = await getRecommendations(props.selectedFeatures);
-      setRecommendedGpuMemorie(res.recommendations[0].videoCardMemory);
+      if (res?.recommendations?.[0]?.videoCardMemory) {
+        setRecommendedGpuMemorie(res.recommendations[0].videoCardMemory);
+      }
     } catch (error) {
       setLoading(false);
       console.error('Error fetching data:', error);
@@ -137,7 +143,7 @@ export const GraphicCard = (props: {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const toggleDescription = () => setShowFullDescription(!showFullDescription);
 
-  useEffect(() => { fetchData(); }, [currentPage, selectedSort]);
+  useEffect(() => { fetchData(); }, [currentPage, selectedSort, priceFilter, searchTerm, filterList, compatible, props.motherboardId?.id]);
   useEffect(() => { fetchData(); }, []);
 
   return (
@@ -152,7 +158,7 @@ export const GraphicCard = (props: {
             >
               <Card className="build-selector">
                 <CardHeader>
-                  <CardTitle className='text-center'>Carte graphique</CardTitle>
+                  <CardTitle className='text-center'>{ui.navGpu}</CardTitle>
                 </CardHeader>
                 <CardContent>
                 <div className="flex items-center justify-center leading-none text-[hsl(var(--accent))]">
@@ -196,46 +202,49 @@ export const GraphicCard = (props: {
                     {/* Compatibilité */}
                     {props.selectedCompatibility ? (
                       <div className="w-4/5">
-                        <div className='font-bold my-2 text-sm text-[#e6e8ee]'>Compatibilité:</div>
+                        <div className='font-bold my-2 text-sm text-[#e6e8ee]'>Compatibility:</div>
                         <div className="text-left grid text-xs max-w-screen-md mx-auto border border-white rounded mb-3 mr-3">
                           <div className="p-1 pl-3 border-b border-white hover:bg-[#101218] hover:font-bold cursor-pointer">
-                            <p className={`mb-1 ${props.selectedCompatibility.Compatibility.motherboardCompatibility.error ? 'text-red-400' : 'text-green-400'}`}>Carte mére :</p>
+                            <p className={`mb-1 ${props.selectedCompatibility.Compatibility.motherboardCompatibility.error ? 'text-red-400' : 'text-green-400'}`}>Motherboard:</p>
                             <p className={props.selectedCompatibility.Compatibility.motherboardCompatibility.error ? 'text-red-400' : 'text-green-400'}>
                               {props.selectedCompatibility.Compatibility.motherboardCompatibility.message}
                             </p>
                           </div>
                           <div className="p-1 pl-3 border-b border-white hover:bg-[#101218] hover:font-bold cursor-pointer">
-                            <p className={`mb-1 ${props.selectedCompatibility.Compatibility.processorCompatibility.error ? 'text-red-400' : 'text-green-400'}`}>Processeur :</p>
+                            <p className={`mb-1 ${props.selectedCompatibility.Compatibility.processorCompatibility.error ? 'text-red-400' : 'text-green-400'}`}>Processor:</p>
                             <p className={props.selectedCompatibility.Compatibility.processorCompatibility.error ? 'text-red-400' : 'text-green-400'}>
                               {props.selectedCompatibility.Compatibility.processorCompatibility.message}
                             </p>
                           </div>
                           <div className="p-1 pl-3 border-b border-white hover:bg-[#101218] hover:font-bold cursor-pointer">
-                            <p className={`mb-1 ${props.selectedCompatibility.Compatibility.gpuCompatibility.error ? 'text-red-400' : 'text-green-400'}`}>Carte graphique :</p>
+                            <p className={`mb-1 ${props.selectedCompatibility.Compatibility.gpuCompatibility.error ? 'text-red-400' : 'text-green-400'}`}>Graphics card:</p>
                             <p className={props.selectedCompatibility.Compatibility.gpuCompatibility.error ? 'text-red-400' : 'text-green-400'}>
                               {props.selectedCompatibility.Compatibility.gpuCompatibility.message}
                             </p>
                           </div>
                           <div className="p-1 pl-3 border-b border-white hover:bg-[#101218] hover:font-bold cursor-pointer">
-                            <p className={`mb-1 ${props.selectedCompatibility.Compatibility.ramCompatibility.error ? 'text-red-400' : 'text-green-400'}`}>Ram :</p>
+                            <p className={`mb-1 ${props.selectedCompatibility.Compatibility.ramCompatibility.error ? 'text-red-400' : 'text-green-400'}`}>RAM :</p>
                             <p className={props.selectedCompatibility.Compatibility.ramCompatibility.error ? 'text-red-400' : 'text-green-400'}>
                               {props.selectedCompatibility.Compatibility.ramCompatibility.message}
                             </p>
                           </div>
                           <div className="p-1 pl-3 border-b border-white hover:bg-[#101218] hover:font-bold cursor-pointer">
-                            <p className={`mb-1 ${props.selectedCompatibility.Compatibility.hardDiskCompatibility.error ? 'text-red-400' : 'text-green-400'}`}>Disque dur compatibilité :</p>
+                            <p className={`mb-1 ${props.selectedCompatibility.Compatibility.hardDiskCompatibility.error ? 'text-red-400' : 'text-green-400'}`}>Hard drive compatibility:
+</p>
                             <p className={props.selectedCompatibility.Compatibility.hardDiskCompatibility.error ? 'text-red-400' : 'text-green-400'}>
                               {props.selectedCompatibility.Compatibility.hardDiskCompatibility.message}
                             </p>
                           </div>
                           <div className="p-1 pl-3 border-b border-white hover:bg-[#101218] hover:font-bold cursor-pointer">
-                            <p className={`mb-1 ${props.selectedCompatibility.Compatibility.powerCompatibility.error ? 'text-red-400' : 'text-green-400'}`}>Boîte d&apos;alimentation compatibilité :</p>
+                            <p className={`mb-1 ${props.selectedCompatibility.Compatibility.powerCompatibility.error ? 'text-red-400' : 'text-green-400'}`}>Power supply box compatibility:
+</p>
                             <p className={props.selectedCompatibility.Compatibility.powerCompatibility.error ? 'text-red-400' : 'text-green-400'}>
                               {props.selectedCompatibility.Compatibility.powerCompatibility.message}
                             </p>
                           </div>
                           <div className="p-1 pl-3 hover:bg-[#101218] hover:font-bold cursor-pointer">
-                            <p className={`mb-1 ${props.selectedCompatibility.Compatibility.caseCompatibility.error ? 'text-red-400' : 'text-green-400'}`}>Boîtier compatibilité :</p>
+                            <p className={`mb-1 ${props.selectedCompatibility.Compatibility.caseCompatibility.error ? 'text-red-400' : 'text-green-400'}`}>Case compatibility:
+</p>
                             <p className={props.selectedCompatibility.Compatibility.caseCompatibility.error ? 'text-red-400' : 'text-green-400'}>
                               {props.selectedCompatibility.Compatibility.caseCompatibility.message}
                             </p>
@@ -260,10 +269,10 @@ export const GraphicCard = (props: {
                           <Trash className="h-4 w-4" />
                         </Button>
                         <Button onClick={() => steOpenDialog(true)} className="bg-[#00e0ff] text-black hover:bg-[#101218] border border-white">
-                          Changer
+                          {ui.builderBtnChange}
                         </Button>
                         <a href={"product/"+props.processorId.id} className='underline mt-2 text-[#00e0ff]' target='_blank'>
-                          Voir en store
+                        {ui.builderLinkSeeInStore}
                         </a>
                       </div>
                     </div>
@@ -298,7 +307,7 @@ export const GraphicCard = (props: {
           <DialogHeader className="sticky top-0 z-10 bg-[#101218] border-b border-border px-4 py-3">
             <DialogTitle>
               <div className='flex justify-between items-center'>
-                <h1>Carte graphique store</h1>
+                <h1>Graphics Card store</h1>
                 <Menu as="div" className="relative inline-block text-left">
                   <div className='flex'>
                     <Menu.Button className="group inline-flex items-center text-sm font-medium">
@@ -370,7 +379,7 @@ export const GraphicCard = (props: {
                           checked={compatible}
                           onChange={(e) => setcompatible(e.target.checked)}
                         />
-                        Compatible avec Carte mére
+                        Compatible with Motherboard
                       </label>
                     </div>
                   ) : null}
@@ -410,11 +419,11 @@ export const GraphicCard = (props: {
                 </div>
               ) : (
                 <>
-                  {!loading && data && data.length === 0 && <p className="text-[#a6adc8]">No results found.</p>}
+                  {!loading && data && data.length === 0 && <p className="text-[#a6adc8]">{ui.builderNoResults}.</p>}
 
                   {!loading && data.length > 0 && (
                     <>
-                      <div className='text-xs text-[#a6adc8] mb-2'>({totalPages}) Résultats en {searchTime.toFixed(2)} seconds</div>
+                      <div className='text-xs text-[#a6adc8] mb-2'>({totalPages}) {ui.builderResultsSummary(totalPages, searchTime)}</div>
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                         {data.map((item, key) => (
                           <div
@@ -424,7 +433,7 @@ export const GraphicCard = (props: {
                             <div>
                               {extractGpuSize(item.name) === recommendedGpuMemorie && recommendedGpuMemorie != null && (
                                 <span className="bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] px-2 py-0.5 rounded-full text-xs font-semibold w-fit">
-                                  Recommandé par AI
+                                  Recommended by AI
                                 </span>
                               )}
                               <div className="aspect-square rounded-xl bg-transparent relative">
@@ -449,10 +458,17 @@ export const GraphicCard = (props: {
 
                               <Button
                                 type='submit'
-                                onClick={() => { props.setProcessorId(item); steOpenDialog(false); }}
+                                onClick={() => {
+                                  props.setProcessorId(item);
+                                  const gpuSize = extractGpuSize(item.name);
+                                  if (gpuSize !== null) {
+                                    props.addFeature("Video Card_Memory", gpuSize);
+                                  }
+                                  steOpenDialog(false);
+                                }}
                                 className={'w-full ' + `${checkcompatibility(item) ? 'bg-primary text-foreground hover:bg-primary/90' : 'bg-red-500 hover:bg-red-600 text-foreground'}`}
                               >
-                                Ajouter
+                                {ui.builderBtnAdd}
                               </Button>
                             </div>
                           </div>
@@ -469,12 +485,13 @@ export const GraphicCard = (props: {
           <DialogFooter className="sticky bottom-0 bg-[#101218] border-t border-border px-4 py-3">
             <div className='grid grid-cols-12 gap-4 w-full items-center'>
               <div className='col-span-12 md:col-span-4 lg:col-span-3'>
-                <Button
-                  className='w-full px-6 py-2 bg-[#00a2ff] hover:bg-[#0092e6] text-foreground'
-                  onClick={() => { setCurrentPage(0); fetchData(); }}
-                >
-                  Filter
-                </Button>
+              <Button
+  className='w-full px-6 py-2 bg-[#00a2ff] hover:bg-[#0092e6] text-foreground'
+  onClick={() => { setCurrentPage(0); fetchData(); }}
+>
+  {ui.filterButton}
+</Button>
+
               </div>
 
               <div className='col-span-12 md:col-span-8 lg:col-span-9 flex justify-end'>

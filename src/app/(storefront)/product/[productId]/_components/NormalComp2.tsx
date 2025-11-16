@@ -244,7 +244,7 @@ Voir la page de produit
 </div>
 </>:<>
 <Sheet  onOpenChange={(e)=>setOpen(e)} open={open}>
-  <SheetTrigger className='w-full'><Button variant={'outline'} className='w-full mt-3 border-[hsl(var(--accent))] bg-opacity-70 hover:border-[hsl(var(--ring))]'>Ajouter un Produit</Button></SheetTrigger>
+  <SheetTrigger className='w-full'><Button variant={'outline'} className='w-full mt-3 border-[hsl(var(--accent))] bg-opacity-70 hover:border-[hsl(var(--ring))]'>Add a Product</Button></SheetTrigger>
   <SheetContent >
     <SheetHeader>
       <SheetTitle>Vous pouver selection un de ces Produits.</SheetTitle>

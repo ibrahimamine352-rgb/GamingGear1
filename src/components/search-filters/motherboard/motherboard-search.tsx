@@ -4,7 +4,8 @@ import { Product } from "@/types";
 import { Button } from '@/components/ui/button';
 import { fetchData } from 'next-auth/client/_utils';
 
-
+import { useLanguage } from "@/context/language-context";
+import { UI_TEXT } from "@/i18n/ui-text";
 
 interface SearchComponentProps {
  
@@ -21,14 +22,16 @@ interface SearchComponentProps {
 
 }
 const SearchComponent: React.FC<SearchComponentProps>  = ({priceFilter,setPriceFilter,fetchData,searchTerm,setSearchTerm,setLoading,setTotalPages,setCurrentPage,totalPages,currentPage}) => {
-
+  const { lang } = useLanguage();
+  const ui = UI_TEXT[lang];
 
 
   return (
     <div>
       <input
         type="text"
-        placeholder="Search..."
+        placeholder={ui.searchPlaceholder}
+
         value={searchTerm}
         onChange={(e)=>setSearchTerm(e.target.value)}
                         className="

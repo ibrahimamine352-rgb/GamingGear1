@@ -64,7 +64,9 @@ export async function DELETE(
       const body = await req.json();
 
   
-      const { name, price, categoryId,  images, isFeatured, isArchived ,   
+      const { name, price, categoryId,  images, isFeatured, isArchived , comingSoon,
+        outOfStock,
+          
         CPUSupportId,
         CoolingMarkId,
         CoolingTypeId,
@@ -133,6 +135,8 @@ export async function DELETE(
           },
           isFeatured,
           isArchived,
+          comingSoon,
+          outOfStock,
         },
       });
   

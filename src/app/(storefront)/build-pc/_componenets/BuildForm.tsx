@@ -15,7 +15,8 @@ import Details from './details'
 import { GraphicCard } from './GraphicCard'
 import { Screen } from './Screen'
 import axios from 'axios'
-
+import { useLanguage } from "@/context/language-context";
+import { UI_TEXT } from "@/i18n/ui-text";
 export function extractNumber(text: string): number | null {
   const regex = /^(\d+)/
   const match = text.match(regex)
@@ -127,6 +128,9 @@ export const BuildForm = (props: {
   memoryNumber: Filter
   memoryType: Filter
 }) => {
+  
+  const { lang } = useLanguage();
+  const ui = UI_TEXT[lang];
   const [motherboardId, setMotherboardId] = useState<Product | undefined>(retrieveFromLocalStorage('motherboardId'))
   const [allProductCompatibility, setAllProductCompatibility] = useState<AllProductsCompatibility>(defaultAllProductsCompatibility)
   const [processorId, setProcessorId] = useState<Product | undefined>(retrieveFromLocalStorage('processorId'))
@@ -202,22 +206,22 @@ export const BuildForm = (props: {
             if (haveCommonElement(CProfiles, PProfiles)) {
               updates['processorCompatibility'] = { message: 'Compatible', error: false }
             } else {
-              updates['processorCompatibility'] = { message: 'Refroidisseur CPU Non Compatible', error: true }
+              updates['processorCompatibility'] = { message: 'CPU Cooler Not Compatible', error: true }
             }
           } else {
             updates['processorCompatibility'] = { message: 'Compatible', error: false }
           }
           updates['motherboardCompatibility'] = { message: 'Compatible', error: false }
         } else {
-          updates['motherboardCompatibility'] = { message: 'Non Compatible', error: true }
-          updates['processorCompatibility'] = { message: 'Non Compatible', error: true }
+          updates['motherboardCompatibility'] = { message: 'Not Compatible', error: true }
+          updates['processorCompatibility'] = { message: 'Not Compatible', error: true }
         }
       }
     } else {
       setRamSlotType("")
-      updates['motherboardCompatibility'] = { message: 'Veuillez sélectionner une carte mére', error: true }
+      updates['motherboardCompatibility'] = { message: 'Please select a motherboard', error: true }
       if (processorId) {
-        updates['processorCompatibility'] = { message: 'Veuillez sélectionner une carte mére', error: true }
+        updates['processorCompatibility'] = { message: 'Please select a motherboard', error: true }
       }
     }
 
@@ -231,15 +235,15 @@ export const BuildForm = (props: {
             if (haveCommonElement(CProfiles, PProfiles)) {
               updates['processorCompatibility'] = { message: 'Compatible', error: false }
             } else {
-              updates['processorCompatibility'] = { message: 'Refroidisseur CPU Non Compatible', error: true }
+              updates['processorCompatibility'] = { message: 'CPU Cooler Not Compatible', error: true }
             }
           } else {
             updates['processorCompatibility'] = { message: 'Compatible', error: false }
           }
           updates['motherboardCompatibility'] = { message: 'Compatible', error: false }
         } else {
-          updates['motherboardCompatibility'] = { message: 'Non Compatible', error: true }
-          updates['processorCompatibility'] = { message: 'Non Compatible', error: true }
+          updates['motherboardCompatibility'] = { message: 'Not Compatible', error: true }
+          updates['processorCompatibility'] = { message: 'Not Compatible', error: true }
         }
       }
 
@@ -249,41 +253,41 @@ export const BuildForm = (props: {
       addFeature("CPU_Core_Count", corCount)
     } else {
       if (motherboardId) {
-        updates['motherboardCompatibility'] = { message: 'Veuillez sélectionner un processeur', error: true }
+        updates['motherboardCompatibility'] = { message: 'Please select a processor', error: true }
       }
-      updates['processorCompatibility'] = { message: 'Veuillez sélectionner un processeur', error: true }
+      updates['processorCompatibility'] = { message: 'Please select a processor', error: true }
     }
 
     if (gpuId) {
       if (motherboardId) {
         updates['gpuCompatibility'] = { message: 'Compatible', error: false }
       } else {
-        updates['gpuCompatibility'] = { message: 'Veuillez sélectionner une carte mére', error: true }
+        updates['gpuCompatibility'] = { message: 'Please select a motherboard', error: true }
       }
       const gpuSize = extractGpuSize(gpuId.name)
       addFeature("Video Card_Memory", gpuSize)
     } else {
-      updates['gpuCompatibility'] = { message: 'Veuillez vérifier si une carte graphique est déjà intégrée.', error: false }
+      updates['gpuCompatibility'] = { message: 'Please check if a graphics card is already integrated.', error: false }
     }
 
     const data: string[] = []
     if (motherboardId) {
       ramId.map((e, k) => {
         if (e != null) {
-          let message = "Veuillez sélectionner au moins une barrette RAM"
+          let message = "Please select at least one RAM module"
           const MProfiles = props.profiles.filter((e) => e.motherboards.find((ee) => ee.productId == motherboardId.id))
           if (e.memories[0].type.name === ramSlotType) {
             const RProfiles = props.profiles.filter((xe) => xe.RAMs.find((ee) => ee.Components.find((re) => re.productId === e.id)))
             if (haveCommonElement(MProfiles, RProfiles)) {
               message = 'Compatible'
             } else {
-              message = 'Non Compatible'
+              message = 'Not Compatible'
             }
           } else {
             if (ramSlotType == "") {
-              message = 'chargement en cours'
+              message = 'Loading...'
             } else {
-              message = ramSlotType + ' à ' + (k + 1) + ' est requis'
+              message = ramSlotType + ' at ' + (k + 1) + 'is required'
             }
           }
           data.push(message)
@@ -296,17 +300,17 @@ export const BuildForm = (props: {
       if (newdata.length == 0) {
         updates['ramCompatibility'] = { message: 'Compatible', error: false }
       } else {
-        if (newdata[0] == 'chargement en cours') {
-          updates['ramCompatibility'] = { message: 'chargement en cours', error: true }
+        if (newdata[0] == 'Loading...') {
+          updates['ramCompatibility'] = { message: 'Loading...', error: true }
         } else {
           updates['ramCompatibility'] = { message: newdata.join(", "), error: true }
         }
       }
     } else {
       if (motherboardId) {
-        updates['ramCompatibility'] = { message: 'Veuillez sélectionner au moins une barrette RAM', error: true }
+        updates['ramCompatibility'] = { message: 'Please select at least one RAM module', error: true }
       } else {
-        updates['ramCompatibility'] = { message: 'Veuillez sélectionner une carte mére', error: true }
+        updates['ramCompatibility'] = { message: 'Please select a motherboard', error: true }
       }
     }
 
@@ -320,19 +324,19 @@ export const BuildForm = (props: {
             if (haveCommonElement(MProfiles, PProfiless)) {
               updates['hardDiskCompatibility'] = { message: 'Compatible', error: false }
             } else {
-              updates['hardDiskCompatibility'] = { message: 'Stockage Secondaire Non Compatible', error: true }
+              updates['hardDiskCompatibility'] = { message: 'Secondary Storage Not Compatible', error: true }
             }
           } else {
             updates['hardDiskCompatibility'] = { message: 'Compatible', error: false }
           }
         } else {
-          updates['hardDiskCompatibility'] = { message: 'Non Compatible', error: true }
+          updates['hardDiskCompatibility'] = { message: 'Not Compatible', error: true }
         }
       } else {
-        updates['hardDiskCompatibility'] = { message: 'Veuillez sélectionner une carte mére', error: true }
+        updates['hardDiskCompatibility'] = { message: 'Please select a motherboard', error: true }
       }
     } else {
-      updates['hardDiskCompatibility'] = { message: 'Veuillez sélectionner un disque dur', error: true }
+      updates['hardDiskCompatibility'] = { message: 'Please select a hard drive', error: true }
     }
 
     if (powerId) {
@@ -342,13 +346,13 @@ export const BuildForm = (props: {
         if (haveCommonElement(MProfiles, PProfiles)) {
           updates['powerCompatibility'] = { message: 'Compatible', error: false }
         } else {
-          updates['powerCompatibility'] = { message: 'Non Compatible', error: true }
+          updates['powerCompatibility'] = { message: 'Not Compatible', error: true }
         }
       } else {
-        updates['powerCompatibility'] = { message: 'Veuillez sélectionner une carte mére', error: true }
+        updates['powerCompatibility'] = { message: 'Please select a motherboard', error: true }
       }
     } else {
-      updates['powerCompatibility'] = { message: 'Veuillez sélectionner la boîte d\'alimentation', error: true }
+      updates['powerCompatibility'] = { message: 'Please select the power supply', error: true }
     }
 
     if (caseId) {
@@ -358,13 +362,13 @@ export const BuildForm = (props: {
         if (haveCommonElement(MProfiles, PProfiles)) {
           updates['caseCompatibility'] = { message: 'Compatible', error: false }
         } else {
-          updates['caseCompatibility'] = { message: 'Non Compatible', error: true }
+          updates['caseCompatibility'] = { message: 'Not Compatible', error: true }
         }
       } else {
-        updates['caseCompatibility'] = { message: 'Veuillez sélectionner une carte mére', error: true }
+        updates['caseCompatibility'] = { message: 'Please select a motherboard', error: true }
       }
     } else {
-      updates['caseCompatibility'] = { message: 'Veuillez sélectionner une boîtier', error: true }
+      updates['caseCompatibility'] = { message: 'Please select a case', error: true }
     }
 
     setCompatibility(updates)
@@ -378,17 +382,17 @@ export const BuildForm = (props: {
     if (motherboardId) {
       ramId.map((e, k) => {
         if (e != null) {
-          let message = "Veuillez sélectionner au moins une barrette RAM"
+          let message = "Please select at least one RAM module."
           const MProfiles = props.profiles.filter((e) => e.motherboards.find((ee) => ee.productId == motherboardId.id))
           if (e.memories[0].type.name === ramSlotType) {
             const RProfiles = props.profiles.filter((xe) => xe.RAMs.find((ee) => ee.Components.find((re) => re.productId === e.id)))
             if (haveCommonElement(MProfiles, RProfiles)) {
               message = 'Compatible'
             } else {
-              message = (k + 1) + ' non Compatible'
+              message = (k + 1) + ' not Compatible'
             }
           } else {
-            message = ramSlotType + ' à ' + (k + 1) + ' est requis'
+            message = ramSlotType + ' at ' + (k + 1) + ' is required'
           }
           data.push(message)
         }
@@ -404,9 +408,9 @@ export const BuildForm = (props: {
       }
     } else {
       if (motherboardId) {
-        updates['ramCompatibility'] = { message: 'Veuillez sélectionner au moins une barrette RAM', error: true }
+        updates['ramCompatibility'] = { message: 'Please select at least one RAM module', error: true }
       } else {
-        updates['ramCompatibility'] = { message: 'Veuillez sélectionner une carte mére', error: true }
+        updates['ramCompatibility'] = { message: 'Please select a motherboard', error: true }
       }
     }
 
@@ -459,7 +463,7 @@ export const BuildForm = (props: {
   return (
     <div className="relative z-0 space-y-8">
       <div>
-        <h1 className="text-4xl font-bold text-foreground mb-2">Build Your PC</h1>
+        <h1 className="text-4xl font-bold text-foreground mb-2">{ui.navBuildYourPc}</h1>
         <div className="h-1 w-20 bg-gradient-to-r from-[#38BDF8] to-[#0EA5E9] rounded-full"></div>
       </div>
 
@@ -520,7 +524,7 @@ export const BuildForm = (props: {
       />
       <HardDisk
         role={<>
-          Primary <p className='text-xs text-[#00e0ff] p-1'>(*Required)</p>
+          {ui.builderCompatprimary} <p className='text-xs text-[#00e0ff] p-1'>{ui.builderRequiredTag}</p>
         </>}
         setProcessorId={sethardDiskPrimaireId}
         processorId={hardDiskPrimaireId}
@@ -533,7 +537,7 @@ export const BuildForm = (props: {
         harddiskType={props.harddiskType}
       />
       <HardDisk
-        role={<>Secondary</>}
+        role={<>{ui.builderCompatsecondary}</>}
         setProcessorId={setHardDiskSecondaire}
         processorId={hardDiskSecondaire}
         motherboardId={motherboardId}

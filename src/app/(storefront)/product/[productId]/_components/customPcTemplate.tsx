@@ -71,11 +71,14 @@ const CustomPcTemplate: React.FC<ProductFormProps> = ({ initialData, motherboard
         stock: parseInt(initialData.stock.toString()),
         price: calculePrix(),
         description: initialData.description,
+        
         additionalDetails: [],
         category: {
             id: '',
             name: ''
-        }
+        },
+        comingSoon: false,
+        outOfStock: false,
     }
     const [TableData, setTableData] = useState<TableData[]>([]);
     const [AdvancedTableData, setAdvancedTableData] = useState<AdvancedTableData[]>([]);
@@ -104,8 +107,8 @@ let array:string[]=[]
 SlotList.forEach((e,k)=>{
     if(e?.type.name!= undefined)
     if(e?.type.name!=ramConditon.ramType){
-        array =[...array,"veuller changer la barette Ram "+k+'Votre Carte mére accepte seulement ce type de ram :'+ramConditon.ramType]
-        toast.error("veuller changer la barette Ram "+k+' Votre Carte mére accepte seulement ce type de ram : '+ramConditon.ramType)
+        array =[...array,"Please replace the RAM module"+k+'Your graphics card only accepts this type of RAM:'+ramConditon.ramType]
+        toast.error("Please replace the RAM module"+k+'Your motherboard only accepts this type of RAM:'+ramConditon.ramType)
     }
 })
 
@@ -169,11 +172,11 @@ setTotal(to)
 useEffect(() => {
         let list: TableData[] = []
         const mb = motherboards.find((e) => e.products[0].id === PcObject.PreBuiltPcmodel?.pcTemplate?.defaultmotherBoardId);
-        list = addDataToTable(mb?.products[0], 'Carte Mére', list);
+        list = addDataToTable(mb?.products[0], 'Motherboard', list);
         const gpu = gpus.find((e) => e.products[0].id === PcObject.PreBuiltPcmodel?.pcTemplate?.defaultgraphicCardId);
-        list = addDataToTable(gpu?.products[0], 'Carte Graphique', list);
+        list = addDataToTable(gpu?.products[0], 'Graphics Card', list);
         const cpu = cpus.find((e) => e.products[0].id === PcObject.PreBuiltPcmodel?.pcTemplate?.defaultprocessorId);
-        list = addDataToTable(cpu?.products[0], 'Processeur', list);
+        list = addDataToTable(cpu?.products[0], 'Processor', list);
         let ram: string[] = []
         let ramPrix = 0
         PcObject.PreBuiltPcmodel?.pcTemplate?.defaultramIdArray.forEach((ra) => {
@@ -215,7 +218,7 @@ useEffect(() => {
             ...list,
             {
                 composant_name: har.join(' , '),
-                composant_Type: "Stockage",
+                composant_Type: "Storage",
                 composant_Destails: "",
                 composant_Price: harPrix.toString() + ' TND',
             }
@@ -270,7 +273,7 @@ useEffect(() => {
             const uniqueId = generateHashId();
             const pc: CartItem = {
                 idd: uniqueId,
-                Title:"PC Personalisé",
+                Title:"Custom PC",
                 reduction:parseInt(PcObject.PreBuiltPcmodel?.pcTemplate?.discountOnPc.toString()),
                 motherboard: mb as unknown as Product,
                 processor: cpu as unknown as Product,
@@ -347,12 +350,12 @@ useEffect(() => {
 
                     {
                        PcObject.PreBuiltPcmodel?.pcTemplate?.discountOnPc&& parseInt(PcObject.PreBuiltPcmodel?.pcTemplate?.discountOnPc.toString())?<>
-                       <div className='text-xs mb-2'>Cette prix est sous une réduction </div>
+                       <div className='text-xs mb-2'>This price is discounted. </div>
                        </>:<></>
                     }
                     <div className=" mb-7 flex items-center gap-x-3">
                         <Button variant={"default"}   onClick={onAddToCart} className="flex items-center bg-purple-500 text-foreground hover:bg-[hsl(var(--accent))] focus:bg-[hsl(var(--accent))]">
-                           Ajouter au panier
+                           Add To Cart
                             <ShoppingCart size={20} />
                         </Button>
                     </div>
@@ -365,7 +368,7 @@ useEffect(() => {
             <div className='grid  grid-cols-2 md:grid-cols-6 gap-2'>
                 <div className='border p-3 rounded-lg mb-3  border-[hsl(var(--accent))]'>
                     <div className='flex flex-col h-full justify-between'>
-                        <div className='w-full text-center font-bold mb-3'>Carte mére </div>
+                        <div className='w-full text-center font-bold mb-3'>Motherboard </div>
                         
                          <NormalComp item={mb} motherboards={motherboards} setItem={setMB} />
 
@@ -379,7 +382,7 @@ useEffect(() => {
                 <div className='border p-3 rounded-lg mb-3  border-[hsl(var(--accent))]'>
                     <div className='flex flex-col h-full justify-between'>
                         
-                        <div className='w-full text-center font-bold mb-3'>Processeur</div>
+                        <div className='w-full text-center font-bold mb-3'>Processor</div>
                         
                         <NormalComp item={cpu} cpus={cpus} setItem={setcpu} />
 
@@ -389,7 +392,7 @@ useEffect(() => {
                 <div className='border p-3 rounded-lg mb-3  border-[hsl(var(--accent))]'>
                     <div className='flex flex-col h-full justify-between'>
                         
-                        <div className='w-full text-center font-bold mb-3'>Carte Graphique</div>
+                        <div className='w-full text-center font-bold mb-3'>Graphics Card</div>
                         
                         <NormalComp item={gpu} cpus={gpus} setItem={setgpu} />
 
@@ -399,7 +402,7 @@ useEffect(() => {
                 <div className='border p-3 rounded-lg mb-3  border-[hsl(var(--accent))]'>
                     <div className='flex flex-col h-full justify-between'>
                         
-                        <div className='w-full text-center font-bold mb-3'>Boitier</div>
+                        <div className='w-full text-center font-bold mb-3'>Case</div>
                         
                         <NormalComp item={cas} cases={cases} setItem={setCase} />
 
@@ -409,7 +412,7 @@ useEffect(() => {
                 <div className='border p-3 rounded-lg mb-3 border-[hsl(var(--accent))]'>
                     <div className='flex flex-col h-full justify-between'>
                         
-                        <div className='w-full text-center font-bold mb-3'>Boitier d&apos;alimentation</div>
+                        <div className='w-full text-center font-bold mb-3'>Power Supply</div>
                         
                         <NormalComp item={power} cpus={powersupplies} setItem={setPower} />
 
@@ -419,7 +422,7 @@ useEffect(() => {
                 <div className='border p-3 rounded-lg mb-3 border-[hsl(var(--accent))]'>
                     <div className='flex flex-col h-full justify-between'>
                         
-                        <div className='w-full text-center font-bold mb-3'>Systeme de Refroidissement</div>
+                        <div className='w-full text-center font-bold mb-3'>Cooling System</div>
                         
                         <NormalComp item={cool} cases={cooling} setItem={setCool} />
 
@@ -429,7 +432,7 @@ useEffect(() => {
                 <div className='border p-3 rounded-lg mb-3 border-[hsl(var(--accent))]'>
                     <div className='flex flex-col h-full justify-between'>
                         
-                        <div className='w-full text-center font-bold mb-3'>Stockage Primaire </div>
+                        <div className='w-full text-center font-bold mb-3'>Primary Storage </div>
                         
                         <NormalComp item={StockagePrimair} cases={diks} setItem={setStockagePrimair} />
 
@@ -439,7 +442,7 @@ useEffect(() => {
                 <div className='border p-3 rounded-lg mb-3  border-[hsl(var(--accent))]'>
                     <div className='flex flex-col h-full justify-between'>
                         
-                        <div className='w-full text-center font-bold mb-3'>Stockage Secondaire</div>
+                        <div className='w-full text-center font-bold mb-3'>Secondary Storage</div>
                         
                         <NormalComp item={StockageSecondaire} cases={diks} setItem={setStockageSecondaire} />
 
@@ -448,7 +451,7 @@ useEffect(() => {
                 </div>
             </div>
             
-           <div className='my-3 font-bold '>Rams</div> 
+           <div className='my-3 font-bold '>RAM</div> 
             <div className='grid  grid-cols-2 md:grid-cols-4 gap-2'>
      
                         

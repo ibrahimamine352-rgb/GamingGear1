@@ -45,6 +45,9 @@ const formSchema = z.object({
   categoryId: z.string().min(1),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
+  comingSoon: z.boolean().default(false).optional(),
+outOfStock: z.boolean().default(false).optional(),
+
   RgbTypeId:z.string().min(1),
   RgbType:z.string().optional(),
   manufacturerId:z.string().min(1),
@@ -108,6 +111,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     categoryId: '',
     isFeatured: false,
     isArchived: false,
+    comingSoon: false,
+    outOfStock: false,
     additionalDetails:[],
     SonsurroundId:'',
     RgbTypeId:'',
@@ -434,8 +439,37 @@ console.log(initialData)
                   </div>
                 </FormItem>
               )}
+            />                
+            <FormField
+              control={form.control}
+              name="comingSoon"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Coming Soon</FormLabel>
+                    <FormDescription>Mark this product as coming soon</FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />  
+            <FormField
+              control={form.control}
+              name="outOfStock"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Out of Stock</FormLabel>
+                    <FormDescription>Mark this product as out of stock</FormDescription>
+                  </div>
+                </FormItem>
+              )}
             />
-         
           </div>
           <Separator />
 

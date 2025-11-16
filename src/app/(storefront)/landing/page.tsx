@@ -30,6 +30,8 @@ import {
 import { useRouter } from "next/navigation";
 import { Product } from "@/types";
 import Link from "next/link";
+import { useLanguage } from "@/context/language-context";
+import { UI_TEXT } from "@/i18n/ui-text";
 
 
 // ------------------------------ CONFIG ------------------------------------
@@ -125,7 +127,9 @@ function Glow() {
 // ------------------------------ HERO --------------------------------------
 function Hero() {
   const router = useRouter();
-  
+  const { lang } = useLanguage();
+  const ui = UI_TEXT[lang];
+
   return (
     <section className="relative isolate" style={{ background: theme.bg }}>
       <Glow />
@@ -134,68 +138,64 @@ function Hero() {
           <div>
             <div className="mb-4 flex items-center gap-3">
               <Badge>
-                <Zap className="mr-2 h-3.5 w-3.5" /> Custom Builds, Tuned for Tunisia
+                <Zap className="mr-2 h-3.5 w-3.5" /> {ui.landingHeroBadge}
               </Badge>
             </div>
             <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-              Build <span style={{ color: theme.accent }}>Your Dream Rig</span>.
+              {/* you can keep the highlight span if you want */}
+              {ui.landingHeroTitleMain.split(ui.landingHeroTitleHighlight)[0]}
+              <span style={{ color: theme.accent }}>{ui.landingHeroTitleHighlight}</span>
+              {ui.landingHeroTitleMain.split(ui.landingHeroTitleHighlight)[1]}
               <br />
-              <span className="text-foreground/90">We make it fast, quiet, and reliable.</span>
+              <span className="text-foreground/90">
+                {ui.landingHeroLine2}
+              </span>
             </h1>
             <p className="mt-4 max-w-xl text-base text-foreground/70 sm:text-lg">
-              From budget beasts to liquid-cooled monsters — we design, assemble, and stress-test PCs that match your games, workflow, and budget.
+              {ui.landingHeroSubtitle}
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Button 
-                className="bg-white text-black hover:shadow-lg" 
+              <Button
+                className="bg-white text-black hover:shadow-lg"
                 onClick={() => {
                   track("cta_configure_click");
                   router.push("/build-pc");
                 }}
               >
-                <Cpu className="h-5 w-5" /> Configure My PC <ArrowRight className="h-4 w-4" />
+                <Cpu className="h-5 w-5" />
+                {ui.landingHeroCtaBuild}
+                <ArrowRight className="h-4 w-4" />
               </Button>
-              <Button 
-                className="border border-white/20 text-foreground hover:bg-white/10" 
+              <Button
+                className="border border-white/20 text-foreground hover:bg-white/10"
                 onClick={() => {
                   track("cta_bundles_click");
                   router.push("/shop");
                 }}
               >
-                <Monitor className="h-5 w-5" /> Browse Products
+                <Monitor className="h-5 w-5" />
+                {ui.landingHeroCtaBrowse}
               </Button>
             </div>
             <div className="mt-6 flex items-center gap-6 text-sm text-foreground/60">
-              <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4" /> 1–3 Year Warranty</div>
-              <div className="flex items-center gap-2"><Truck className="h-4 w-4" /> Delivery in Tunisia</div>
-              <div className="flex items-center gap-2"><Gauge className="h-4 w-4" /> Stress-Tested</div>
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4" /> {ui.landingHeroWarranty}
+              </div>
+              <div className="flex items-center gap-2">
+                <Truck className="h-4 w-4" /> {ui.landingHeroDelivery}
+              </div>
+              <div className="flex items-center gap-2">
+                <Gauge className="h-4 w-4" /> {ui.landingHeroStressTest}
+              </div>
             </div>
           </div>
-
-          <div className="relative">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <Card className="p-3">
-                <div className="aspect-[16/10] w-full overflow-hidden rounded-xl bg-gradient-to-br from-white/5 to-white/0">
-                  <div className="relative h-full w-full">
-                    <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_0%,rgba(138,92,255,0.25),transparent),radial-gradient(60%_50%_at_100%_100%,rgba(0,224,255,0.25),transparent)]" />
-                    <div className="absolute inset-0 flex items-end justify-end p-6">
-                      <div className="h-[85%] w-[65%] rounded-xl border border-border bg-black/30 backdrop-blur-md" />
-                    </div>
-                    <div className="absolute bottom-6 left-6 rounded-xl border border-border bg-card/70 p-3 text-foreground/80">
-                      <p className="text-xs">Featured Build</p>
-                      <p className="text-sm font-semibold">Ryzen 7 + RTX 4070 SUPER</p>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </motion.div>
-          </div>
+          {/* right side stays the same */}
         </div>
       </Container>
-      <div className="border-t border-border" />
     </section>
   );
 }
+
 
 // ---------------------------- VALUE PROPS ----------------------------------
 const propsData = [
@@ -265,6 +265,8 @@ function useAutoSpec({ budget, useCase, brand }: { budget: number; useCase: stri
 }
 
 function QuickConfiguratorReal() {
+  const { lang } = useLanguage();
+  const ui = UI_TEXT[lang];
   const [budget, setBudget] = useState(2400);
   const [useCase, setUseCase] = useState("esports");
   const [brand, setBrand] = useState("nvidia");
@@ -322,17 +324,23 @@ function QuickConfiguratorReal() {
     <section id="configure" className="relative" style={{ background: theme.bg }}>
       <Container className="py-12 sm:py-16">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">Start a Build</h2>
+          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
+            {ui.landingConfigTitle}
+          </h2>
           <div className="flex items-center gap-2 text-foreground/70 text-sm">
-            <Wallet className="h-4 w-4" /> Est. Price is live & based on parts
+            <Wallet className="h-4 w-4" />
+            {ui.landingConfigPriceHint}
           </div>
         </div>
-
+  
         <Card className="p-6">
           {/* Controls */}
           <div className="grid gap-6 md:grid-cols-3">
             <div>
-              <label className="text-foreground/80 text-sm flex items-center gap-2"><SlidersHorizontal className="h-4 w-4" />Budget (TND)</label>
+              <label className="text-foreground/80 text-sm flex items-center gap-2">
+                <SlidersHorizontal className="h-4 w-4" />
+                {ui.landingConfigBudgetLabel}
+              </label>
               <input
                 type="range"
                 min={1600}
@@ -342,34 +350,42 @@ function QuickConfiguratorReal() {
                 onChange={(e) => setBudget(parseInt(e.target.value))}
                 className="mt-3 w-full"
               />
-              <div className="mt-2 text-foreground font-semibold">{budget.toLocaleString()} TND</div>
+              <div className="mt-2 text-foreground font-semibold">
+                {budget.toLocaleString()} TND
+              </div>
             </div>
+  
             <div>
-              <label className="text-foreground/80 text-sm">Use Case</label>
+              <label className="text-foreground/80 text-sm">
+                {ui.landingConfigUseCaseLabel}
+              </label>
               <select
                 className="mt-3 w-full rounded-xl border border-border bg-card/70 p-2 text-foreground"
                 value={useCase}
                 onChange={(e) => setUseCase(e.target.value)}
               >
-                <option value="esports">Esports / 1080p</option>
-                <option value="aaa">AAA / 1440p</option>
-                <option value="creator">Creator + Gaming</option>
+                <option value="esports">{ui.landingConfigUseEsports}</option>
+                <option value="aaa">{ui.landingConfigUseAAA}</option>
+                <option value="creator">{ui.landingConfigUseCreator}</option>
               </select>
             </div>
+  
             <div>
-              <label className="text-foreground/80 text-sm">Brand Preference</label>
+              <label className="text-foreground/80 text-sm">
+                {ui.landingConfigBrandLabel}
+              </label>
               <select
                 className="mt-3 w-full rounded-xl border border-border bg-card/70 p-2 text-foreground"
                 value={brand}
                 onChange={(e) => setBrand(e.target.value)}
               >
-                <option value="nvidia">NVIDIA GPU</option>
-                <option value="amd">AMD (CPU/GPU)</option>
-                <option value="intel">Intel CPU</option>
+                <option value="nvidia">{ui.landingConfigBrandNvidia}</option>
+                <option value="amd">{ui.landingConfigBrandAmd}</option>
+                <option value="intel">{ui.landingConfigBrandIntel}</option>
               </select>
             </div>
           </div>
-
+  
           {/* Spec Preview */}
           <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <Spec label="CPU" value={spec.cpu} />
@@ -381,32 +397,51 @@ function QuickConfiguratorReal() {
             <Spec label="Monitor Suggestion" value={recMonitor} />
             <Spec label="Notes" value={spec.note} />
           </div>
-
+  
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
             <div className="text-foreground/80">
-              Estimated Price: <span className="text-foreground font-semibold">{estPrice.toLocaleString()} TND</span>
-              <span className="ml-2 text-xs text-foreground/50">incl. assembly & stress test</span>
+              {ui.landingConfigEstPrice}:{" "}
+              <span className="text-foreground font-semibold">
+                {estPrice.toLocaleString()} TND
+              </span>
+              <span className="ml-2 text-xs text-foreground/50">
+                {ui.landingConfigEstNote}
+              </span>
             </div>
             <div className="flex items-center gap-3">
               <Button
                 as="a"
                 href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(
                   `Hi Gaming Gear TN!
-Budget: ${budget} TND
-Use case: ${useCase}
-Brand: ${brand}
-Spec: ${spec.cpu}, ${spec.gpu}, ${spec.ram}, ${spec.storage}, ${spec.psu}, ${spec.chassis}
-Estimated Price: ${estPrice} TND
-Link: gaminggear.tn/landing#configure`
+  Budget: ${budget} TND
+  Use case: ${useCase}
+  Brand: ${brand}
+  Spec: ${spec.cpu}, ${spec.gpu}, ${spec.ram}, ${spec.storage}, ${spec.psu}, ${spec.chassis}
+  Estimated Price: ${estPrice} TND
+  Link: gaminggear.tn/landing#configure`
                 )}`}
                 target="_blank"
                 rel="noreferrer"
                 className="bg-white text-black"
-                onClick={() => track("cta_whatsapp_from_config", { budget, useCase, brand, estPrice })}
+                onClick={() =>
+                  track("cta_whatsapp_from_config", {
+                    budget,
+                    useCase,
+                    brand,
+                    estPrice,
+                  })
+                }
               >
-                Reserve on WhatsApp <MousePointerClick className="h-4 w-4" />
+                {ui.landingConfigWhatsapp}{" "}
+                <MousePointerClick className="h-4 w-4" />
               </Button>
-              <Button as="a" href={`mailto:${EMAIL}`} className="border border-white/20 text-foreground hover:bg-white/10" onClick={() => track("cta_email_from_config") }>
+  
+              <Button
+                as="a"
+                href={`mailto:${EMAIL}`}
+                className="border border-white/20 text-foreground hover:bg-white/10"
+                onClick={() => track("cta_email_from_config")}
+              >
                 Email This Spec
               </Button>
             </div>
@@ -415,6 +450,7 @@ Link: gaminggear.tn/landing#configure`
       </Container>
     </section>
   );
+  
 }
 
 function Spec({ label, value }: { label: string; value: string }) {

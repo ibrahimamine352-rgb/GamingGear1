@@ -49,6 +49,9 @@ const formSchema = z.object({
   stock: z.coerce.number().min(0).optional(),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
+  comingSoon: z.boolean().default(false).optional(),
+outOfStock: z.boolean().default(false).optional(),
+
   additionalDetails: z.object({ name: z.string(), value: z.string() }).array(),
 
 });
@@ -176,6 +179,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     stock: 0,
     isFeatured: false,
     isArchived: false,
+    comingSoon: false,
+    outOfStock: false,
     additionalDetails: [],
     PackProduct:{
       Clavier:[],
@@ -591,6 +596,21 @@ useEffect(()=>{
             />
             <FormField
               control={form.control}
+              name="comingSoon"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Coming Soon</FormLabel>
+                    <FormDescription>Mark this product as coming soon</FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="isArchived"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
@@ -612,7 +632,21 @@ useEffect(()=>{
                 </FormItem>
               )}
             />
-
+            <FormField
+              control={form.control}
+              name="outOfStock"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Out of Stock</FormLabel>
+                    <FormDescription>Mark this product as out of stock</FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
           </div>
 
 

@@ -43,6 +43,8 @@ const formSchema = z.object({
   categoryId: z.string().min(1),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
+  comingSoon: z.boolean().default(false).optional(),
+  outOfStock: z.boolean().default(false).optional(),
   
   brandId: z.string().min(1),
   typeId:  z.string().min(1),
@@ -114,6 +116,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     categoryId: '',
     isFeatured: false,
     isArchived: false,
+    comingSoon: false,
+    outOfStock: false,
     additionalDetails:[]
   }
 
@@ -236,17 +240,21 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 <FormItem>
                   <FormLabel>Category</FormLabel>
                   <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue defaultValue={field.value} placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+  <FormControl>
+    <SelectTrigger>
+      <SelectValue placeholder="Select a category" />
+    </SelectTrigger>
+  </FormControl>
+  <SelectContent position="popper" sideOffset={4} className="max-h-64 p-0">
+    <div className="max-h-64 overflow-y-auto">
+      {categories.map((category) => (
+        <SelectItem key={category.id} value={category.id}>
+          {category.name}
+        </SelectItem>
+      ))}
+    </div>
+  </SelectContent>
+</Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -351,7 +359,36 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 </FormItem>
               )}
             />
-         
+            <FormField
+              control={form.control}
+              name="comingSoon"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Coming Soon</FormLabel>
+                    <FormDescription>Mark this product as coming soon</FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="outOfStock"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Out of Stock</FormLabel>
+                    <FormDescription>Mark this product as out of stock</FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
           </div>
           <Separator />
 
@@ -387,7 +424,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               form1={form} 
               loading={loading} 
               setLoading={setLoading} 
-              data={...HarddiskBrand}
+              data={HarddiskBrand}
               fieldaAfficher="name"
               url="/api/harddisk/HarddiskBrand"
               formLab="brandId"
@@ -400,7 +437,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               form1={form} 
               loading={loading} 
               setLoading={setLoading} 
-              data={...HarddiskCapacity}
+              data={HarddiskCapacity}
               fieldaAfficher="name"
               url="/api/harddisk/HarddiskCapacity"
               formLab="capacityId"
@@ -412,7 +449,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               form1={form} 
               loading={loading} 
               setLoading={setLoading} 
-              data={...HarddiskComputerinterface}
+              data={HarddiskComputerinterface}
               fieldaAfficher="name"
               url="/api/harddisk/HarddiskComputerinterface"
               formLab="ComputerinterfaceId"
@@ -424,7 +461,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               form1={form} 
               loading={loading} 
               setLoading={setLoading} 
-              data={...HarddiskType}
+              data={HarddiskType}
               fieldaAfficher="name"
               url="/api/harddisk/HarddiskType"
               formLab="typeId"
