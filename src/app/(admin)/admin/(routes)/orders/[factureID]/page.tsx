@@ -1,5 +1,4 @@
 import Invoice from "@/components/front/Facture";
-import { CartItem } from "@/hooks/use-cart";
 import prismadb from "@/lib/prismadb";
 import { Product } from '@/types';
 
@@ -190,45 +189,42 @@ const ProductPage: React.FC<ProductPageProps> = async ({
         }
     })
     console.log(facture)
-    const itemsData: CartItem[] = (facture?.orderItems || []).map((e) => {
+    const itemsData = (facture?.orderItems || []).map((e) => {
         // Assuming you want to extract relevant properties from 'e' to create a new 'CartItem'
         const { id, name, dicountPrice, description, price, stock, category, mouseId, images, additionalDetails, ...otherProperties } = e.product;
         if (e.number == '' || "NaN") {
-            const cartItem: CartItem = {
-                id,
-                name,
-                additionalDetails,
-                description,
-                price: parseInt(price.toString()),
-                stock: parseInt(stock.toString()),
-                dicountPrice: parseInt(dicountPrice.toString()),
-                number: 1,
-                category,
-                images
-
-                // Include other properties as needed
+            const cartItem = {
+              id,
+              name,
+              additionalDetails,
+              description,
+              price: parseInt(price.toString()),
+              stock: parseInt(stock.toString()),
+              dicountPrice: parseInt(dicountPrice.toString()),
+              number: 1,
+              category,
+              images,
             };
             return cartItem;
-        } else {
-            const cartItem: CartItem = {
-                id,
-                name,
-                additionalDetails,
-                description,
-                price: parseInt(price.toString()),
-                dicountPrice: parseInt(dicountPrice.toString()),
-                stock: parseInt(stock.toString()),
-                number: parseInt(e.number),
-                category,
-                images
-
-                // Include other properties as needed
+          } else {
+            const cartItem = {
+              id,
+              name,
+              additionalDetails,
+              description,
+              price: parseInt(price.toString()),
+              dicountPrice: parseInt(dicountPrice.toString()),
+              stock: parseInt(stock.toString()),
+              number: parseInt(e.number),
+              category,
+              images,
             };
             return cartItem;
-        }
+          }
+          
         // Create a new 'CartItem' with the extracted properties
     });
-    const getpcs: () => Promise<CartItem[]> = async () => {
+    const getpcs: () => Promise<any[]> = async () => {
         const pcsz = await Promise.all((facture?.orderPc || []).map(async (e) => {
 
             const motherboard = await prismadb.product.findUnique({
@@ -417,9 +413,8 @@ const ProductPage: React.FC<ProductPageProps> = async ({
 
         return pcsz
     }
-    let pcs: CartItem[] = []
     const d = await getpcs()
-    let packs: CartItem[] = []
+    let packs: any[] = []
     if (facture && facture.PackOrders) {
         packs = facture.PackOrders.map((p) => {
             return {

@@ -81,7 +81,13 @@ export const PopFormModal = <TFormValues extends AnyValues = AnyValues>({
           <FormLabel>{label}</FormLabel>
           <div className="md:grid md:grid-cols-2 items-start gap-8">
             <div>
-            <Select onValueChange={(val) => form1.setValue(formLab as any, val)} value={form1.watch(formLab as any)}>
+            <Select
+  onValueChange={(val: string) => {
+    // convert to number if needed, otherwise keep as string
+    form1.setValue(formLab as any, IsNumber ? Number(val) : (val as any));
+  }}
+  value={String(form1.watch(formLab as any) ?? "")}
+>
   <FormControl>
     <SelectTrigger>
       <SelectValue placeholder={`Select ${formCControlName}`} />
@@ -96,13 +102,14 @@ export const PopFormModal = <TFormValues extends AnyValues = AnyValues>({
   >
     <div className="max-h-64 overflow-y-auto">
       {data.map((row: any) => (
-        <SelectItem key={row.id} value={row.id}>
+        <SelectItem key={row.id} value={String(row.id)}>
           {row[fieldaAfficher]}
         </SelectItem>
       ))}
     </div>
   </SelectContent>
 </Select>
+
 
               <FormMessage />
             </div>
@@ -116,7 +123,7 @@ export const PopFormModal = <TFormValues extends AnyValues = AnyValues>({
                 <DialogContent className="sm:max-w-[425px]">
                   <DialogHeader>
                     <DialogTitle>{label}</DialogTitle>
-                    <DialogDescription>Click save when you're done.</DialogDescription>
+                    <DialogDescription>Click save when you&apos;re done.</DialogDescription>
                   </DialogHeader>
 
                   <div className="grid gap-4 py-4">

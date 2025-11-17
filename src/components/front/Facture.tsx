@@ -5,7 +5,7 @@ import './facture.css'
 import { Order } from '@prisma/client';
 import Image from 'next/image';
 import html2pdf from 'html2pdf.js';
-const Invoice = (props: { invoiceData: CartItem[] ,order:Order|null}) => {
+const Invoice = (props: { invoiceData: any[]; order: Order | null }) => {
   const order=props.order
   const invoiceRef = useRef(null);
   const generatePDF = () => {
@@ -359,10 +359,10 @@ const Invoice = (props: { invoiceData: CartItem[] ,order:Order|null}) => {
   );
 };
 
-const calculateTotal = (items: CartItem[]) => {
-
-
-  return items.reduce((total, item) => total + item.number * item.price, 0);
+const calculateTotal = (items: any[]) => {
+  return items.reduce(
+    (total, item: any) => total + (item.number ?? 1) * (item.price ?? 0),
+    0
+  );
 };
-
 export default Invoice;

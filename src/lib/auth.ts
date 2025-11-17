@@ -65,10 +65,11 @@ export const authOptions: NextAuthOptions = {
 
         return {
           id: String(existingUser.id),
-          email: existingUser.email,
-          username: existingUser.username,
+          email: existingUser.email ?? "",
+          // 👇 ensure it's never null
+          username: existingUser.username ?? "",
           role: existingUser.role,
-        };
+        } as any; // <-- let NextAuth accept it without type whining
       },
     }),
   ],

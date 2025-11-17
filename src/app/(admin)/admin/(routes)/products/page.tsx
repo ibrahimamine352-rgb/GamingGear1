@@ -54,6 +54,8 @@ console.log(products)
     category: item.category.name,
 
     createdAt: format(item.createdAt, 'MMMM do, yyyy'),
+    comingSoon: item.comingSoon,
+    outOfStock: item.outOfStock,
   }));
 
   return (

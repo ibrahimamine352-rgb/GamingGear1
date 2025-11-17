@@ -34,8 +34,6 @@ const ProductsPage = async ({
     isArchived: item.isArchived,
     comingSoon: item.comingSoon,
     outOfStock: item.outOfStock,
-    comingSoon: item.comingSoon,
-    outOfStock: item.outOfStock,
     price: formatter.format(item.price.toNumber()),
     category: item.category.name,
     createdAt: format(item.createdAt, 'MMMM do, yyyy'),

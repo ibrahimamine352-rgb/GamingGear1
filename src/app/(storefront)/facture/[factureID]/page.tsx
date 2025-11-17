@@ -1,5 +1,4 @@
 import Invoice from "@/components/front/Facture";
-import { CartItem } from "@/hooks/use-cart";
 import prismadb from "@/lib/prismadb";
 import { Product } from '@/types';
 
@@ -99,11 +98,11 @@ interface ProductPageProps {
         }
     })
     console.log(facture)
-    const itemsData: CartItem[] = (facture?.orderItems || []).map((e) => {
+    const itemsData = (facture?.orderItems || []).map((e) => {
         // Assuming you want to extract relevant properties from 'e' to create a new 'CartItem'
         const { id, name, dicountPrice, description, price, stock, category, mouseId,images,additionalDetails, ...otherProperties } = e.product;
         if(e.number==''||"NaN"){
-            const cartItem: CartItem = {
+            const cartItem = {
                 id,
                 name,
               additionalDetails,
@@ -119,7 +118,7 @@ interface ProductPageProps {
               };
               return cartItem;
         }else{
-            const cartItem: CartItem = {
+            const cartItem = {
                 id,
                 name,
               additionalDetails,
@@ -137,7 +136,7 @@ interface ProductPageProps {
         }
         // Create a new 'CartItem' with the extracted properties
       });
-      const getpcs: () => Promise<CartItem[]>= async () =>{
+      const getpcs: () => Promise<any[]> = async () => {
         const pcsz =  await Promise.all((facture?.orderPc || []).map(async (e) => {
        
             const motherboard =await prismadb.product.findUnique({
@@ -327,7 +326,6 @@ interface ProductPageProps {
 
         return pcsz
       }
-      let pcs: CartItem[] =[]
      
       if(facture&&facture?.orderPc.length>0){
         const d= await getpcs()

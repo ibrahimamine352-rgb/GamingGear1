@@ -5,6 +5,8 @@ import { Column } from "@tanstack/react-table"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { useLanguage } from "@/context/language-context";
+import { UI_TEXT } from "@/i18n/ui-text";
 import {
   Command,
   CommandEmpty,
@@ -36,6 +38,8 @@ export function DataTableFacetedFilter<TData, TValue>({
   title,
   options,
 }: DataTableFacetedFilterProps<TData, TValue>) {
+  const { lang } = useLanguage();
+  const ui = UI_TEXT[lang];
   const facets = column?.getFacetedUniqueValues()
   const filterValue = column?.getFilterValue() as string
    const selectedValues = new Set(filterValue ? filterValue.split(',') : [])
