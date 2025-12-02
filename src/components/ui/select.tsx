@@ -51,15 +51,16 @@ const SelectContent = React.forwardRef<
   )}
   {...props}
 >
-      <SelectPrimitive.Viewport
-        className={cn(
-          "p-1",
-          position === "popper" &&
-            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
-        )}
-      >
-        {children}
-      </SelectPrimitive.Viewport>
+<SelectPrimitive.Viewport
+  className={cn(
+    "p-1 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700/60 scrollbar-track-transparent",
+    position === "popper" &&
+      "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
+  )}
+>
+  {children}
+</SelectPrimitive.Viewport>
+
     </SelectPrimitive.Content>
   </SelectPrimitive.Portal>
 ))
