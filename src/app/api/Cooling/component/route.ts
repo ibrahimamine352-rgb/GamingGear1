@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
-import { NextApiResponse } from 'next';
 import { checkItemGroupsCase } from '@/app/(storefront)/build-pc/_componenets/Case';
 import { checkItemGroupsCooling } from '@/app/(storefront)/build-pc/_componenets/Cooling';
+import { slugify } from "@/lib/slugify";
 
 export async function POST(
   req: Request,
@@ -14,7 +14,6 @@ export async function POST(
     const {
       name,
       price,
-      categoryId,
       images,
       isFeatured,
       isArchived,
@@ -28,6 +27,7 @@ export async function POST(
       description,
       stock,
       dicountPrice,
+      categoryId,       // ✅ needed for relation
     } = body;
 
     if (!name) {
@@ -45,7 +45,10 @@ export async function POST(
     if (!categoryId) {
       return new NextResponse("Category id is required", { status: 400 });
     }
-    console.log("dazdz");
+
+    // ✅ generate slug for Product
+    const baseSlug = slugify(name);
+    const slug = `${baseSlug}-${Date.now()}`;
 
     const product = await prismadb.cooling.create({
       data: {
@@ -56,16 +59,20 @@ export async function POST(
         Rgb: rgb,
         product: {
           create: {
+            slug,                       // ✅ required by Product model
             name,
             price: price,
             isFeatured: isFeatured,
             isArchived: isArchived,
-            comingSoon,      // include it
-  outOfStock,      
+            comingSoon,                 // ✅ keep flags
+            outOfStock,
             description: description,
-            categoryId: categoryId,
             stock: stock,
             dicountPrice: dicountPrice,
+            // ✅ use relation instead of raw categoryId
+            category: {
+              connect: { id: categoryId },
+            },
             images: {
               createMany: {
                 data: images.map((image: { url: string }) => ({
@@ -85,7 +92,7 @@ export async function POST(
   }
 };
 
-export async function GET(req: Request, res: NextApiResponse) {
+export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url || '', 'http://localhost');
 
@@ -155,7 +162,9 @@ export async function GET(req: Request, res: NextApiResponse) {
     const filterListParam = searchParams.get('filterList');
 
     if (filterListParam) {
-      const decodedFilterList = JSON.parse(decodeURIComponent(filterListParam)) as checkItemGroupsCooling;
+      const decodedFilterList = JSON.parse(
+        decodeURIComponent(filterListParam)
+      ) as checkItemGroupsCooling;
 
       const cpuFilters = [];
 
@@ -255,24 +264,20 @@ export async function GET(req: Request, res: NextApiResponse) {
     const products = await prismadb.product.findMany({
       where: whereClause,
       include: {
-      
         images: true,
       },
       orderBy: orderByClause,
       take: units,
       skip: page * units,
     });
-    const total=  await prismadb.product.count({
-      where: whereClause,
-    
-   
-    });
 
-    console.log();
+    const total = await prismadb.product.count({
+      where: whereClause,
+    });
 
     return NextResponse.json({ data: products, total });
   } catch (error) {
     console.error('[PRODUCTS_GET]', error);
-    res.status(500).json({ error: 'Internal error' });
+    return new NextResponse("Internal error", { status: 500 });
   }
 }

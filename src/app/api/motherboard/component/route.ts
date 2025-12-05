@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prismadb from "@/lib/prismadb";
+import { slugify } from "@/lib/slugify";
 
 // Define the filter type locally (do NOT import from a client component)
 type CheckItem = { id: number; searchKey: string };
@@ -12,7 +13,7 @@ type CheckItemGroups = {
 };
 
 /* =========================
-   CREATE (optional, unchanged in spirit but cleaned)
+   CREATE
    ========================= */
 export async function POST(req: Request) {
   try {
@@ -48,6 +49,10 @@ export async function POST(req: Request) {
     if (!ramslotsId) return new NextResponse("ramslotsId is required", { status: 400 });
     if (stock == null) return new NextResponse("stock is required", { status: 400 });
 
+    // ✅ SEO slug for Product (required by schema)
+    const baseSlug = slugify(name);
+    const slug = `${baseSlug}-${Date.now()}`;
+
     const motherboard = await prismadb.motherboard.create({
       data: {
         chipsetId,
@@ -57,18 +62,26 @@ export async function POST(req: Request) {
         ramslotsId,
         products: {
           create: {
+            slug, // ✅ required
             name,
             price,
             isFeatured: !!isFeatured,
             isArchived: !!isArchived,
-            comingSoon,     // include it
+            comingSoon,
             outOfStock,
             description,
-            categoryId,
             stock,
-            dicountPrice,
+            dicountPrice: dicountPrice ?? 0,
+            // ✅ connect Product -> Category relation
+            category: {
+              connect: { id: categoryId },
+            },
             additionalDetails: additionalDetails?.length
-              ? { createMany: { data: additionalDetails } }
+              ? {
+                  createMany: {
+                    data: [...additionalDetails],
+                  },
+                }
               : undefined,
             images: {
               createMany: {
@@ -118,7 +131,9 @@ export async function GET(req: Request) {
     if (q) {
       const words = q.split(/\s+/).filter(Boolean);
       if (words.length) {
-        where.AND = words.map((w) => ({ name: { contains: w, mode: "insensitive" } }));
+        where.AND = words.map((w) => ({
+          name: { contains: w, mode: "insensitive" },
+        }));
       } else {
         where.name = { contains: q, mode: "insensitive" };
       }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
+import { slugify } from '@/lib/slugify';
 
 export async function POST(
   req: Request,
@@ -44,7 +45,7 @@ export async function POST(
       DefaultSpeaker,
       DefaultManette,
       DefaultChair,
-      DefaultPack,              // OK to keep in destructuring; we just won't use it below
+      DefaultPack,              // still allowed in body, just unused
       additionalDetails = [],
     } = body;
 
@@ -63,25 +64,35 @@ export async function POST(
       return new NextResponse('Category id is required', { status: 400 });
     }
 
+    // ✅ SEO slug for Product
+    const baseSlug = slugify(name);
+    const slug = `${baseSlug}-${Date.now()}`;
+
     const product = await prismadb.accessoryPack.create({
       data: {
         Product: {
           create: {
+            slug,                     // ✅ required by Product model
             name,
-            price: price,
+            price,
             isFeatured,
             isArchived,
             comingSoon,
-          outOfStock,
+            outOfStock,
             description,
-            categoryId,
             stock,
-            dicountPrice,
-            additionalDetails: {
-              createMany: {
-                data: [...additionalDetails],
-              },
+            dicountPrice: dicountPrice ?? 0,
+            // ✅ connect to category relation instead of categoryId field
+            category: {
+              connect: { id: categoryId },
             },
+            additionalDetails: additionalDetails.length
+              ? {
+                  createMany: {
+                    data: [...additionalDetails],
+                  },
+                }
+              : undefined,
             images: {
               createMany: {
                 data: images.map((image: { url: string }) => ({
@@ -92,7 +103,7 @@ export async function POST(
           },
         },
 
-        // pointers & numeric fields valid on accessoryPack
+        // fields on accessoryPack
         discountOnPack,
         DefaultCamera,
         DefaultChair,
@@ -104,7 +115,7 @@ export async function POST(
         DefaultMousePad,
         DefaultScreen,
         DefaultSpeaker,
-        // ❌ DefaultPack removed here (not a field on accessoryPack)
+        // ❌ DefaultPack intentionally NOT sent here (not in DB model)
 
         // relation connects (now always arrays)
         Clavier: { connect: Clavier.map((i: any) => ({ id: i.id })) },

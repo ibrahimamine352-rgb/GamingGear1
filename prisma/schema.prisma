@@ -26,7 +26,8 @@ model User {
 model Product {
   id                  String           @id @default(uuid())
   categoryId          String
-  name                String
+  name                String           
+  slug                String?           @unique
   dicountPrice        Decimal          @default(0)
   description         String
   price               Decimal

@@ -1,124 +1,159 @@
-
 import { NextResponse } from 'next/server';
-
-
 import prismadb from '@/lib/prismadb';
-import { NextApiResponse } from 'next';
-import { CheckItemGroupsPower } from '@/app/(storefront)/build-pc/_componenets/Power';
+import { slugify } from '@/lib/slugify';
+
+// Local filter type – don't import from client components
+type CheckItem = { id: number; searchKey: string };
+type CheckItemGroupsPower = {
+  powersupplyMarque: CheckItem[];
+  psCertification: CheckItem[];
+};
 
 export async function POST(
   req: Request,
   { params }: { params: {} }
 ) {
   try {
-
-
     const body = await req.json();
 
-    const { name, price, categoryId, images, isFeatured, isArchived, comingSoon, outOfStock,   description, stock, additionalDetails,
+    const {
+      name,
+      price,
+      categoryId,
+      images,
+      isFeatured,
+      isArchived,
+      comingSoon,
+      outOfStock,
+      description,
+      stock,
+      additionalDetails = [],
       certification80ID,
       powersupplyMarqueID,
       modularity,
       Power,
+      dicountPrice = 0,
     } = body;
 
     if (!name) {
-      return new NextResponse("Name is required", { status: 400 });
+      return new NextResponse('Name is required', { status: 400 });
     }
 
     if (!images || !images.length) {
-      return new NextResponse("Images are required", { status: 400 });
+      return new NextResponse('Images are required', { status: 400 });
     }
 
-    if (!price) {
-      return new NextResponse("Price is required", { status: 400 });
+    if (price == null) {
+      return new NextResponse('Price is required', { status: 400 });
     }
 
     if (!categoryId) {
-      return new NextResponse("Category id is required", { status: 400 });
+      return new NextResponse('Category id is required', { status: 400 });
     }
 
+    if (stock == null) {
+      return new NextResponse('Stock is required', { status: 400 });
+    }
 
-    const cer= await prismadb.psCertification.findUnique({
-      where:{
-        id:certification80ID
-      }
-    })
-    console.log(cer)
+    if (!certification80ID) {
+      return new NextResponse('certification80ID is required', { status: 400 });
+    }
 
+    if (!powersupplyMarqueID) {
+      return new NextResponse('powersupplyMarqueID is required', { status: 400 });
+    }
+
+    // Optional sanity check (kept from your code)
+    await prismadb.psCertification.findUnique({
+      where: { id: certification80ID },
+    });
+
+    // SEO slug for Product
+    const baseSlug = slugify(name);
+    const slug = `${baseSlug}-${Date.now()}`;
 
     const product = await prismadb.powersupply.create({
       data: {
-        
-    
-        powersupplyMarqueId:powersupplyMarqueID,
+        powersupplyMarqueId: powersupplyMarqueID,
         modularity,
         Power,
-        certificationId:certification80ID
-        , 
+        certificationId: certification80ID,
         products: {
           create: {
-
-            name, price,
-            categoryId,
+            slug,
+            name,
+            price,
             isFeatured,
-            isArchived
-            , description
-            , stock,      
+            isArchived,
             comingSoon,
             outOfStock,
-              
+            description,
+            stock,
+            dicountPrice,
+
+            // connect category relation
+            category: {
+              connect: { id: categoryId },
+            },
+
             images: {
               createMany: {
-                data: [...images]
-              }},
-            additionalDetails: {
-              createMany: {
-                data: [...additionalDetails]
-              }
-
+                data: images.map((image: { url: string }) => ({
+                  url: image.url,
+                })),
+              },
             },
-          }
-        }
 
-      }
+            additionalDetails: additionalDetails.length
+              ? {
+                  createMany: {
+                    data: [...additionalDetails],
+                  },
+                }
+              : undefined,
+          },
+        },
+      },
     });
 
     return NextResponse.json(product);
   } catch (error) {
     console.log('[PRODUCTS_POST]', error);
-    return new NextResponse("Internal error", { status: 500 });
+    return new NextResponse('Internal error', { status: 500 });
   }
-};
+}
 
-export async function GET(req: Request, res: NextApiResponse) {
+export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url || '', 'http://localhost');
+    const { searchParams } = new URL(req.url);
 
-    const page = parseInt(searchParams.get('page') || '0');
-    const units = parseInt(searchParams.get('units') || '14') || 14;
+    const page = parseInt(searchParams.get('page') || '0', 10);
+    const units = parseInt(searchParams.get('units') || '14', 10) || 14;
     const q = searchParams.get('q') || '';
     const isFeatured = searchParams.get('isFeatured');
     const sort = searchParams.get('sort') || '';
     const maxDt = searchParams.get('maxDt') || '';
-    const minDt = searchParams.get('minDt') || ''; 
+    const minDt = searchParams.get('minDt') || '';
     const motherboardId = searchParams.get('motherboardId') || '';
 
-
-   
     const whereClause: Record<string, any> = {
-      isArchived:false ,
+      isArchived: false,
       powersupplies: {
         some: {},
       },
     };
-  
+
+    if (isFeatured) {
+      whereClause.isFeatured = true;
+    }
+
     if (q) {
       whereClause.name = {
         contains: q,
         mode: 'insensitive',
       };
     }
+
     let orderByClause: Record<string, 'asc' | 'desc'> = {};
 
     if (sort && sort.length > 0) {
@@ -127,81 +162,76 @@ export async function GET(req: Request, res: NextApiResponse) {
           orderByClause = {
             soldnumber: 'desc',
           };
-          break; 
-        case 'Les plus récents':
-          orderByClause = {
-            price: 'desc', // or 'desc' depending on your preference
-          };
           break;
         case 'Les plus récents':
           orderByClause = {
-            createdAt: 'asc', // or 'desc' depending on your preference
+            price: 'desc',
           };
           break;
         case 'Prix : Croissant':
           orderByClause = {
-            price: 'asc', // or 'desc' depending on your preference
+            price: 'asc',
           };
           break;
         case 'Prix : Décroissant':
           orderByClause = {
-            price: 'desc', // or 'desc' depending on your preference
+            price: 'desc',
           };
           break;
-        // Add more cases for other fields you want to support
         default:
-          // Default sorting if no match is found
           orderByClause = {
-           price: 'asc',
+            price: 'asc',
           };
       }
-    }else{
+    } else {
       orderByClause = {
-        price: 'asc', // or 'desc' depending on your preference
+        price: 'asc',
       };
     }
- 
 
     const filterListParam = searchParams.get('filterList');
-   
-     if (filterListParam) {
-      const decodedFilterList = JSON.parse(decodeURIComponent(filterListParam)) as CheckItemGroupsPower;
-    
-      const cpuFilters = [];
-    
-      const chipsetFilter = decodedFilterList.powersupplyMarque;
-      if (chipsetFilter && chipsetFilter.length > 0) {
+
+    if (filterListParam) {
+      const decodedFilterList = JSON.parse(
+        decodeURIComponent(filterListParam)
+      ) as CheckItemGroupsPower;
+
+      const cpuFilters: any[] = [];
+
+      const marqueFilter = decodedFilterList.powersupplyMarque;
+      if (marqueFilter && marqueFilter.length > 0) {
         cpuFilters.push({
           Marque: {
             name: {
-              in: decodedFilterList.powersupplyMarque.map(item => item.searchKey),
+              in: decodedFilterList.powersupplyMarque.map((item) => item.searchKey),
             },
           },
         });
       }
-    
-      const motherboardcpusupportFilter = decodedFilterList.psCertification;
-      if (motherboardcpusupportFilter && motherboardcpusupportFilter.length > 0) {
+
+      const certFilter = decodedFilterList.psCertification;
+      if (certFilter && certFilter.length > 0) {
         cpuFilters.push({
           certification: {
             name: {
-              in: decodedFilterList.psCertification.map(item => item.searchKey),
+              in: decodedFilterList.psCertification.map((item) => item.searchKey),
             },
           },
         });
       }
-      if(maxDt.length>0&&maxDt.length){
+
+      if (maxDt.length > 0) {
         whereClause.price = {
-          lte: parseInt(maxDt),
+          lte: parseInt(maxDt, 10),
         };
-        if (minDt.length>0&&minDt.length ) {
+        if (minDt.length > 0) {
           whereClause.price = {
             ...(whereClause.price || {}),
-            gte: parseInt(minDt),
+            gte: parseInt(minDt, 10),
           };
         }
       }
-     
+
       if (cpuFilters.length > 0) {
         whereClause.powersupplies = {
           some: {
@@ -211,32 +241,31 @@ export async function GET(req: Request, res: NextApiResponse) {
       }
     }
 
-    if(motherboardId.length>0){
-      const prossa=  await prismadb.compatibiltyProfile.findMany({
-        where:{
-          motherboards:{
-            some:{
-              productId:{
-                equals:motherboardId
-              }
-            }
-          }
+    if (motherboardId.length > 0) {
+      const prossa = await prismadb.compatibiltyProfile.findMany({
+        where: {
+          motherboards: {
+            some: {
+              productId: {
+                equals: motherboardId,
+              },
+            },
+          },
         },
-        include:{
-          powersupplys:true
-        }
-      })
+        include: {
+          powersupplys: true,
+        },
+      });
 
-      if(prossa.length>0){
-        whereClause.id={
+      if (prossa.length > 0) {
+        whereClause.id = {
           in: prossa
-    .flatMap((e) => e.powersupplys.map((ee) => ee.productId))
-    .filter((productId) => productId !== undefined), 
-        }
-        console.log( whereClause.id)
+            .flatMap((e) => e.powersupplys.map((ee) => ee.productId))
+            .filter((productId) => productId !== undefined),
+        };
       }
     }
-    console.log(whereClause)
+
     const products = await prismadb.product.findMany({
       where: whereClause,
       include: {
@@ -247,15 +276,14 @@ export async function GET(req: Request, res: NextApiResponse) {
       take: units,
       skip: page * units,
     });
-    const total=  await prismadb.product.count({
+
+    const total = await prismadb.product.count({
       where: whereClause,
-    
-   
     });
-    console.log();
-    return NextResponse.json({data:products,total});
+
+    return NextResponse.json({ data: products, total });
   } catch (error) {
     console.error('[PRODUCTS_GET]', error);
-    res.status(500).json({ error: 'Internal error' });
+    return new NextResponse('Internal error', { status: 500 });
   }
 }

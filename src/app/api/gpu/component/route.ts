@@ -1,22 +1,19 @@
-
 import { NextResponse } from 'next/server';
 
-
 import prismadb from '@/lib/prismadb';
-import { NextApiResponse } from 'next';
 import { checkItemGroupsGPU } from '@/app/(storefront)/build-pc/_componenets/GraphicCard';
-
+import { slugify } from "@/lib/slugify"; // ✅ added
 
 export async function POST(
   req: Request,
-  { params }: { params: { } }
+  { params }: { params: {} }
 ) {
   try {
     const body = await req.json();
 
     const {
       name,
-      price, 
+      price,
       categoryId,
       images,
       isFeatured,
@@ -55,59 +52,58 @@ export async function POST(
       return new NextResponse("Category id is required", { status: 400 });
     }
 
+    // ✅ generate slug for Product
+    const baseSlug = slugify(name);
+    const slug = `${baseSlug}-${Date.now()}`;
 
+    const motherboard = await prismadb.gpu.create({
+      data: {
+        gpuArchBrandId,
+        GpuBrandId,
+        graphiccardNameId,
+        products: {
+          create: {
+            slug,                // ✅ required now
+            name,
+            price: price,
+            isFeatured: isFeatured,
+            isArchived: isArchived,
+            comingSoon,          // keep flags
+            outOfStock,
+            description: description,
+            stock: stock,
+            dicountPrice: dicountPrice,
+            // ✅ use relation instead of raw categoryId
+            category: {
+              connect: { id: categoryId },
+            },
+            additionalDetails: additionalDetails
+              ? {
+                  createMany: {
+                    data: [...additionalDetails],
+                  },
+                }
+              : undefined,
+            images: {
+              createMany: {
+                data: images.map((image: { url: string }) => ({
+                  url: image.url,
+                })),
+              },
+            },
+          },
+        },
+      },
+    });
 
-
-
-   const motherboard = await prismadb.gpu.create({
-  data: {
-    gpuArchBrandId,
-    GpuBrandId,
-    graphiccardNameId,
-    products: {
-    create:{
-
-      name,
-    price: price,
-    isFeatured: isFeatured,
-    isArchived: isArchived,
-    comingSoon,      // include it
-     outOfStock,  
-    description:description,
-    categoryId: categoryId,
-    stock:stock,
-    dicountPrice:dicountPrice,
-    additionalDetails: {
-      createMany: {
-        data: [...additionalDetails]
-      }
-
-    },
-    images: {
-      createMany: {
-        data: images.map((image: { url: string }) => ({
-          url: image.url,
-        })),
-      }
-       // Replace any with the actual data types from your Prisma schema
-  
-   
-  },
-    }
-   }}
-});
-
-    
-
-    return  NextResponse.json(motherboard);
+    return NextResponse.json(motherboard);
   } catch (error) {
     console.log('[MOTHERBOARD_POST]', error);
     return new NextResponse("Internal error", { status: 500 });
   }
-};
+}
 
-
-export async function GET(req: Request, res: NextApiResponse) {
+export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url || '', 'http://localhost');
 
@@ -117,24 +113,23 @@ export async function GET(req: Request, res: NextApiResponse) {
     const isFeatured = searchParams.get('isFeatured');
     const sort = searchParams.get('sort') || '';
     const maxDt = searchParams.get('maxDt') || '';
-    const minDt = searchParams.get('minDt') || ''; 
+    const minDt = searchParams.get('minDt') || '';
     const motherboardId = searchParams.get('motherboardId') || '';
 
-
-   
     const whereClause: Record<string, any> = {
-      isArchived:false ,
+      isArchived: false,
       gpus: {
         some: {},
       },
     };
-  
+
     if (q) {
       whereClause.name = {
         contains: q,
         mode: 'insensitive',
       };
     }
+
     let orderByClause: Record<string, 'asc' | 'desc'> = {};
 
     if (sort && sort.length > 0) {
@@ -143,48 +138,47 @@ export async function GET(req: Request, res: NextApiResponse) {
           orderByClause = {
             soldnumber: 'desc',
           };
-          break; 
+          break;
         case 'Les plus récents':
           orderByClause = {
-            price: 'desc', // or 'desc' depending on your preference
+            price: 'desc',
           };
           break;
         case 'Les plus récents':
           orderByClause = {
-            createdAt: 'asc', // or 'desc' depending on your preference
+            createdAt: 'asc',
           };
           break;
         case 'Prix : Croissant':
           orderByClause = {
-            price: 'asc', // or 'desc' depending on your preference
+            price: 'asc',
           };
           break;
         case 'Prix : Décroissant':
           orderByClause = {
-            price: 'desc', // or 'desc' depending on your preference
+            price: 'desc',
           };
           break;
-        // Add more cases for other fields you want to support
         default:
-          // Default sorting if no match is found
           orderByClause = {
-           price: 'asc',
+            price: 'asc',
           };
       }
-    }else{
+    } else {
       orderByClause = {
-        price: 'asc', // or 'desc' depending on your preference
+        price: 'asc',
       };
     }
- 
 
     const filterListParam = searchParams.get('filterList');
-   
-     if (filterListParam) {
-      const decodedFilterList = JSON.parse(decodeURIComponent(filterListParam)) as checkItemGroupsGPU;
-    
+
+    if (filterListParam) {
+      const decodedFilterList = JSON.parse(
+        decodeURIComponent(filterListParam)
+      ) as checkItemGroupsGPU;
+
       const cpuFilters = [];
-    
+
       const chipsetFilter = decodedFilterList.gpuArchBrand;
       if (chipsetFilter && chipsetFilter.length > 0) {
         cpuFilters.push({
@@ -195,7 +189,7 @@ export async function GET(req: Request, res: NextApiResponse) {
           },
         });
       }
-    
+
       const motherboardgpusupportFilter = decodedFilterList.gpuBrand;
       if (motherboardgpusupportFilter && motherboardgpusupportFilter.length > 0) {
         cpuFilters.push({
@@ -206,6 +200,7 @@ export async function GET(req: Request, res: NextApiResponse) {
           },
         });
       }
+
       const graphiccardName = decodedFilterList.graphiccardName;
       if (graphiccardName && graphiccardName.length > 0) {
         cpuFilters.push({
@@ -216,18 +211,19 @@ export async function GET(req: Request, res: NextApiResponse) {
           },
         });
       }
-      if(maxDt.length>0&&maxDt.length){
+
+      if (maxDt.length > 0 && maxDt.length) {
         whereClause.price = {
           lte: parseInt(maxDt),
         };
-        if (minDt.length>0&&minDt.length ) {
+        if (minDt.length > 0 && minDt.length) {
           whereClause.price = {
             ...(whereClause.price || {}),
             gte: parseInt(minDt),
           };
         }
       }
-     
+
       if (cpuFilters.length > 0) {
         whereClause.gpus = {
           some: {
@@ -237,32 +233,34 @@ export async function GET(req: Request, res: NextApiResponse) {
       }
     }
 
-    if(motherboardId.length>0){
-      const prossa=  await prismadb.compatibiltyProfile.findMany({
-        where:{
-          motherboards:{
-            some:{
-              productId:{
-                equals:motherboardId
-              }
-            }
-          }
+    if (motherboardId.length > 0) {
+      const prossa = await prismadb.compatibiltyProfile.findMany({
+        where: {
+          motherboards: {
+            some: {
+              productId: {
+                equals: motherboardId,
+              },
+            },
+          },
         },
-        include:{
-          GPUs:true
-        }
-      })
+        include: {
+          GPUs: true,
+        },
+      });
 
-      if(prossa.length>0){
-        whereClause.id={
+      if (prossa.length > 0) {
+        whereClause.id = {
           in: prossa
-    .flatMap((e) => e.GPUs.map((ee) => ee.productId))
-    .filter((productId) => productId !== undefined), 
-        }
-        console.log( whereClause.id)
+            .flatMap((e) => e.GPUs.map((ee) => ee.productId))
+            .filter((productId) => productId !== undefined),
+        };
+        console.log(whereClause.id);
       }
     }
-    console.log(whereClause)
+
+    console.log(whereClause);
+
     const products = await prismadb.product.findMany({
       where: whereClause,
       include: {
@@ -273,15 +271,15 @@ export async function GET(req: Request, res: NextApiResponse) {
       take: units,
       skip: page * units,
     });
-    const total=  await prismadb.product.count({
+
+    const total = await prismadb.product.count({
       where: whereClause,
-    
-   
     });
+
     console.log();
-    return NextResponse.json({data:products,total});
+    return NextResponse.json({ data: products, total });
   } catch (error) {
     console.error('[PRODUCTS_GET]', error);
-    res.status(500).json({ error: 'Internal error' });
+    return new NextResponse('Internal error', { status: 500 });
   }
 }

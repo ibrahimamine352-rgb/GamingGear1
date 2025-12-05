@@ -2,6 +2,8 @@
 "use client"
 import Image from 'next/image'
 import React, { useState } from 'react'
+import { slugify } from "@/lib/slugify";
+
 import {
     Sheet,
     SheetContent,
@@ -10,24 +12,24 @@ import {
     SheetTitle,
     SheetTrigger,
   } from "@/components/ui/sheet"
-import { Product, Case, Cooling, Cpu, Gpu, HDD, Motherboard, Power, PreCustmizedPc, Prod, RAM } from '@/types';
+import { Product, Case, Cooling, Cpu, Gpu, HDD, Motherboard, Power, PreCustmizedPc, Prod, RAM, ProdCol } from '@/types';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 interface  nProps{
-item: Prod|undefined
-cases?: Case[];
-cooling?: Cooling[];
-cpus?: Cpu[];
-diks?: HDD[];
-gpus?: Gpu[];
-motherboards?: Motherboard[];
-powersupplies?: Power[];
-rams?: RAM[];
-setItem:(v:Prod | undefined)=>void
+item: ProdCol|undefined
+cases?: ProdCol[];
+cooling?: ProdCol[];
+cpus?: ProdCol[];
+diks?: ProdCol[];
+gpus?: ProdCol[];
+motherboards?: ProdCol[];
+powersupplies?: ProdCol[];
+rams?: ProdCol[];
+setItem:(v:ProdCol | undefined)=>void
 }
 
 
-const NormalComp: React.FC<nProps> = ({item, setItem,motherboards, gpus, cpus, cases, powersupplies, cooling, diks, rams }) => {
+const NormalComp2: React.FC<nProps> = ({item, setItem,motherboards, gpus, cpus, cases, powersupplies, cooling, diks, rams }) => {
   const [open , setOpen]=useState(false)
   return (
     <div>       
@@ -58,7 +60,7 @@ const NormalComp: React.FC<nProps> = ({item, setItem,motherboards, gpus, cpus, c
 
 
         </> : <>
-            <div className='flex justify-center py-10 border-b border-border'>
+            <div className='flex justify-center py-10 border-b-1 border-slate-200'>
                 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" id="Layer_1" x="0px" y="0px" width="52px" height="52px" viewBox="0 0 512 512" enable-background="new 0 0 512 512">
                     <g>
                         <path d="M31.5,34.5v443h449v-443H31.5z M57.5,61.5h399v316.478l-57.26-99.177L323,146.747l-76.24,132.053l-23.813,41.246   l-0.706-1.223L179.5,244.795l-42.741,74.029L98.264,385.5H57.5V61.5z" />
@@ -93,12 +95,12 @@ const NormalComp: React.FC<nProps> = ({item, setItem,motherboards, gpus, cpus, c
        {motherboards.map((mot)=>{
         return(<>
         {
-            mot.products[0].id!=item.id?<>
+            mot.id!=item.id?<>
             <div className='flex flex-col h-full justify-end '>
               <div className='pb-3'>
               <div className="aspect-square rounded-xl  relative">
                 <Image
-                    src={mot.products[0].images[0].url}
+                    src={mot.images[0].url}
                     alt=""
                     fill
                     className="aspect-square object-cover rounded-md rounded-b-none"
@@ -107,12 +109,12 @@ const NormalComp: React.FC<nProps> = ({item, setItem,motherboards, gpus, cpus, c
 
             </div>
          
-            <div className="dark:text-[hsl(var(--accent))]">   {mot.products[0].name}</div> 
-    {   mot.products[0].price.toString()} TND <br />
+            <div className="dark:text-[hsl(var(--accent))]">   {mot.name}</div> 
+    {   mot.price.toString()} TND <br />
               </div>
           
-            <Button variant={'outline'} onClick={()=>{setItem(mot.products[0]);setOpen(false)}}>Selectionner</Button>
-            <Link target='_blanc' className='text-sm underline my-1' href={"/product/"+mot.products[0].id}>
+            <Button variant={'outline'} onClick={()=>{setItem(mot);setOpen(false)}}>Selectionner</Button>
+            <Link target='_blanc' className='text-sm underline my-1' href={"/product/"+mot.id}>
 Voir la page de produit
 </Link>
             </div>
@@ -143,12 +145,12 @@ Voir la page de produit
        {cpus.map((mot)=>{
         return(<>
         {
-            mot.products[0].id!=item.id?<>
+            mot.id!=item.id?<>
             <div className='flex flex-col h-full justify-end '>
               <div className='pb-3'>
               <div className="aspect-square rounded-xl  relative">
                 <Image
-                    src={mot.products[0].images[0].url}
+                    src={mot.images[0].url}
                     alt=""
                     fill
                     className="aspect-square object-cover rounded-md rounded-b-none"
@@ -157,12 +159,13 @@ Voir la page de produit
 
             </div>
          
-            <div className="dark:text-[hsl(var(--accent))]">   {mot.products[0].name}</div> 
-    {   mot.products[0].price.toString()} TND <br />
+            <div className="dark:text-[hsl(var(--accent))]">   {mot.name}</div> 
+    {   mot.price.toString()} TND <br />
               </div>
           
-            <Button variant={'outline'} onClick={()=>{setItem(mot.products[0]);setOpen(false)}}>Selectionner</Button>
-            <Link target='_blanc' className='text-sm underline my-1' href={"/product/"+mot.products[0].id}>
+            <Button variant={'outline'} onClick={()=>{setItem(mot);setOpen(false)}}>Selectionner</Button>
+            <Link target='_blanc' className='text-sm underline my-1' href={`/product/${slugify(mot.name)}-${mot.id}`}
+            >
 Voir la page de produit
 </Link>
             </div>
@@ -193,12 +196,12 @@ Voir la page de produit
        {cases.map((mot)=>{
         return(<>
         {
-            mot.product[0].id!=item.id?<>
+            mot.id!=item.id?<>
             <div className='flex flex-col h-full justify-end '>
               <div className='pb-3'>
               <div className="aspect-square rounded-xl  relative">
                 <Image
-                    src={mot.product[0].images[0].url}
+                    src={mot.images[0].url}
                     alt=""
                     fill
                     className="aspect-square object-cover rounded-md rounded-b-none"
@@ -207,12 +210,13 @@ Voir la page de produit
 
             </div>
          
-            <div className="dark:text-[hsl(var(--accent))]">   {mot.product[0].name}</div> 
-    {   mot.product[0].price.toString()} TND <br />
+            <div className="dark:text-[hsl(var(--accent))]">   {mot.name}</div> 
+    {   mot.price.toString()} TND <br />
               </div>
           
-            <Button variant={'outline'} onClick={()=>{setItem(mot.product[0]);setOpen(false)}}>Selectionner</Button>
-            <Link target='_blanc' className='text-sm underline my-1' href={"/product/"+mot.product[0].id}>
+            <Button variant={'outline'} onClick={()=>{setItem(mot);setOpen(false)}}>Selectionner</Button>
+            <Link target='_blanc' className='text-sm underline my-1' href={`/product/${slugify(mot.name)}-${mot.id}`}
+            >
 Voir la page de produit
 </Link>
             </div>
@@ -244,7 +248,7 @@ Voir la page de produit
 </div>
 </>:<>
 <Sheet  onOpenChange={(e)=>setOpen(e)} open={open}>
-  <SheetTrigger className='w-full'><Button variant={'outline'} className='w-full mt-3  border-[hsl(var(--accent))] bg-opacity-70'>Add a Product</Button></SheetTrigger>
+  <SheetTrigger className='w-full'><Button variant={'outline'} className='w-full mt-3 border-[hsl(var(--accent))] bg-opacity-70 hover:border-[hsl(var(--ring))]'>Add a Product</Button></SheetTrigger>
   <SheetContent >
     <SheetHeader>
       <SheetTitle>Vous pouver selection un de ces Produits.</SheetTitle>
@@ -263,7 +267,7 @@ Voir la page de produit
               <div className='pb-3'>
               <div className="aspect-square rounded-xl  relative">
                 <Image
-                    src={mot.products[0].images[0].url}
+                    src={mot.images[0].url}
                     alt=""
                     fill
                     className="aspect-square object-cover rounded-md rounded-b-none"
@@ -272,12 +276,12 @@ Voir la page de produit
 
             </div>
          
-            <div className="dark:text-[hsl(var(--accent))]">   {mot.products[0].name}</div> 
-    {   mot.products[0].price.toString()} TND <br />
+            <div className="dark:text-[hsl(var(--accent))]">   {mot.name}</div> 
+    {   mot.price.toString()} TND <br />
               </div>
           
-            <Button variant={'outline'} onClick={()=>{setItem(mot.products[0]);setOpen(false)}}>Selectionner</Button>
-            <Link target='_blanc' className='text-sm underline my-1' href={"/product/"+mot.products[0].id}>
+            <Button variant={'outline'} onClick={()=>{setItem(mot);setOpen(false)}}>Selectionner</Button>
+            <Link target='_blanc' className='text-sm underline my-1' href={"/product/"+mot.id}>
 Voir la page de produit
 </Link>
             </div>
@@ -299,4 +303,4 @@ Voir la page de produit
   )
 }
 
-export default NormalComp
+export default NormalComp2

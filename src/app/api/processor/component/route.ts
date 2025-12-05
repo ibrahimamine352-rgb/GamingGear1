@@ -1,10 +1,17 @@
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
-import { checkItemGroupsCPU } from '@/app/(storefront)/build-pc/_componenets/Processor';
+import { slugify } from '@/lib/slugify';
+
+// Define filter type locally (don't import from client components)
+type CheckItem = { id: number; searchKey: string };
+type CheckItemGroupsCPU = {
+  cPUSupport: CheckItem[];
+  processorModel: CheckItem[];
+};
 
 // ------------------------------
 // POST  /api/processor/component
-// Create ONE product + its OWN CPU row (no shared Processor).
+// Create ONE product + its OWN CPU row.
 // ------------------------------
 export async function POST(
   req: Request,
@@ -23,7 +30,7 @@ export async function POST(
       comingSoon,
       outOfStock,
       processorModelId,
-      cpusupportId,       // <-- IMPORTANT: matches your form field name
+      cpusupportId, // matches your form field name
       description,
       stock,
       additionalDetails,
@@ -36,8 +43,9 @@ export async function POST(
     if (!categoryId) return new NextResponse('Category id is required', { status: 400 });
     if (!processorModelId) return new NextResponse('Processor model is required', { status: 400 });
     if (!cpusupportId) return new NextResponse('CPU support is required', { status: 400 });
+    if (stock === undefined || stock === null) return new NextResponse('Stock is required', { status: 400 });
 
-    // 1) Create a dedicated CPU row for THIS product (do not reuse a shared one)
+    // 1) Create a dedicated CPU row for THIS product
     const cpu = await prismadb.processor.create({
       data: {
         processorModel: { connect: { id: processorModelId } },
@@ -45,12 +53,16 @@ export async function POST(
       },
     });
 
+    // SEO slug for Product
+    const baseSlug = slugify(name);
+    const slug = `${baseSlug}-${Date.now()}`;
+
     // 2) Create the product
     const product = await prismadb.product.create({
       data: {
+        slug,
         name,
         price,
-        categoryId,
         description,
         stock,
         dicountPrice: dicountPrice ?? 0,
@@ -59,20 +71,27 @@ export async function POST(
         comingSoon: !!comingSoon,
         outOfStock: !!outOfStock,
 
+        // connect category relation
+        category: {
+          connect: { id: categoryId },
+        },
+
         images: {
           createMany: {
             data: images.map((img: { url: string }) => ({ url: img.url })),
           },
         },
 
-        additionalDetails: {
-          createMany: {
-            data: (additionalDetails ?? []).map((d: { name: string; value: string }) => ({
-              name: d.name,
-              value: d.value,
-            })),
-          },
-        },
+        additionalDetails: additionalDetails?.length
+          ? {
+              createMany: {
+                data: additionalDetails.map((d: { name: string; value: string }) => ({
+                  name: d.name,
+                  value: d.value,
+                })),
+              },
+            }
+          : undefined,
       },
     });
 
@@ -81,7 +100,7 @@ export async function POST(
       where: { id: product.id },
       data: {
         cpus: {
-          set: [{ id: cpu.id }], // replaces any existing CPU links for safety
+          set: [{ id: cpu.id }],
         },
       },
     });
@@ -89,7 +108,12 @@ export async function POST(
     // Optionally return the full product with relations
     const full = await prismadb.product.findUnique({
       where: { id: product.id },
-      include: { images: true, additionalDetails: true, cpus: { include: { processorModel: true, cpusupport: true } } },
+      include: {
+        images: true,
+        additionalDetails: true,
+        cpus: { include: { processorModel: true, cpusupport: true } },
+        category: true,
+      },
     });
 
     return NextResponse.json(full);
@@ -111,7 +135,7 @@ export async function GET(req: Request) {
     const units = parseInt(searchParams.get('units') || '14', 10) || 14;
     const q = searchParams.get('q') || '';
 
-    const isFeatured = searchParams.get('isFeatured'); // (kept in case you use it later)
+    const isFeatured = searchParams.get('isFeatured');
     const sort = searchParams.get('sort') || '';
     const maxDt = searchParams.get('maxDt') || '';
     const minDt = searchParams.get('minDt') || '';
@@ -120,9 +144,13 @@ export async function GET(req: Request) {
     const whereClause: Record<string, any> = {
       isArchived: false,
       cpus: {
-        some: {}, // we only want products that have at least one CPU linked
+        some: {},
       },
     };
+
+    if (isFeatured) {
+      whereClause.isFeatured = true;
+    }
 
     if (q) {
       whereClause.name = { contains: q, mode: 'insensitive' };
@@ -136,7 +164,7 @@ export async function GET(req: Request) {
           orderByClause = { soldnumber: 'desc' };
           break;
         case 'Les plus récents':
-          orderByClause = { price: 'desc' }; // you might want createdAt: 'desc' instead
+          orderByClause = { price: 'desc' };
           break;
         case 'Prix : Croissant':
           orderByClause = { price: 'asc' };
@@ -154,7 +182,9 @@ export async function GET(req: Request) {
     // Filters
     const filterListParam = searchParams.get('filterList');
     if (filterListParam) {
-      const decodedFilterList = JSON.parse(decodeURIComponent(filterListParam)) as checkItemGroupsCPU;
+      const decodedFilterList = JSON.parse(
+        decodeURIComponent(filterListParam)
+      ) as CheckItemGroupsCPU;
 
       const cpuFilters: any[] = [];
 
@@ -170,7 +200,7 @@ export async function GET(req: Request) {
         });
       }
 
-      // Filter by Processor Model (e.g., AMD, Intel)
+      // Filter by Processor Model (e.g., Ryzen 7, i5)
       const processorModelFilter = decodedFilterList.processorModel;
       if (processorModelFilter && processorModelFilter.length > 0) {
         cpuFilters.push({
@@ -186,7 +216,10 @@ export async function GET(req: Request) {
       if (maxDt.length > 0) {
         whereClause.price = { lte: parseInt(maxDt, 10) };
         if (minDt.length > 0) {
-          whereClause.price = { ...(whereClause.price || {}), gte: parseInt(minDt, 10) };
+          whereClause.price = {
+            ...(whereClause.price || {}),
+            gte: parseInt(minDt, 10),
+          };
         }
       }
 

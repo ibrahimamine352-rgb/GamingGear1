@@ -1,6 +1,7 @@
 import prismadb from "@/lib/prismadb";
 import Image from "next/image";
 import Link from "next/link";
+import { slugify } from "@/lib/slugify";
 
 export const revalidate = 60;
 
@@ -43,10 +44,11 @@ export default async function FullSetupPage() {
               const img = p.images?.[0]?.url ?? "/placeholder.png";
               return (
                 <Link
-                  key={p.id}
-                  href={`/product/${p.id}`}
-                  className="group rounded-2xl border border-border bg-card hover:border-accent hover:shadow-xl transition p-4"
-                >
+  key={p.id}
+  href={`/product/${slugify(p.name)}-${p.id}`}
+  className="group rounded-2xl border border-border bg-card hover:border-accent hover:shadow-xl transition p-4"
+>
+
                   <div className="relative md:aspect-square aspect-[4/3] overflow-hidden rounded-xl mb-4">
                     <Image
                       src={img}

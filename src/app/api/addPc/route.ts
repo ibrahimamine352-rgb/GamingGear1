@@ -1,33 +1,46 @@
 import { NextResponse } from 'next/server';
+import { slugify } from "@/lib/slugify";
 
 import prismadb from '@/lib/prismadb';
 
 export async function POST(
   req: Request,
-  {  }: {  }
+  { }: { }
 ) {
   try {
-  
-
     const body = await req.json();
 
-    const { name, price, categoryId,  images, isFeatured, isArchived ,comingSoon,
+    const {
+      name,
+      price,
+      categoryId,
+      images,
+      isFeatured,
+      isArchived,
+      comingSoon,
       outOfStock,
-       description,stock,additionalDetails,  caseId,
-        graphicCardId,
-        motherBoardId,
-        powerSupplyId,
-        processorId,
-        hardDiskArray,
-        ramIdArray,
-        defaultcaseId,
-              defaultgraphicCardId,
-              defaulthardDiskArray,
-              defaultmotherBoardId,
-              defaultpowerSupplyId,
-              defaultprocessorId,
-              defaultramIdArray,defaultcooling,
-              discountOnPc,coolings} = body;
+      description,
+      stock,
+      additionalDetails,
+      caseId,
+      graphicCardId,
+      motherBoardId,
+      powerSupplyId,
+      processorId,
+      hardDiskArray,
+      ramIdArray,
+      defaultcaseId,
+      defaultgraphicCardId,
+      defaulthardDiskArray,
+      defaultmotherBoardId,
+      defaultpowerSupplyId,
+      defaultprocessorId,
+      defaultramIdArray,
+      defaultcooling,
+      discountOnPc,
+      coolings
+    } = body;
+
     if (!additionalDetails) {
       return new NextResponse("additionalDetails is required", { status: 400 });
     }
@@ -43,120 +56,117 @@ export async function POST(
       return new NextResponse("Images are required", { status: 400 });
     }
 
-  
-
     if (!categoryId) {
       return new NextResponse("Category id is required", { status: 400 });
     }
 
-   
-
-   
+    const baseSlug = slugify(name);
+    const slug = `${baseSlug}-${Date.now()}`;
 
     const product = await prismadb.preBuiltPcmodel.create({
-      data: 
-      {
-        product:{
-            create:{
-                stock:0,
-                name,
-                price,
-                isFeatured,
-                isArchived,
-                comingSoon,
-                outOfStock,
-                categoryId,
-                description,
-                
-                additionalDetails:{
-                  createMany:{
-                   data: [...additionalDetails]
-                  }
-        
-                },
-                images: {
-                  createMany: {
-                    data: [
-                      ...images.map((image: { url: string }) => image),
-                    ],
-                  },
-                },
+      data: {
+        product: {
+          create: {
+            slug,
+            stock: stock ?? 0,
+            name,
+            price,
+            isFeatured,
+            isArchived,
+            comingSoon,
+            outOfStock,
+            description,
+
+            // ✅ use relation instead of raw categoryId
+            category: {
+              connect: { id: categoryId },
+            },
+
+            additionalDetails: {
+              createMany: {
+                data: [...additionalDetails]
+              }
+            },
+            images: {
+              createMany: {
+                data: [
+                  ...images.map((image: { url: string }) => image),
+                ],
               },
+            },
+          },
         },
-        pcTemplate:{
-            create:{
-              defaultcaseId,
-              defaultgraphicCardId,
-              defaulthardDiskArray,
-              defaultmotherBoardId,
-              defaultpowerSupplyId,
-              defaultprocessorId,
-              defaultramIdArray,
-              defaultcooling,
-              discountOnPc:discountOnPc??0,
+        pcTemplate: {
+          create: {
+            defaultcaseId,
+            defaultgraphicCardId,
+            defaulthardDiskArray,
+            defaultmotherBoardId,
+            defaultpowerSupplyId,
+            defaultprocessorId,
+            defaultramIdArray,
+            defaultcooling,
+            discountOnPc: discountOnPc ?? 0,
 
-              motherBoardId: {
-                create: motherBoardId.map((pcCase: any) => ({
-                  productId:pcCase
-                })),
-              
-              },
-              processorId: {
-                create: processorId.map((pcCase: any) => ({
-                  productId:pcCase
-                })),
-              },
-              graphicCardId: {
-                create: graphicCardId.map((pcCase: any) => ({
-                  productId:pcCase
-                })),
-              },
-              powerSupplyId: {
-                create: powerSupplyId.map((pcCase: any) => ({
-                  productId:pcCase
-                })),
-              },
-              caseId: {
-                create: caseId.map((pcCase: any) => ({
-                  productId:pcCase
-                })),
-              },
-              cooling: {
-                create: coolings.map((pcCase: any) => ({
-                  productId:pcCase
-                })),
-              },
-              ramIdArray: {
-                create: ramIdArray.map((ramSlot: { rams: string[],defaultId:string }) => ({
-                  Components: {
-                    create: ramSlot.rams.map((ram) => ({
-                      productId:ram
-                    })),
-                  },
-                  defaultId:ramSlot.defaultId
-                })),
-              },
-              hardDiskArray: {
-                create: hardDiskArray.map((storage: { disks: string[],defaultId:string }) => ({
-                  Components: {
-                    create: storage.disks.map((disk) => ({
-                      productId:disk
-                    })),
-                  },
-                  defaultId:storage.defaultId
-                })),
-              },
-
-                
-            }
+            motherBoardId: {
+              create: motherBoardId.map((pcCase: any) => ({
+                productId: pcCase
+              })),
+            },
+            processorId: {
+              create: processorId.map((pcCase: any) => ({
+                productId: pcCase
+              })),
+            },
+            graphicCardId: {
+              create: graphicCardId.map((pcCase: any) => ({
+                productId: pcCase
+              })),
+            },
+            powerSupplyId: {
+              create: powerSupplyId.map((pcCase: any) => ({
+                productId: pcCase
+              })),
+            },
+            caseId: {
+              create: caseId.map((pcCase: any) => ({
+                productId: pcCase
+              })),
+            },
+            cooling: {
+              create: coolings.map((pcCase: any) => ({
+                productId: pcCase
+              })),
+            },
+            ramIdArray: {
+              create: ramIdArray.map((ramSlot: { rams: string[], defaultId: string }) => ({
+                Components: {
+                  create: ramSlot.rams.map((ram) => ({
+                    productId: ram
+                  })),
+                },
+                defaultId: ramSlot.defaultId
+              })),
+            },
+            hardDiskArray: {
+              create: hardDiskArray.map((storage: { disks: string[], defaultId: string }) => ({
+                Components: {
+                  create: storage.disks.map((disk) => ({
+                    productId: disk
+                  })),
+                },
+                defaultId: storage.defaultId
+              })),
+            },
+          }
         }
       }
     });
-  
+
     return NextResponse.json(product);
   } catch (error) {
     console.log('[PRODUCTS_POST]', error);
-    return new NextResponse("Internal error "+error, { status: 500 });
+    return new NextResponse("Internal error " + error, { status: 500 });
   }
 };
 
@@ -164,18 +174,14 @@ export async function DELETE(
   req: Request,
 ) {
   try {
- 
-
-
     const products = await prismadb.pcTemplate.deleteMany();
-  
+
     return NextResponse.json(products);
   } catch (error) {
     console.log('[PRODUCTS_GET]', error);
     return new NextResponse("Internal error", { status: 500 });
   }
 };
-
 
 export async function GET(req: Request) {
   try {
@@ -208,4 +214,3 @@ export async function GET(req: Request) {
     return new NextResponse("Internal error", { status: 500 });
   }
 }
-;

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { slugify } from "@/lib/slugify";
 
 // Feel free to replace with your own card component later
 export default function FeaturedPrebuiltClient({
@@ -46,10 +47,11 @@ export default function FeaturedPrebuiltClient({
         const img = p.images?.[0]?.url ?? "/placeholder.png";
         return (
           <Link
-            key={p.id}
-            href={`/product/${p.id}`}
-            className="group rounded-2xl border border-border bg-card p-4 hover:border-accent transition"
-          >
+  key={p.id}
+  href={`/product/${slugify(p.name)}-${p.id}`}
+  className="group rounded-2xl border border-border bg-card p-4 hover:border-accent transition"
+>
+
             <div className="relative aspect-[4/3] overflow-hidden rounded-xl mb-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={img} alt={p.name} className="h-full w-full object-cover group-hover:scale-[1.02] transition" />

@@ -1,13 +1,10 @@
-
 import { NextResponse } from 'next/server';
-
-
 import prismadb from '@/lib/prismadb';
-
+import { slugify } from "@/lib/slugify";
 
 export async function POST(
   req: Request,
-  { params }: { params: { } }
+  { params }: { params: {} }
 ) {
   try {
     const body = await req.json();
@@ -33,7 +30,7 @@ export async function POST(
       description,
       stock,
       dicountPrice,
-      additionalDetails
+      additionalDetails,
     } = body;
 
     if (!name) {
@@ -44,95 +41,83 @@ export async function POST(
       return new NextResponse("Images are required", { status: 400 });
     }
 
-    if (!price) {
+    if (price === undefined || price === null) {
       return new NextResponse("Price is required", { status: 400 });
     }
 
     if (!categoryId) {
       return new NextResponse("Category id is required", { status: 400 });
     }
-  
-    if (!stock) {
-      return new NextResponse("Category id is required", { status: 400 });
+
+    if (stock === undefined || stock === null) {
+      return new NextResponse("Stock is required", { status: 400 });
     }
 
+    // ✅ SEO slug for Product
+    const baseSlug = slugify(name);
+    const slug = `${baseSlug}-${Date.now()}`;
 
+    const laptop = await prismadb.laptop.create({
+      data: {
+        manufacturerId,
+        ProcesseurId,
+        SystemId,
+        GraphiccardId,
+        HardiskId,
+        ScreenSizeId,
+        RefreshRateId,
+        memoryId,
+        TouchScreen,
+        product: {
+          create: {
+            slug, // ✅ required slug in Product
+            name,
+            price,
+            isFeatured,
+            isArchived,
+            comingSoon,
+            outOfStock,
+            description,
+            stock,
+            dicountPrice: dicountPrice ?? 0,
+            // ✅ connect to category relation
+            category: {
+              connect: { id: categoryId },
+            },
+            additionalDetails: additionalDetails
+              ? {
+                  createMany: {
+                    data: [...additionalDetails],
+                  },
+                }
+              : undefined,
+            images: {
+              createMany: {
+                data: images.map((image: { url: string }) => ({
+                  url: image.url,
+                })),
+              },
+            },
+          },
+        },
+      },
+    });
 
-
-
-   const motherboard = await prismadb.laptop.create({
-  data: {
-  
-    manufacturerId,
-    ProcesseurId,
-
-    SystemId,
-    GraphiccardId,
-
-    HardiskId,
-    ScreenSizeId,
-
-    RefreshRateId,
-
-    memoryId,
-
-    TouchScreen,
-    product: {
-    create:{
-
-      name,
-    price: price,
-    isFeatured: isFeatured,
-    isArchived: isArchived,
-    comingSoon,
-          outOfStock,
-    description:description,
-    categoryId: categoryId,
-    stock:stock,
-    dicountPrice:dicountPrice,
-    additionalDetails: {
-      createMany: {
-        data: [...additionalDetails]
-      }
-
-    },
-    images: {
-      createMany: {
-        data: images.map((image: { url: string }) => ({
-          url: image.url,
-        })),
-      }
-       // Replace any with the actual data types from your Prisma schema
-  
-   
-  },
-    }
-   }}
-});
-
-    
-
-    return  NextResponse.json(motherboard);
+    return NextResponse.json(laptop);
   } catch (error) {
     console.log('[MOTHERBOARD_POST]', error);
     return new NextResponse("Internal error", { status: 500 });
   }
-};
+}
 
-export async function GET(
-  req: Request,
-  { params }: { params: { storeId: string } },
-) {
+export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url)
+    const { searchParams } = new URL(req.url);
     const categoryId = searchParams.get('categoryId') || undefined;
     const isFeatured = searchParams.get('isFeatured');
 
-
-
     const products = await prismadb.product.findMany({
       where: {
-    
         categoryId,
         isFeatured: isFeatured ? true : undefined,
         isArchived: false,
@@ -143,12 +128,12 @@ export async function GET(
       },
       orderBy: {
         createdAt: 'desc',
-      }
+      },
     });
-  
+
     return NextResponse.json(products);
   } catch (error) {
     console.log('[PRODUCTS_GET]', error);
     return new NextResponse("Internal error", { status: 500 });
   }
-};
+}

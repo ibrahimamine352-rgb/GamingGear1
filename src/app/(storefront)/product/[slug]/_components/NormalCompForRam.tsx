@@ -2,6 +2,8 @@
 "use client"
 import Image from 'next/image'
 import React, { useState } from 'react'
+import { slugify } from "@/lib/slugify";
+
 import {
     Sheet,
     SheetContent,
@@ -113,7 +115,8 @@ const NormalComp: React.FC<nProps> = ({item, setItem,motherboards, gpus, cpus, c
               </div>
           
             <Button variant={'outline'} onClick={()=>{setItem(mot,keyy);setOpen(false)}}>Selectionner</Button>
-            <Link target='_blanc' className='text-sm underline my-1' href={"/product/"+mot.products[0].id}>
+            <Link target='_blanc' className='text-sm underline my-1'  href={`/product/${slugify(mot.products[0].name)}-${mot.products[0].id}`}
+>
 Voir la page de produit
 </Link>
             </div>

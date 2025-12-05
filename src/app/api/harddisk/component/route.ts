@@ -1,27 +1,33 @@
-
 import { NextResponse } from 'next/server';
 
-
 import prismadb from '@/lib/prismadb';
-import { NextApiResponse } from 'next';
-import { checkItemGroupsHardDisk } from '@/app/(storefront)/build-pc/_componenets/HardDisk'; 
+import { checkItemGroupsHardDisk } from '@/app/(storefront)/build-pc/_componenets/HardDisk';
+import { slugify } from "@/lib/slugify";
 
 export async function POST(
   req: Request,
-  { params }: { params: { } }
+  { params }: { params: {} }
 ) {
   try {
     const body = await req.json();
 
     const {
-      name, price, categoryId,  images, isFeatured, isArchived , comingSoon,
+      name,
+      price,
+      categoryId,
+      images,
+      isFeatured,
+      isArchived,
+      comingSoon,
       outOfStock,
-      description,stock,additionalDetails,
+      description,
+      stock,
+      additionalDetails,
       brandId,
       capacityId,
-   
       ComputerinterfaceId,
       typeId,
+      dicountPrice,
     } = body;
 
     if (!name) {
@@ -40,55 +46,59 @@ export async function POST(
       return new NextResponse("Category id is required", { status: 400 });
     }
 
-   const motherboard = await prismadb.harddisk.create({
-  data: {
-    brandId,
-    capacityId,
-  
-    ComputerinterfaceId,
-    typeId,
-    product: {
-    create:{
+    // ✅ generate slug for Product
+    const baseSlug = slugify(name);
+    const slug = `${baseSlug}-${Date.now()}`;
 
-      name, price, 
-      categoryId,
-       isFeatured,
-        isArchived 
-        , description
-        ,stock,
-        comingSoon,
-        outOfStock,
-        additionalDetails:{
-          createMany:{
-           data: [...additionalDetails]
-          }
+    const motherboard = await prismadb.harddisk.create({
+      data: {
+        brandId,
+        capacityId,
+        ComputerinterfaceId,
+        typeId,
+        product: {
+          create: {
+            slug, // ✅ required by Product now
+            name,
+            price,
+            isFeatured,
+            isArchived,
+            comingSoon,
+            outOfStock,
+            description,
+            stock,
+            dicountPrice: dicountPrice ?? 0,
+            // ✅ use relation instead of raw categoryId
+            category: {
+              connect: { id: categoryId },
+            },
+            additionalDetails: additionalDetails
+              ? {
+                  createMany: {
+                    data: [...additionalDetails],
+                  },
+                }
+              : undefined,
+            images: {
+              createMany: {
+                data: images.map((image: { url: string }) => ({
+                  url: image.url,
+                })),
+              },
+            },
+          },
+        },
+      },
+    });
 
-        }
-        ,
-    images: {
-      createMany: {
-        data: images.map((image: { url: string }) => ({
-          url: image.url,
-        })),
-      }
-       // Replace any with the actual data types from your Prisma schema
-  
-   
-  },
-    }
-   }}
-});
-
-    
-
-    return  NextResponse.json(motherboard);
+    return NextResponse.json(motherboard);
   } catch (error) {
     console.log('[MOTHERBOARD_POST]', error);
     return new NextResponse("Internal error", { status: 500 });
   }
-};
+}
 
-export async function GET(req: Request, res: NextApiResponse) {
+export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url || '', 'http://localhost');
 
@@ -98,8 +108,9 @@ export async function GET(req: Request, res: NextApiResponse) {
     const isFeatured = searchParams.get('isFeatured');
     const sort = searchParams.get('sort') || '';
     const motherboardId = searchParams.get('motherboardId') || '';
+
     const whereClause: Record<string, any> = {
-      isArchived:false ,
+      isArchived: false,
       storages: {
         some: {},
       },
@@ -111,6 +122,7 @@ export async function GET(req: Request, res: NextApiResponse) {
         mode: 'insensitive',
       };
     }
+
     let orderByClause: Record<string, 'asc' | 'desc'> = {};
 
     if (sort && sort.length > 0) {
@@ -122,43 +134,43 @@ export async function GET(req: Request, res: NextApiResponse) {
           break;
         case 'Les plus récents':
           orderByClause = {
-            price: 'desc', // or 'desc' depending on your preference
+            price: 'desc',
           };
           break;
         case 'Les plus récents':
           orderByClause = {
-            createdAt: 'asc', // or 'desc' depending on your preference
+            createdAt: 'asc',
           };
           break;
         case 'Prix : Croissant':
           orderByClause = {
-            price: 'asc', // or 'desc' depending on your preference
+            price: 'asc',
           };
           break;
         case 'Prix : Décroissant':
           orderByClause = {
-            price: 'desc', // or 'desc' depending on your preference
+            price: 'desc',
           };
           break;
-        // Add more cases for other fields you want to support
         default:
-          // Default sorting if no match is found
           orderByClause = {
             price: 'asc',
           };
       }
-    }else{
+    } else {
       orderByClause = {
-        price: 'asc', // or 'desc' depending on your preference
+        price: 'asc',
       };
     }
- 
+
     const filterListParam = searchParams.get('filterList');
     if (filterListParam) {
-      const decodedFilterList = JSON.parse(decodeURIComponent(filterListParam)) as checkItemGroupsHardDisk;
-    
+      const decodedFilterList = JSON.parse(
+        decodeURIComponent(filterListParam)
+      ) as checkItemGroupsHardDisk;
+
       const memoryFilters = [];
-    
+
       const motherboardcpusupportFilter = decodedFilterList.harddiskBrand;
       if (motherboardcpusupportFilter && motherboardcpusupportFilter.length > 0) {
         memoryFilters.push({
@@ -166,11 +178,10 @@ export async function GET(req: Request, res: NextApiResponse) {
             name: {
               in: decodedFilterList.harddiskBrand.map(item => item.searchKey),
             },
-       
-          
-        }});
+          },
+        });
       }
-    
+
       const motherboardformatFilter = decodedFilterList.harddiskCapacity;
       if (motherboardformatFilter && motherboardformatFilter.length > 0) {
         memoryFilters.push({
@@ -181,7 +192,7 @@ export async function GET(req: Request, res: NextApiResponse) {
           },
         });
       }
-    
+
       const motherboardmanufacturerFilter = decodedFilterList.harddiskComputerinterface;
       if (motherboardmanufacturerFilter && motherboardmanufacturerFilter.length > 0) {
         memoryFilters.push({
@@ -190,9 +201,9 @@ export async function GET(req: Request, res: NextApiResponse) {
               in: decodedFilterList.harddiskComputerinterface.map(item => item.searchKey),
             },
           },
-        }); 
+        });
       }
-    
+
       const memoryMarqueFilter = decodedFilterList.harddiskType;
       if (memoryMarqueFilter && memoryMarqueFilter.length > 0) {
         memoryFilters.push({
@@ -203,8 +214,8 @@ export async function GET(req: Request, res: NextApiResponse) {
           },
         });
       }
-    
-      console.log(memoryFilters)
+
+      console.log(memoryFilters);
       if (memoryFilters.length > 0) {
         whereClause.storages = {
           some: {
@@ -213,65 +224,66 @@ export async function GET(req: Request, res: NextApiResponse) {
         };
       }
     }
-    if(motherboardId.length>0){
-      const prossa=  await prismadb.compatibiltyProfile.findMany({
-        where:{
-          motherboards:{
-            some:{
-              productId:{
-                equals:motherboardId
-              }
-            }
-          }
-        },
-        include:{
-          disks:{
-            include:{
-              Components:true
-            }
-          }
-        }
-      })
 
-      if(prossa.length>0){
-        whereClause.id={
+    if (motherboardId.length > 0) {
+      const prossa = await prismadb.compatibiltyProfile.findMany({
+        where: {
+          motherboards: {
+            some: {
+              productId: {
+                equals: motherboardId,
+              },
+            },
+          },
+        },
+        include: {
+          disks: {
+            include: {
+              Components: true,
+            },
+          },
+        },
+      });
+
+      if (prossa.length > 0) {
+        whereClause.id = {
           in: prossa
-    .flatMap((e) => e.disks.map((ee) => ee.Components.flatMap((az)=>az.productId))).flat()
-    .filter((productId) => productId !== undefined), 
-        }
-        console.log( whereClause.id)
+            .flatMap((e) =>
+              e.disks.map((ee) => ee.Components.flatMap((az) => az.productId))
+            )
+            .flat()
+            .filter((productId) => productId !== undefined),
+        };
+        console.log(whereClause.id);
       }
     }
 
-    
     const products = await prismadb.product.findMany({
       where: whereClause,
       include: {
         storages: {
-          include:{
-            type:true,
-            brand:true,
-            Computerinterface:true,
-            capacity:true,
-          }
+          include: {
+            type: true,
+            brand: true,
+            Computerinterface: true,
+            capacity: true,
+          },
         },
         images: true,
-        _count:true 
+        _count: true,
       },
       orderBy: orderByClause,
       take: units,
       skip: page * units,
-      
     });
-    const total=  await prismadb.product.count({
+
+    const total = await prismadb.product.count({
       where: whereClause,
-    
-   
     });
-  
-    return NextResponse.json({data:products,total:total});
+
+    return NextResponse.json({ data: products, total });
   } catch (error) {
     console.error('[PRODUCTS_GET]', error);
-    res.status(500).json({ error: 'Internal error' });
+    return new NextResponse('Internal error', { status: 500 });
   }
 }

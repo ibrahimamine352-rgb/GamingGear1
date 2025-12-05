@@ -4,6 +4,7 @@ import Image from "next/image";
 import { MouseEventHandler } from "react";
 import { Expand, ShoppingCart } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { slugify } from "@/lib/slugify";
 
 import Currency from "@/components/ui/currency";
 import IconButton from "@/components/ui/icon-button";
@@ -20,7 +21,10 @@ const ProductCard: React.FC<ProductCard> = ({ data }) => {
   const cart = useCart();
   const router = useRouter();
 
-  const handleClick = () => router.push(`/product/${data?.id}`);
+  const handleClick = () => {
+    if (!data) return;
+    router.push(`/product/${slugify(data.name)}-${data.id}`);
+  };
 
   const onPreview: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.stopPropagation();

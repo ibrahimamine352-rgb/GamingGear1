@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
 import "./Searchbar.css";
+import { slugify } from "@/lib/slugify";
 
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
@@ -109,7 +110,7 @@ const ui = UI_TEXT[lang];
                                 <CommandItem key={p.id} value={p.name} className="text-foreground hover:bg-white/10 rounded-lg mx-2 my-1">
                                     <div 
                                         onClick={() => {
-                                            router.push(`/product/${p.id}`);
+                                            router.push(`/product/${slugify(p.name)}-${p.id}`);
                                             setOpen(false);
                                             setSearchQuery('')
                                         }} 
@@ -132,7 +133,7 @@ const ui = UI_TEXT[lang];
                                             <div className='flex items-center ml-5'>
                                                 <IconButton 
                                                     onClick={() => {
-                                                        router.push(`/product/${p.id}`);
+                                                        router.push(`/product/${slugify(p.name)}-${p.id}`);
                                                         setOpen(false);
                                                         setSearchQuery('')
                                                     }} 
