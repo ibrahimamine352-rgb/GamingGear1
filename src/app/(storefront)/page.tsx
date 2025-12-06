@@ -3,24 +3,25 @@ import prismadb from "@/lib/prismadb";
 
 import { format } from "date-fns";
 import { Product } from "@/types";
-import { Metadata } from "next";
+import type { Metadata } from "next";
+
 type SlidesColumn = {
-  id: string
+  id: string;
   title: string;
   imageUrl: string;
   description: string;
   url: string;
   createdAt: string;
-  discount:number;
+  discount: number;
   bgUrl: string;
   mobilebgURl: string;
-  descriptionColor:string;
-  titleColor:string;
-  Price:string;
-  PriceColor:string;
-  DeletedPrice:string;
-  DeletedPriceColor:string;
-}
+  descriptionColor: string;
+  titleColor: string;
+  Price: string;
+  PriceColor: string;
+  DeletedPrice: string;
+  DeletedPriceColor: string;
+};
 
 const keywords = [
   // Arabic
@@ -135,61 +136,85 @@ const keywords = [
   "offres spéciales",
   "réductions",
   "bundles",
-  "configurations"
+  "configurations",
 ];
-export const metadata:Metadata= {
- 
-keywords
-}
+
+export const metadata: Metadata = {
+  title: "PC Gamer & PC Portable Tunisie | Gaming Gear TN",
+  description:
+    "Gaming Gear TN : PC Gamer, PC portables, composants, écrans et accessoires en Tunisie. Configurations sur mesure, livraison rapide, garantie locale.",
+  keywords,
+  openGraph: {
+    title: "PC Gamer & PC Portable Tunisie | Gaming Gear TN",
+    description:
+      "Gaming Gear TN : PC Gamer, PC portables, composants, écrans et accessoires en Tunisie. Configurations sur mesure, livraison rapide.",
+    url: "https://gaminggeartn.tn",
+    siteName: "Gaming Gear TN",
+    locale: "fr_TN",
+    type: "website",
+  },
+};
 
 export default async function Home() {
-  const slides = await prismadb.slide.findMany({
-  });
+  const slides = await prismadb.slide.findMany({});
   const formattedslides: SlidesColumn[] = slides.map((item) => ({
     id: item.id,
     title: item.title,
-    description:item.description,
-    imageUrl:item.imageUrl,
+    description: item.description,
+    imageUrl: item.imageUrl,
     bgUrl: item.bgUrl,
     mobilebgURl: item.mobilebgURl,
-    url:item.url,
-    descriptionColor:item.descriptionColor,
-    titleColor:item.titleColor,
-    createdAt: format(item.createdAt, 'MMMM do, yyyy'),
-    discount:item.discount,
-    Price:item.Price,
-    PriceColor:item.PriceColor,
-    DeletedPrice:item.DeletedPrice,
-    DeletedPriceColor:item.DeletedPriceColor,
+    url: item.url,
+    descriptionColor: item.descriptionColor,
+    titleColor: item.titleColor,
+    createdAt: format(item.createdAt, "MMMM do, yyyy"),
+    discount: item.discount,
+    Price: item.Price,
+    PriceColor: item.PriceColor,
+    DeletedPrice: item.DeletedPrice,
+    DeletedPriceColor: item.DeletedPriceColor,
   }));
-  const featured = await prismadb.product.findMany({ 
-   where :{
-    isFeatured:true,
-    isArchived:false,
-   },
-   include:{
-     images:true,
-     category:true,
-     additionalDetails: true 
-   }
- 
-   });
-   const formattedproducts: Product[] = featured.map((item) => ({
+
+  const featured = await prismadb.product.findMany({
+    where: {
+      isFeatured: true,
+      isArchived: false,
+    },
+    include: {
+      images: true,
+      category: true,
+      additionalDetails: true,
+    },
+  });
+
+  const formattedproducts: Product[] = featured.map((item) => ({
     id: item.id,
     name: item.name,
-    images:item.images,
-    stock:parseInt(item.stock.toString()),
+    images: item.images,
+    stock: parseInt(item.stock.toString()),
     price: parseFloat(item.price.toString()),
-    dicountPrice:parseInt(item.dicountPrice.toString()),
+    dicountPrice: parseInt(item.dicountPrice.toString()),
     category: item.category,
-    description:item.description,
+    description: item.description,
     additionalDetails: item?.additionalDetails,
-    comingSoon: item.comingSoon,                       // <- required by type
-  outOfStock: item.outOfStock,  
+    comingSoon: item.comingSoon,
+    outOfStock: item.outOfStock,
   }));
- 
 
+  return (
+    <>
+      {/* Hidden H1 for SEO – Google sees it, users don't */}
+      <h1
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          top: 0,
+        }}
+      >
+        PC Gamer et PC Portables en Tunisie – Gaming Gear TN
+      </h1>
 
-  
-  return <NewLanding slides={formattedslides} featured={formattedproducts} />;
+      <NewLanding slides={formattedslides} featured={formattedproducts} />
+    </>
+  );
 }

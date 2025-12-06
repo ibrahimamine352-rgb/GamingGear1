@@ -13,8 +13,9 @@ import ClientProviders from "./ClientProviders";
 import { LanguageProvider } from "@/context/language-context";
 const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
-  title: "Gaming Gear TN",
-  description: "Your exclusive destination for high-end PCs and gaming peripherals",
+  title: "PC Gamer & PC Portable Tunisie | Gaming Gear TN",
+  description:
+    "Boutique spécialisée en PC Gamer, PC portables, composants et périphériques en Tunisie. Configurations sur-mesure, livraison rapide et garantie 1 an.",
   verification: {
     google: "WN6mHKSUzEyafoGqd8VqSidxCAnomSUBXp_8mUguVh4",
   },
