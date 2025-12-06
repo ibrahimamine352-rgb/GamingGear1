@@ -48,31 +48,49 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const product = await prismadb.product.findFirst({
       where: {
         OR: [
-          { slug: params.slug },                                  // /product/<db-slug>
-          ...(idCandidate ? [{ id: idCandidate }] : []),          // /product/<uuid> or /product/name-uuid
+          { slug: params.slug },
+          ...(idCandidate ? [{ id: idCandidate }] : []),
         ],
+      },
+      select: {
+        name: true,
+        description: true,
+        category: { select: { name: true } },
       },
     });
 
     if (!product) {
       return {
-        title: "Not Found",
-        description: "The page is not found",
+        title: "Produit introuvable | Gaming Gear TN",
+        description: "Ce produit n'existe plus ou a été retiré.",
       };
     }
 
+    const name = product.name ?? "Produit Gaming";
+    const categoryName = product.category?.name ?? "Produit Gaming";
+
+    const shortDesc =
+      (product.description ?? "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 150) ||
+      `${name} disponible en Tunisie chez Gaming Gear TN. Livraison rapide et garantie.`;
+
     return {
-      title: product.name,
-      description: product.description ?? '',
+      title: `${name} – ${categoryName} Tunisie | Gaming Gear TN`,
+      description: shortDesc,
     };
   } catch (error) {
-    console.error('[PRODUCT_METADATA_ERROR]', error);
+    console.error("[PRODUCT_METADATA_ERROR]", error);
+
     return {
-      title: 'Error',
-      description: 'Error loading product',
+      title: "Erreur | Gaming Gear TN",
+      description: "Impossible de charger les informations produit.",
     };
   }
 }
+
+
 
 export const revalidate = 0;
 

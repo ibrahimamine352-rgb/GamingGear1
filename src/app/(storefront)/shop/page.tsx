@@ -48,17 +48,51 @@ interface Props {
   searchParams: { [key: string]: string | string[] | undefined }
 }
 
-export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+export async function generateMetadata(
+  { searchParams }: Props
+): Promise<Metadata> {
   try {
-    const search = searchParams['search'] ?? ''
-    const categoryy = searchParams['categorie'] ?? ''
-    if (search.length > 0) return { title: search.toString(), description: '' }
-    if (categoryy.length > 0) return { title: categoryy.toString() }
-    return { title: '' }
+    const search = searchParams["search"] ?? "";
+    const categoryy = searchParams["categorie"] ?? "";
+
+    // If user searched something → use it as the title
+    if (search.length > 0) {
+      return { title: search.toString(), description: "" };
+    }
+
+    // If user is browsing a specific category → use category name
+    if (categoryy.length > 0) {
+      return { title: categoryy.toString(), description: "" };
+    }
+
+    // Default SEO title when no search / category
+    return {
+      title:
+        "Boutique Gaming Tunisie – PC Gamer, Laptops & Composants | Gaming Gear TN",
+      description:
+        "Découvrez notre boutique gaming en Tunisie : PC Gamer, PC portables, composants, écrans et périphériques. Livraison rapide et garantie locale chez Gaming Gear TN.",
+      openGraph: {
+        title:
+          "Boutique Gaming Tunisie – PC Gamer, Laptops & Composants | Gaming Gear TN",
+        description:
+          "PC Gamer, PC portables, composants, écrans et accessoires en Tunisie. Trouvez tout ce dont vous avez besoin pour votre setup gaming.",
+        url: "https://gaminggeartn.tn/store",
+        siteName: "Gaming Gear TN",
+        locale: "fr_TN",
+        type: "website",
+      },
+    };
   } catch {
-    return { title: '' }
+    // If something goes wrong, still return a safe SEO default
+    return {
+      title:
+        "Boutique Gaming Tunisie – PC Gamer, Laptops & Composants | Gaming Gear TN",
+      description:
+        "PC Gamer, PC portables, composants, écrans et périphériques en Tunisie. Livraison rapide et garantie locale.",
+    };
   }
 }
+
 
 export type HomeFilter = {
   title: string

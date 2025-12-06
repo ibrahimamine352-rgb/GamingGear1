@@ -2,6 +2,20 @@ import prismadb from "@/lib/prismadb";
 import Image from "next/image";
 import Link from "next/link";
 import { slugify } from "@/lib/slugify";
+export const metadata = {
+  title: "Full Setup Gamer Tunisie – PC + Écran + Clavier + Souris | Gaming Gear TN",
+  description:
+    "Bundles Full Setup gaming en Tunisie : PC Gamer + écran + clavier + souris. Prêts à l'emploi, performances garanties et livraison rapide.",
+  openGraph: {
+    title: "Full Setup Gamer Tunisie – Bundles Complets",
+    description:
+      "Bundles complets de gaming incluant PC, écran et périphériques. Idéal pour joueurs débutants et avancés.",
+    url: "https://gaminggeartn.tn/full-setup",
+    siteName: "Gaming Gear TN",
+    locale: "fr_TN",
+    type: "website",
+  },
+};
 
 export const revalidate = 60;
 

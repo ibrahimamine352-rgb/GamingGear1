@@ -5,12 +5,23 @@ import { BuildForm } from './_componenets/BuildForm';
 import { Product } from '@prisma/client';
 import { Metadata } from 'next';
 
-export async function generateMetadata():Promise<Metadata> {
-return {
-  title:"Build Pc",
-  description:"Your exclusive destination for high-end PCs and peripherals, elevating your computing experience with unmatched performance and elegance."
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "PC Gamer Tunisie – Configurer & Construire Votre PC | Gaming Gear TN",
+    description:
+      "Construisez votre PC Gamer sur mesure en Tunisie. Compatibilité garantie, composants testés, performances maximales. Choisissez CPU, GPU, RAM, SSD, refroidissement et plus.",
+    openGraph: {
+      title: "PC Gamer Tunisie – Configurer Votre PC | Gaming Gear TN",
+      description:
+        "Outil de configuration PC en Tunisie. Choisissez vos composants et obtenez une machine optimisée pour le gaming ou le travail.",
+      url: "https://gaminggeartn.tn/builds",
+      siteName: "Gaming Gear TN",
+      locale: "fr_TN",
+      type: "website",
+    },
+  };
 }
-}
+
 
 export type ProfileType={
   id:string
