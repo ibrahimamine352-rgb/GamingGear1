@@ -15,6 +15,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Gaming Gear TN",
   description: "Your exclusive destination for high-end PCs and gaming peripherals",
+  verification: {
+    google: "WN6mHKSUzEyafoGqd8VqSidxCAnomSUBXp_8mUguVh4",
+  },
   icons: {
     icon: [
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
