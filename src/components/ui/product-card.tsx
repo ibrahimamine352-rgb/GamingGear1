@@ -23,8 +23,11 @@ const ProductCard: React.FC<ProductCard> = ({ data }) => {
 
   const handleClick = () => {
     if (!data) return;
-    router.push(`/product/${slugify(data.name)}-${data.id}`);
+    // Prefer the real slug from DB; fallback to name+id
+    const slug = (data as any).slug ?? `${slugify(data.name)}-${data.id}`;
+    router.push(`/product/${slug}`);
   };
+  
 
   const onPreview: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.stopPropagation();

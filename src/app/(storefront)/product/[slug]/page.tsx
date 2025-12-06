@@ -15,41 +15,62 @@ import { Metadata } from 'next';
 import CustomPackTemplate from './_components/customPackTemplate';
 import { Image as IImage } from '@prisma/client';
 
-// 🔹 NEW: helper to extract the real id from slug or raw id
-function extractId(slugOrId: string): string {
-  // If it’s just an id (no "-"), this still works
-  const parts = slugOrId.split("-");
-  return parts[parts.length - 1];
+// ✅ CORRECT helper: extract full UUID from the slug
+// works for:
+//   "/product/<uuid>"
+//   "/product/some-name-<uuid>"
+function extractIdFromParam(slugParam: string): string | null {
+  if (!slugParam) return null;
+
+  // Try to grab a UUID at the end of the string
+  const uuidRegex =
+    /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+  const match = slugParam.match(uuidRegex);
+  if (match && match[0]) {
+    return match[0]; // full "47f847f3-6321-4f62-be45-12b935cc98fe"
+  }
+
+  // If it doesn't match UUID pattern, assume the whole thing *is* the id
+  return slugParam;
 }
 
 interface Props {
   params: {
-    slug: string;   // 🔹 was productId
+    slug: string;
   }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
-    const productId = extractId(params.slug);
+    const idCandidate = extractIdFromParam(params.slug);
 
     const product = await prismadb.product.findFirst({
       where: {
-        id: productId,
-      }
-    })
-    if (!product) return {
-      title: "Not Found",
-      description: "The page is not found"
+        OR: [
+          { slug: params.slug },                                  // /product/<db-slug>
+          ...(idCandidate ? [{ id: idCandidate }] : []),          // /product/<uuid> or /product/name-uuid
+        ],
+      },
+    });
+
+    if (!product) {
+      return {
+        title: "Not Found",
+        description: "The page is not found",
+      };
     }
+
     return {
       title: product.name,
-      description: product.description
-    }
+      description: product.description ?? '',
+    };
   } catch (error) {
+    console.error('[PRODUCT_METADATA_ERROR]', error);
     return {
-      title: '',
-      description: ''
-    }
+      title: 'Error',
+      description: 'Error loading product',
+    };
   }
 }
 
@@ -57,7 +78,7 @@ export const revalidate = 0;
 
 interface ProductPageProps {
   params: {
-    slug: string;  // 🔹 was productId
+    slug: string;
   },
 }
 
@@ -67,10 +88,18 @@ interface ProdDeatails {
 }
 
 const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
-  const productId = extractId(params.slug);  // 🔹 get id from slug or raw id
+  const idCandidate = extractIdFromParam(params.slug);
+
+  // 👇 TEMP LOGGING - helps you debug in terminal / Vercel logs if needed
+  console.log('[PRODUCT_PAGE] slug param =', params.slug, '-> idCandidate =', idCandidate);
 
   const product = await prismadb.product.findFirst({
-    where: { id: productId },
+    where: {
+      OR: [
+        { slug: params.slug },                         // /product/<db-slug>
+        ...(idCandidate ? [{ id: idCandidate }] : []), // /product/<uuid>  or  /product/name-uuid
+      ],
+    },
     include: {
       PackProduct: {
         include: {
@@ -124,7 +153,19 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
     }
   });
 
-  if (!product) return null;
+  // 🔥 IMPORTANT: show *something* instead of blank
+  if (!product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-2">Product not found</h1>
+          <p className="text-sm text-muted-foreground">
+            We could not find any product for URL segment: <code>{params.slug}</code>
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const suggestedProducts = await prismadb.product.findMany({
     where: { categoryId: product?.category?.id },
@@ -186,7 +227,6 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
         i++
         return data
       }
-      // … your other detail logic here …
     }
     return []
   }
