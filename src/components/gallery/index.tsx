@@ -1,41 +1,46 @@
+"use client";
+
 import NextImage from "next/image";
 import { Tab } from "@headlessui/react";
 
-import { cn } from "@/lib/utils";
 import { Image } from "@/types";
 
-interface GalleryTabProps {
-  image: Image;
+import GalleryTab from "./gallery-tab";
+
+interface GalleryProps {
+  images: Image[];
 }
 
-const GalleryTab: React.FC<GalleryTabProps> = ({ image }) => {
+const Gallery: React.FC<GalleryProps> = ({
+  images = []
+}) => {
   return (
-    <Tab
-      className="relative flex aspect-square cursor-pointer items-center justify-center rounded-xl border border-border bg-card/70 backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
-    >
-      {({ selected }) => (
-        <div>
-          <span className="absolute h-full w-full aspect-square inset-0 overflow-hidden rounded-xl">
-            <NextImage
-              fill
-              src={image.url}
-              // ✅ SEO-FRIENDLY ALT INSTEAD OF EMPTY STRING
-              alt="Gaming Gear TN product image"
-              className="object-cover object-center rounded-xl"
-            />
-          </span>
-          <span
-            className={cn(
-              "absolute inset-0 rounded-xl ring-2 ring-offset-2 transition-all duration-300",
-              selected
-                ? "ring-[#00e0ff] shadow-[0_0_10px_rgba(0,224,255,0.3)]"
-                : "ring-transparent"
-            )}
-          />
-        </div>
-      )}
-    </Tab>
-  );
-};
+    <Tab.Group as="div" className="flex flex-col-reverse">
+      <div className="mx-auto mt-6 w-full max-w-2xl lg:max-w-none">
+        <Tab.List className="grid grid-cols-4 gap-6">
+          {images.map((image) => (
+            <GalleryTab key={image.id} image={image} />
+          ))}
+        </Tab.List>
+      </div>
 
-export default GalleryTab;
+      <Tab.Panels className="aspect-square w-full p-6">
+        {images.map((image) => (
+          <Tab.Panel key={image.id}>
+            <div className="aspect-square relative h-full w-full sm:rounded-xl overflow-hidden bg-gradient-to-br from-white/5 to-white/0 border border-border">
+            <NextImage
+  fill
+  src={image.url}
+  alt="Gaming Gear TN product image"
+  className="object-cover object-center rounded-xl"
+/>
+
+            </div>
+          </Tab.Panel>
+        ))}
+      </Tab.Panels>
+    </Tab.Group>
+  );
+}
+ 
+export default Gallery;
