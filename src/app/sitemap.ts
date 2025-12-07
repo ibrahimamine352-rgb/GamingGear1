@@ -6,35 +6,27 @@ import { slugify } from "@/lib/slugify";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://gaminggeartn.tn";
 
-  // 🔹 Static routes
+  // 🔹 Static pages
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: `${baseUrl}/`,
       lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 1,
     },
     {
       url: `${baseUrl}/storefront`,
       lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.9,
     },
     {
       url: `${baseUrl}/builds`,
       lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8,
     },
     {
       url: `${baseUrl}/full-setup`,
       lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8,
     },
   ];
 
-  // 🔹 Product pages
+  // 🔹 Dynamic product URLs
   const products = await prismadb.product.findMany({
     select: {
       id: true,
@@ -55,8 +47,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return {
       url: `${baseUrl}/product/${slug}`,
       lastModified: product.updatedAt,
-      changeFrequency: "weekly",
-      priority: 0.7,
     };
   });
 
