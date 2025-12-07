@@ -1,3 +1,4 @@
+// src/app/(storefront)/product/[slug]/page.tsx
 import ProductList from '@/components/product-list'
 import Gallery from '@/components/gallery';
 import Info from '@/components/info';
@@ -16,22 +17,17 @@ import CustomPackTemplate from './_components/customPackTemplate';
 import { Image as IImage } from '@prisma/client';
 
 // ✅ CORRECT helper: extract full UUID from the slug
-// works for:
-//   "/product/<uuid>"
-//   "/product/some-name-<uuid>"
 function extractIdFromParam(slugParam: string): string | null {
   if (!slugParam) return null;
 
-  // Try to grab a UUID at the end of the string
   const uuidRegex =
     /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
   const match = slugParam.match(uuidRegex);
   if (match && match[0]) {
-    return match[0]; // full "47f847f3-6321-4f62-be45-12b935cc98fe"
+    return match[0];
   }
 
-  // If it doesn't match UUID pattern, assume the whole thing *is* the id
   return slugParam;
 }
 
@@ -90,8 +86,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-
-
 export const revalidate = 0;
 
 interface ProductPageProps {
@@ -108,14 +102,13 @@ interface ProdDeatails {
 const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
   const idCandidate = extractIdFromParam(params.slug);
 
-  // 👇 TEMP LOGGING - helps you debug in terminal / Vercel logs if needed
   console.log('[PRODUCT_PAGE] slug param =', params.slug, '-> idCandidate =', idCandidate);
 
   const product = await prismadb.product.findFirst({
     where: {
       OR: [
-        { slug: params.slug },                         // /product/<db-slug>
-        ...(idCandidate ? [{ id: idCandidate }] : []), // /product/<uuid>  or  /product/name-uuid
+        { slug: params.slug },
+        ...(idCandidate ? [{ id: idCandidate }] : []),
       ],
     },
     include: {
@@ -171,7 +164,7 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
     }
   });
 
-  // 🔥 IMPORTANT: show *something* instead of blank
+  // 🔥 If no product, show a simple 404-like page
   if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
@@ -220,6 +213,32 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
     outOfStock: product.outOfStock,
   }
 
+  const productUrl = `https://gaminggeartn.tn/product/${params.slug}`;
+
+  // ✅ JSON-LD structured data for Google
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: formattedproduct.name,
+    description:
+      formattedproduct.description ||
+      "Produit gaming disponible en Tunisie chez Gaming Gear TN.",
+    image: formattedproduct.images?.map((img) => img.url) ?? [],
+    sku: formattedproduct.id,
+    brand: product.category?.name || "Gaming Gear TN",
+    category: product.category?.name || "Gaming",
+    offers: {
+      "@type": "Offer",
+      url: productUrl,
+      priceCurrency: "TND",
+      price: formattedproduct.price,
+      availability: product.outOfStock
+        ? "https://schema.org/OutOfStock"
+        : "https://schema.org/InStock",
+      itemCondition: "https://schema.org/NewCondition",
+    },
+  };
+
   const dataa: Field[] = formattedproduct.additionalDetails.map((item) => ({
     id: item.id,
     name: item.name,
@@ -251,6 +270,7 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
 
   const details = getData(product)
 
+  // 🔹 Branch 1: Prebuilt PC
   if (product.PreBuiltPcmodel) {
     const mbs = await prismadb.motherboard.findMany({
       where: { products: { some: { id: { in: product.PreBuiltPcmodel.pcTemplate.motherBoardId.map((e) => e.productId) } } } },
@@ -293,6 +313,12 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
 
     return (
       <div className="bg-background min-h-screen">
+        {/* JSON-LD for Google */}
+        <script
+          type="application/ld+json"
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <div className="container mx-auto px-6 py-8">
           <div className="rounded-2xl border border-border bg-card/70 backdrop-blur-sm shadow-[0_0_0_1px_rgba(255,255,255,0.02)] glass-card p-8">
             <CustomPcTemplate
@@ -312,9 +338,16 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
       </div>
     )
   } else {
+    // 🔹 Branch 2: Pack product
     if (product.PackProduct.length > 0) {
       return (
         <div className="bg-background min-h-screen">
+          {/* JSON-LD for Google */}
+          <script
+            type="application/ld+json"
+            suppressHydrationWarning
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
           <Container>
             <div className="px-4 py-10 sm:px-6 lg:px-8">
               {product.PackProduct ? (
@@ -354,6 +387,7 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
         </div>
       )
     } else {
+      // 🔹 Branch 3: Normal single product
       const unavailable = Boolean(product.comingSoon || product.outOfStock);
       const showSale = !unavailable && parseInt(product.dicountPrice.toString()) > 0;
 
@@ -364,6 +398,12 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
 
       return (
         <div className="bg-background min-h-screen">
+          {/* JSON-LD for Google */}
+          <script
+            type="application/ld+json"
+            suppressHydrationWarning
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
           <Container>
             <div className="px-4 py-10 sm:px-6 lg:px-8">
               <div className="lg:grid lg:grid-cols-3 lg:items-start lg:gap-x-8">
