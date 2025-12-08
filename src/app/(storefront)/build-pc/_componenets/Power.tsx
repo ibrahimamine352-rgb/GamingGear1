@@ -3,8 +3,12 @@
 import React, { Fragment, MouseEventHandler, useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { XMarkIcon } from '@heroicons/react/24/outline'
-import { PsuIcon } from "./comps"
+import { Menu, Transition } from "@headlessui/react";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { Trash } from "lucide-react";
+import { Pagination } from "@nextui-org/pagination";
+
+import { PsuIcon } from "./comps";
 import { InlineDetails } from "@/components/InlineDetails";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,17 +19,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Container from "@/components/ui/container";
 import Skeleton from "@/components/ui/skeleton";
 import SearchComponent from "@/components/search-filters/motherboard/motherboard-search";
 import Currency from "@/components/ui/currency";
-import { Pagination } from "@nextui-org/pagination";
-import { Menu, Transition } from "@headlessui/react";
-import { ChevronDownIcon } from "@heroicons/react/20/solid";
-import { Trash } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useLanguage } from "@/context/language-context";
 import { UI_TEXT } from "@/i18n/ui-text";
 
@@ -76,9 +74,10 @@ export const Power = (props: {
 }) => {
   const { lang } = useLanguage();
   const ui = UI_TEXT[lang];
+
   const [data, setData] = useState<PSUProduct[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
+  const [totalPages, setTotalPages] = useState(0); // total items
   const [loading, setLoading] = useState(true);
   const [priceFilter, setPriceFilter] = useState<number[]>([0, 5000]);
 
@@ -87,7 +86,9 @@ export const Power = (props: {
     powersupplyMarque: [],
   });
 
-  const [recommendedWattage, setRecommendedWattage] = useState<number | null>(null);
+  const [recommendedWattage, setRecommendedWattage] = useState<number | null>(
+    null
+  );
 
   const [selectedSort, setSelectedSort] = useState("Prix : Croissant");
   const [searchTerm, setSearchTerm] = useState("");
@@ -110,33 +111,48 @@ export const Power = (props: {
       const startTime = performance.now();
 
       const response = await fetch(
-        `/api/powersupply/component?minDt=${priceFilter[0]}&maxDt=${priceFilter[1]}&q=${searchTerm}&sort=${selectedSort}&units=10&page=${currentPage}&filterList=${encodedFilterList}${
-          compatible && props.motherboardId ? `&motherboardId=${props.motherboardId.id}` : ""
-        }`
+        `/api/powersupply/component?minDt=${priceFilter[0]}&maxDt=${priceFilter[1]}` +
+          `&q=${encodeURIComponent(searchTerm)}` +
+          `&sort=${encodeURIComponent(selectedSort)}` +
+          `&units=10&page=${currentPage}&filterList=${encodedFilterList}` +
+          `${compatible && props.motherboardId ? `&motherboardId=${props.motherboardId.id}` : ""}`
       );
       const dataa = await response.json();
-
       const endTime = performance.now();
       setSearchTime((endTime - startTime) / 1000);
 
-      setData(dataa.data as PSUProduct[]);
+      setData(Array.isArray(dataa.data) ? (dataa.data as PSUProduct[]) : []);
       setTotalPages(dataa.total ?? 0);
-      setLoading(false);
 
-      const rec = await getRecommendations(props.selectedFeatures);
-      setRecommendedWattage(rec?.recommendations?.[0]?.powerSupplyWattage ?? null);
+      // recommendation is allowed to fail silently
+      try {
+        const rec = await getRecommendations(props.selectedFeatures);
+        setRecommendedWattage(rec?.recommendations?.[0]?.powerSupplyWattage ?? null);
+      } catch (e) {
+        setRecommendedWattage(null);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
+      setData([]);
+      setTotalPages(0);
+    } finally {
       setLoading(false);
     }
   };
 
   const handleCheckboxChange = (filterKey: keyof CheckItemGroupsPower, value: string) => {
     setFilterList((prev) => {
-      const existingIndex = prev[filterKey].findIndex((i) => i.searchKey === value);
-      if (existingIndex !== -1) prev[filterKey].splice(existingIndex, 1);
-      else prev[filterKey].push({ id: Date.now(), searchKey: value });
-      return { ...prev };
+      const exists = prev[filterKey].some((i) => i.searchKey === value);
+      if (exists) {
+        return {
+          ...prev,
+          [filterKey]: prev[filterKey].filter((i) => i.searchKey !== value),
+        };
+      }
+      return {
+        ...prev,
+        [filterKey]: [...prev[filterKey], { id: Date.now(), searchKey: value }],
+      };
     });
   };
 
@@ -157,8 +173,12 @@ export const Power = (props: {
   const checkcompatibility = (product: Product) => {
     const mb = props.motherboardId;
     if (mb) {
-      const MProfiles = props.profiles.filter((p) => p.motherboards.find((m) => m.productId === mb.id));
-      const PProfiles = props.profiles.filter((p) => p.powersupplys.find((ps) => ps.productId === product.id));
+      const MProfiles = props.profiles.filter((p) =>
+        p.motherboards.find((m) => m.productId === mb.id)
+      );
+      const PProfiles = props.profiles.filter((p) =>
+        p.powersupplys.find((ps) => ps.productId === product.id)
+      );
       return haveCommonElement(MProfiles, PProfiles);
     }
     return true;
@@ -167,6 +187,9 @@ export const Power = (props: {
   const [openDialog, setOpenDialog] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const toggleDescription = () => setShowFullDescription((s) => !s);
+
+  const totalPagesForPagination =
+    parseInt((totalPages / 10).toFixed(0)) + (totalPages % 10 === 0 ? 0 : 1);
 
   return (
     <div className="text-foreground">
@@ -177,19 +200,21 @@ export const Power = (props: {
             {/* LEFT SELECTOR */}
             <button
               onClick={() => setOpenDialog(true)}
-              className='lg:w-1/5 w-full min-w-md:max-w-lg m-3 bg-transparent border-transparent hover:bg-[hsl(var(--card)/0.08)] rounded-xl'
+              className="lg:w-1/5 w-full min-w-md:max-w-lg m-3 bg-transparent border-transparent hover:bg-[hsl(var(--card)/0.08)] rounded-xl"
             >
               <Card className="rounded-xl build-selector">
                 <CardHeader>
                   <CardTitle className="text-center">
-                  {ui.builderCompatPsu}
-                    <p className="text-xs text-muted-foreground p-1">{ui.builderRequiredTag}</p>
+                    {ui.builderCompatPsu}
+                    <p className="text-xs text-muted-foreground p-1">
+                      {ui.builderRequiredTag}
+                    </p>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                <div className="flex items-center justify-center leading-none text-[hsl(var(--accent))]">
-                <PsuIcon className="block w-24 h-24 md:w-28 md:h-28" />
-                </div>
+                  <div className="flex items-center justify-center leading-none text-[hsl(var(--accent))]">
+                    <PsuIcon className="block w-24 h-24 md:w-28 md:h-28" />
+                  </div>
                 </CardContent>
               </Card>
             </button>
@@ -198,228 +223,137 @@ export const Power = (props: {
             <Card className="lg:w-4/5 w-full justify-center flex md:flex-row flex-col items-center m-3 rounded-xl build-container">
               <CardContent className="p-0 w-full h-full">
                 {props.processorId ? (
-                  <div className="build-container hover:bg-[#1a1a1a] transition flex md:flex-row flex-col justify-between group items-center rounded-xl space-x-3">
-                    {/* Image */}
-                    <div className="flex-shrink-0">
-                      <div className="aspect-square mt-3 rounded-xl bg-transparent ml-3 relative" style={{ height: "150px" }}>
-                        <Image
-                          src={props.processorId.images?.[0]?.url}
-                          alt={props.processorId.name ?? "Product image"}
-                          fill
-                          className="aspect-square object-cover rounded-md h-full w-full"
-                        />
-                      </div>
-                    </div>
+                  (() => {
+                    const desc = props.processorId.description || "";
+                    const imgSrc = props.processorId.images?.[0]?.url || "/placeholder.png";
+                    return (
+                      <div className="build-container hover:bg-[#1a1a1a] transition flex md:flex-row flex-col justify-between group items-center rounded-xl space-x-3">
+                        {/* Image */}
+                        <div className="flex-shrink-0">
+                          <div
+                            className="aspect-square mt-3 rounded-xl bg-transparent ml-3 relative"
+                            style={{ height: "150px" }}
+                          >
+                            <Image
+                              src={imgSrc}
+                              alt={props.processorId.name ?? "Product image"}
+                              fill
+                              className="aspect-square object-cover rounded-md h-full w-full"
+                            />
+                          </div>
+                        </div>
 
-                    {/* Description */}
-                    <div className="flex-grow p-3">
-                      <p className="font-semibold text-sm">{props.processorId.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {showFullDescription
-                          ? props.processorId.description
-                          : `${props.processorId.description?.slice(0, 100) ?? ""}...`}
-                        {props.processorId.description && props.processorId.description.length > 100 && (
-                          <span className="font-bold cursor-pointer text-[#007bff]" onClick={toggleDescription}>
-                            {showFullDescription ? " See Less" : " See More"}
-                          </span>
+                        {/* Description */}
+                        <div className="flex-grow p-3">
+                          <p className="font-semibold text-sm">{props.processorId.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {showFullDescription
+                              ? desc
+                              : `${desc.slice(0, 100)}${desc.length > 100 ? "..." : ""}`}
+                            {desc.length > 100 && (
+                              <span
+                                className="font-bold cursor-pointer text-[#007bff]"
+                                onClick={toggleDescription}
+                              >
+                                {showFullDescription ? " See Less" : " See More"}
+                              </span>
+                            )}
+                          </p>
+                        </div>
+
+                        {/* Compatibility */}
+                        {props.selectedCompatibility && (
+                          <div className="w-4/5">
+                            <div className="font-bold my-2 text-sm">Compatibility:</div>
+                            <div className="text-left grid text-xs max-w-screen-md mx-auto border border-white rounded mb-3 mr-3">
+                              {[
+                                ["motherboardCompatibility", "Motherboard :"],
+                                ["processorCompatibility", "Processor :"],
+                                ["gpuCompatibility", "Graphic Card :"],
+                                ["ramCompatibility", "RAM :"],
+                                ["hardDiskCompatibility", "Hard drive compatibility :"],
+                                ["powerCompatibility", "Power supply box compatibility :"],
+                                ["caseCompatibility", "Case compatibility:"],
+                              ].map(([key, label]) => {
+                                const k = key as keyof AllProductsCompatibility["Compatibility"];
+                                const comp = props.selectedCompatibility.Compatibility[k];
+                                return (
+                                  <div
+                                    key={key}
+                                    className="p-1 pl-3 border-b last:border-b-0 border-white hover:bg-[#101218] hover:font-bold cursor-pointer"
+                                  >
+                                    <p
+                                      className={`mb-1 ${
+                                        comp.error ? "text-red-400" : "text-primary"
+                                      }`}
+                                    >
+                                      {label}
+                                    </p>
+                                    <p
+                                      className={
+                                        comp.error ? "text-red-400" : "text-primary"
+                                      }
+                                    >
+                                      {comp.message}
+                                    </p>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
                         )}
-                      </p>
-                    </div>
 
-                    {/* Compatibilité */}
-                    {props.selectedCompatibility ? (
-                      <div className="w-4/5">
-                        <div className="font-bold my-2 text-sm">Compatibility:</div>
-                        <div className="text-left grid text-xs max-w-screen-md mx-auto border border-white rounded mb-3 mr-3">
-                          <div className="p-1 pl-3 border-b border-white hover:bg-[#101218] hover:font-bold cursor-pointer">
-                            <p
-                              className={`mb-1 ${
-                                props.selectedCompatibility.Compatibility.motherboardCompatibility.error
-                                  ? "text-red-400"
-                                  : "text-primary"
-                              }`}
+                        {/* Price & actions */}
+                        <div className="flex-shrink-0 p-3">
+                          <div className="text-center flex flex-col">
+                            <div className="p-3">
+                              <Currency value={props.processorId?.price} />
+                            </div>
+                            <Button
+                              className="mb-3"
+                              disabled={loading}
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => {
+                                props.setProcessorId(undefined);
+                                props.removeFeature("Power Supply_Wattage");
+                              }}
                             >
-                              Motherboard :
-                            </p>
-                            <p
-                              className={
-                                props.selectedCompatibility.Compatibility.motherboardCompatibility.error
-                                  ? "text-red-400"
-                                  : "text-primary"
-                              }
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              onClick={() => setOpenDialog(true)}
+                              className="btn-primary-blue"
                             >
-                              {props.selectedCompatibility.Compatibility.motherboardCompatibility.message}
-                            </p>
-                          </div>
-                          <div className="p-1 pl-3 border-b border-white hover:bg-[#101218] hover:font-bold cursor-pointer">
-                            <p
-                              className={`mb-1 ${
-                                props.selectedCompatibility.Compatibility.processorCompatibility.error
-                                  ? "text-red-400"
-                                  : "text-primary"
-                              }`}
+                              {ui.builderBtnChange}
+                            </Button>
+                            <a
+                              href={`product/${props.processorId.id}`}
+                              className="underline mt-2 text-[#007bff]"
+                              target="_blank"
+                              rel="noreferrer"
                             >
-                              Processor :
-                            </p>
-                            <p
-                              className={
-                                props.selectedCompatibility.Compatibility.processorCompatibility.error
-                                  ? "text-red-400"
-                                  : "text-primary"
-                              }
-                            >
-                              {props.selectedCompatibility.Compatibility.processorCompatibility.message}
-                            </p>
-                          </div>
-                          <div className="p-1 pl-3 border-b border-white hover:bg-[#101218] hover:font-bold cursor-pointer">
-                            <p
-                              className={`mb-1 ${
-                                props.selectedCompatibility.Compatibility.gpuCompatibility.error
-                                  ? "text-red-400"
-                                  : "text-primary"
-                              }`}
-                            >
-                              Graphic Card :
-                            </p>
-                            <p
-                              className={
-                                props.selectedCompatibility.Compatibility.gpuCompatibility.error
-                                  ? "text-red-400"
-                                  : "text-primary"
-                              }
-                            >
-                              {props.selectedCompatibility.Compatibility.gpuCompatibility.message}
-                            </p>
-                          </div>
-                          <div className="p-1 pl-3 border-b border-white hover:bg-[#101218] hover:font-bold cursor-pointer">
-                            <p
-                              className={`mb-1 ${
-                                props.selectedCompatibility.Compatibility.ramCompatibility.error
-                                  ? "text-red-400"
-                                  : "text-primary"
-                              }`}
-                            >
-                              RAM :
-                            </p>
-                            <p
-                              className={
-                                props.selectedCompatibility.Compatibility.ramCompatibility.error
-                                  ? "text-red-400"
-                                  : "text-primary"
-                              }
-                            >
-                              {props.selectedCompatibility.Compatibility.ramCompatibility.message}
-                            </p>
-                          </div>
-                          <div className="p-1 pl-3 border-b border-white hover:bg-[#101218] hover:font-bold cursor-pointer">
-                            <p
-                              className={`mb-1 ${
-                                props.selectedCompatibility.Compatibility.hardDiskCompatibility.error
-                                  ? "text-red-400"
-                                  : "text-primary"
-                              }`}
-                            >
-                              Hard drive compatibility :
-                            </p>
-                            <p
-                              className={
-                                props.selectedCompatibility.Compatibility.hardDiskCompatibility.error
-                                  ? "text-red-400"
-                                  : "text-primary"
-                              }
-                            >
-                              {props.selectedCompatibility.Compatibility.hardDiskCompatibility.message}
-                            </p>
-                          </div>
-                          <div className="p-1 pl-3 border-b border-white hover:bg-[#101218] hover:font-bold cursor-pointer">
-                            <p
-                              className={`mb-1 ${
-                                props.selectedCompatibility.Compatibility.powerCompatibility.error
-                                  ? "text-red-400"
-                                  : "text-primary"
-                              }`}
-                            >
-                              Power supply box compatibility :
-                            </p>
-                            <p
-                              className={
-                                props.selectedCompatibility.Compatibility.powerCompatibility.error
-                                  ? "text-red-400"
-                                  : "text-primary"
-                              }
-                            >
-                              {props.selectedCompatibility.Compatibility.powerCompatibility.message}
-                            </p>
-                          </div>
-                          <div className="p-1 pl-3 hover:bg-[#101218] hover:font-bold cursor-pointer">
-                            <p
-                              className={`mb-1 ${
-                                props.selectedCompatibility.Compatibility.caseCompatibility.error
-                                  ? "text-red-400"
-                                  : "text-primary"
-                              }`}
-                            >
-                              Case compatibility:
-
-                            </p>
-                            <p
-                              className={
-                                props.selectedCompatibility.Compatibility.caseCompatibility.error
-                                  ? "text-red-400"
-                                  : "text-primary"
-                              }
-                            >
-                              {props.selectedCompatibility.Compatibility.caseCompatibility.message}
-                            </p>
+                              {ui.builderLinkSeeInStore}
+                            </a>
                           </div>
                         </div>
                       </div>
-                    ) : null}
-
-                    {/* Price & actions */}
-                    <div className="flex-shrink-0 p-3">
-                      <div className="text-center flex flex-col">
-                        <div className="p-3">
-                          <Currency value={props.processorId?.price} />
-                        </div>
-                        <Button
-                          className="mb-3"
-                          disabled={loading}
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => {
-                            props.setProcessorId(undefined);
-                            props.removeFeature("Power Supply_Wattage");
-                          }}
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                        <Button onClick={() => setOpenDialog(true)} className="btn-primary-blue">
-                        {ui.builderBtnChange}
-                        </Button>
-                        <a
-                          href={`product/${props.processorId.id}`}
-                          className="underline mt-2 text-[#007bff]"
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {ui.builderLinkSeeInStore}
-                        </a>
-                      </div>
-                    </div>
-                  </div>
+                    );
+                  })()
                 ) : (
                   <div
                     onClick={() => setOpenDialog(true)}
                     className="cursor-pointer w-full h-full flex justify-center items-center"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width={40} height={40} viewBox="0 0 44 55" className="fill-current text-[hsl(var(--accent))]">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width={40}
+                      height={40}
+                      viewBox="0 0 44 55"
+                      className="fill-current text-[hsl(var(--accent))]"
+                    >
                       <g>
-                        <path
-                         
-                          d="M41.9,21H23V2.1c0-0.6-0.5-1-1-1c-0.6,0-1,0.5-1,1V21H2.1c-0.6,0-1,0.5-1,1s0.5,1,1,1H21v18.8c0,0.6,0.5,1,1,1
-                        c0.6,0,1-0.5,1-1V23h18.8c0.6,0,1-0.5,1-1S42.5,21,41.9,21z"
-                        />
+                        <path d="M41.9,21H23V2.1c0-0.6-0.5-1-1-1c-0.6,0-1,0.5-1,1V21H2.1c-0.6,0-1,0.5-1,1s0.5,1,1,1H21v18.8c0,0.6,0.5,1,1,1 c0.6,0,1-0.5,1-1V23h18.8c0.6,0,1-0.5,1-1S42.5,21,41.9,21z" />
                       </g>
                     </svg>
                   </div>
@@ -430,7 +364,7 @@ export const Power = (props: {
         </CardContent>
       </Card>
 
-      {/* DIALOG — mirrored from Case */}
+      {/* DIALOG */}
       {openDialog && (
         <Dialog open={openDialog} onOpenChange={setOpenDialog}>
           <DialogContent
@@ -439,7 +373,6 @@ export const Power = (props: {
               h-[85vh] md:h-[80vh]
               p-0 overflow-hidden
               flex flex-col
-              
               bg-[#101218] text-[#e6e8ee]
               border border-border rounded-2xl
             "
@@ -448,12 +381,19 @@ export const Power = (props: {
             <DialogHeader className="sticky top-0 z-10 bg-card border-b border-border px-4 py-3">
               <DialogTitle>
                 <div className="flex justify-between items-center">
-                  <h1>power supply store </h1>
+                  <h1>power supply store</h1>
                   <Menu as="div" className="relative inline-block text-left">
                     <div className="flex">
                       <Menu.Button className="group inline-flex justify-center text-sm font-medium text-foreground">
-                        Sort&nbsp;(<span className="text-sm font-medium text-foreground">{selectedSort}</span>)
-                        <ChevronDownIcon className="-mr-1 ml-1 h-5 w-5 flex-shrink-0 text-muted-foreground" aria-hidden="true" />
+                        Sort&nbsp;(
+                        <span className="text-sm font-medium text-foreground">
+                          {selectedSort}
+                        </span>
+                        )
+                        <ChevronDownIcon
+                          className="-mr-1 ml-1 h-5 w-5 flex-shrink-0 text-muted-foreground"
+                          aria-hidden="true"
+                        />
                       </Menu.Button>
                     </div>
 
@@ -477,7 +417,9 @@ export const Power = (props: {
                                     setCurrentPage(0);
                                   }}
                                   className={classNames(
-                                    option.current ? "cursor-pointer text-[#007bff] font-medium" : "cursor-pointer text-muted-foreground",
+                                    option.current
+                                      ? "cursor-pointer text-[#007bff] font-medium"
+                                      : "cursor-pointer text-muted-foreground",
                                     active ? "bg-muted" : "",
                                     "block px-4 py-2 text-sm"
                                   )}
@@ -512,10 +454,10 @@ export const Power = (props: {
                   totalPages={totalPages}
                 />
 
-                {props.psCertification.list.length > 0 ? (
+                {(props.psCertification?.list?.length ?? 0) > 0 && (
                   <>
                     <br />
-                    {props.motherboardId ? (
+                    {props.motherboardId && (
                       <div>
                         <div className="flex items-center appearance-none">
                           <Input
@@ -524,28 +466,39 @@ export const Power = (props: {
                             checked={compatible}
                             onChange={(e) => setCompatible(e.target.checked)}
                           />
-                          <label className="text-sm">Compatible with Motherboard </label>
+                          <label className="text-sm">
+                            Compatible with Motherboard
+                          </label>
                         </div>
                       </div>
-                    ) : null}
+                    )}
 
                     {Object.entries(props).map(([filterKey, filter]) => {
                       if (["psCertification", "powersupplyMarque"].includes(filterKey)) {
-                        const filterData = filter as Filter;
+                        const filterData = filter as Filter | undefined;
+                        if (!filterData?.list) return null;
+
                         return (
                           <CheckboxGroup
                             key={filterKey}
                             label={filterData.title.toString()}
                             items={filterData.list}
-                            onChange={(value) => handleCheckboxChange(filterKey as keyof CheckItemGroupsPower, value)}
-                            selectedItems={filterList[filterKey as keyof CheckItemGroupsPower].map((i) => i.searchKey)}
+                            onChange={(value) =>
+                              handleCheckboxChange(
+                                filterKey as keyof CheckItemGroupsPower,
+                                value
+                              )
+                            }
+                            selectedItems={filterList[
+                              filterKey as keyof CheckItemGroupsPower
+                            ].map((i) => i.searchKey)}
                           />
                         );
                       }
                       return null;
                     })}
                   </>
-                ) : null}
+                )}
               </div>
 
               {/* RESULTS */}
@@ -564,40 +517,68 @@ export const Power = (props: {
                   </div>
                 ) : (
                   <>
-                    {!loading && data && data.length === 0 && <p className="text-muted-foreground">{ui.builderNoResults}.</p>}
+                    {data.length === 0 && (
+                      <p className="text-muted-foreground">
+                        {ui.builderNoResults}.
+                      </p>
+                    )}
 
-                    {!loading && data.length > 0 && (
+                    {data.length > 0 && (
                       <>
                         <div className="text-sm text-muted-foreground">
-                          ({totalPages}) {ui.builderResultsSummary(totalPages, searchTime)}
+                          ({totalPages}){" "}
+                          {ui.builderResultsSummary(totalPages, searchTime)}
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                           {data.map((item) => {
-                            const raw = (item.powersupplies ?? item.powersupplys)?.[0]?.Power;
-                            const watt = typeof raw === "string" ? parseInt(raw, 10) : (raw as number | undefined);
+                            const raw =
+                              (item.powersupplies ?? item.powersupplys)?.[0]?.Power;
+                            const watt =
+                              typeof raw === "string"
+                                ? parseInt(raw, 10)
+                                : (raw as number | undefined);
                             const isRecommended =
-                              recommendedWattage != null && typeof watt === "number" && watt === recommendedWattage;
+                              recommendedWattage != null &&
+                              typeof watt === "number" &&
+                              watt === recommendedWattage;
 
                             return (
-                              <div key={item.id} className={`bg-[#12141b] hover:bg-[#101218] transition flex flex-col justify-between group cursor-pointer rounded-xl border border-white/5 p-3 space-y-1 ${
-                              checkcompatibility(item) ? "ring-1 ring-[#00e0ff]/50" : "ring-1 ring-red-500/40"}`}>
+                              <div
+                                key={item.id}
+                                className={`bg-[#12141b] hover:bg-[#101218] transition flex flex-col justify-between group cursor-pointer rounded-xl border border-white/5 p-3 space-y-1 ${
+                                  checkcompatibility(item)
+                                    ? "ring-1 ring-[#00e0ff]/50"
+                                    : "ring-1 ring-red-500/40"
+                                }`}
+                              >
                                 <div>
-                                  {isRecommended && <span className="text-[#007bff] font-semibold">Recommended by AI</span>}
+                                  {isRecommended && (
+                                    <span className="text-[#007bff] font-semibold">
+                                      Recommended by AI
+                                    </span>
+                                  )}
                                   <div className="aspect-square rounded-xl bg-transparent relative">
-                                    <Image src={item.images?.[0]?.url} alt={item.name} fill className="aspect-square object-cover rounded-md" />
+                                    <Image
+                                      src={item.images?.[0]?.url || "/placeholder.png"}
+                                      alt={item.name}
+                                      fill
+                                      className="aspect-square object-cover rounded-md"
+                                    />
                                   </div>
                                   <div>
                                     <p className="font-semibold text-sm">{item.name}</p>
-                                    <p className="text-sm text-muted-foreground">{item.category?.name}</p>
+                                    <p className="text-sm text-muted-foreground">
+                                      {item.category?.name}
+                                    </p>
                                   </div>
                                   <div className="flex items-center justify-between text-xs">
                                     <Currency value={item?.price} />
                                   </div>
                                 </div>
 
-                                <div className='w-full'>
-                                <InlineDetails text={item.description} />
+                                <div className="w-full">
+                                  <InlineDetails text={item.description || ""} />
 
                                   <Button
                                     type="submit"
@@ -626,29 +607,30 @@ export const Power = (props: {
 
             {/* Sticky footer */}
             <DialogFooter className="sticky bottom-0 bg-[#101218] border-t border-border px-4 py-3">
-            <div className='grid grid-cols-12 gap-4 w-full items-center'>
-              <div className='col-span-12 md:col-span-4 lg:col-span-3'>
-              <Button
-  className='w-full px-6 py-2 bg-[#00a2ff] hover:bg-[#0092e6] text-foreground'
-  onClick={() => { setCurrentPage(0); fetchData(); }}
->
-  {ui.filterButton}
-</Button>
-
-              </div>
+              <div className="grid grid-cols-12 gap-4 w-full items-center">
+                <div className="col-span-12 md:col-span-4 lg:col-span-3">
+                  <Button
+                    className="w-full px-6 py-2 bg-[#00a2ff] hover:bg-[#0092e6] text-foreground"
+                    onClick={() => {
+                      setCurrentPage(0);
+                      fetchData();
+                    }}
+                  >
+                    {ui.filterButton}
+                  </Button>
+                </div>
 
                 <div className="col-span-12 md:col-span-8 lg:col-span-9 flex justify-end">
-                  {totalPages > 0 && !loading && data.length > 0 && (
+                  {totalPagesForPagination > 0 && !loading && data.length > 0 && (
                     <Pagination
                       isCompact
                       showControls
-                      total={parseInt((totalPages / 10).toFixed(0)) + (totalPages % 10 === 0 ? 0 : 1)}
+                      total={totalPagesForPagination}
                       classNames={{
                         wrapper: "gap-2",
                         item: "w-8 h-8 text-foreground bg-white/10 border border-white/20 hover:bg-white/20",
                         cursor:
-                          "bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] font-semibold shadow-[0_0_20px_hsl(var(--accent)/0.15)]"
-,
+                          "bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] font-semibold shadow-[0_0_20px_hsl(var(--accent)/0.15)]",
                         prev: "bg-white/10 border border-white/20 text-foreground hover:bg-white/20",
                         next: "bg-white/10 border border-white/20 text-foreground hover:bg-white/20",
                       }}
@@ -666,18 +648,19 @@ export const Power = (props: {
   );
 };
 
-/* ---------- CheckboxGroup (same as Case) ---------- */
+/* ---------- CheckboxGroup ---------- */
 const CheckboxGroup = (props: {
   label: string;
   items: filterItem[];
   onChange: (value: string) => void;
   selectedItems: string[];
 }) => {
+  const items = props.items || [];
   return (
     <div>
       <br />
       <p>{props.label}</p>
-      {props.items.map((item) => (
+      {items.map((item) => (
         <div key={item.name}>
           <div className="flex items-center appearance-none">
             <Input

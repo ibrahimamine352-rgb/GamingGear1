@@ -1,9 +1,8 @@
-"use client"
-import axios from 'axios'
-import { XMarkIcon } from '@heroicons/react/24/outline'
-import { MotherboardIcon } from "./comps"
-import React, { MouseEventHandler, useEffect, useState, Fragment } from 'react'
-import { Button } from "@/components/ui/button"
+"use client";
+
+import { MotherboardIcon } from "./comps";
+import React, { useEffect, useState, Fragment } from "react";
+import { Button } from "@/components/ui/button";
 import { InlineDetails } from "@/components/InlineDetails";
 import {
   Dialog,
@@ -11,85 +10,94 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import Container from '@/components/ui/container'
-import Skeleton from '@/components/ui/skeleton'
-import SearchComponent from '@/components/search-filters/motherboard/motherboard-search'
-import { Filter, ProfileType, filterItem } from '../page'
-import Image from 'next/image'
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Container from "@/components/ui/container";
+import Skeleton from "@/components/ui/skeleton";
+import SearchComponent from "@/components/search-filters/motherboard/motherboard-search";
+import { Filter, ProfileType, filterItem } from "../page";
+import Image from "next/image";
 import { Product } from "@/types";
-import usePreviewModal from '@/hooks/use-preview-modal'
-import useCart from '@/hooks/use-cart'
-import { useRouter } from 'next/navigation'
-import Currency from '@/components/ui/currency'
-import { Trash } from 'lucide-react'
-import { ChevronDownIcon } from '@heroicons/react/20/solid'
-import { Menu, Transition } from '@headlessui/react'
-import { Pagination } from '@nextui-org/pagination'
-import { AllProductsCompatibility } from './comps'
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import Currency from "@/components/ui/currency";
+import { Trash } from "lucide-react";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { Menu, Transition } from "@headlessui/react";
+import { Pagination } from "@nextui-org/pagination";
+import { AllProductsCompatibility } from "./comps";
 import { useLanguage } from "@/context/language-context";
 import { UI_TEXT } from "@/i18n/ui-text";
 
-type checkItem = { id: number, searchKey: string }
+type checkItem = { id: number; searchKey: string };
 
-function classNames(...classes: (string | boolean)[]): string {
-  return classes.filter(Boolean).join(' ');
+function classNames(...classes: (string | boolean)[]) {
+  return classes.filter(Boolean).join(" ");
 }
 
 export type checkItemGroups = {
-  motherboardchipset: checkItem[],
-  motherboardcpusupport: checkItem[],
-  motherboardformat: checkItem[],
-  motherboardmanufacturer: checkItem[],
-  motherboardramslots: checkItem[],
-}
+  motherboardchipset: checkItem[];
+  motherboardcpusupport: checkItem[];
+  motherboardformat: checkItem[];
+  motherboardmanufacturer: checkItem[];
+  motherboardramslots: checkItem[];
+};
 
 export const Motherboard = (props: {
-  selectedCompatibility: AllProductsCompatibility | undefined
+  selectedCompatibility: AllProductsCompatibility | undefined;
   setMotherboardId: (values: Product | undefined) => void;
-  motherboardId: Product | undefined,
-  profiles: ProfileType[],
-  motherboardmanufacturer: Filter,
-  motherboardchipset: Filter
-  motherboardcpusupport: Filter
-  motherboardformat: Filter
-  cpuId: Product | undefined,
-  motherboardramslots: Filter,
+  motherboardId: Product | undefined;
+  profiles: ProfileType[];
+  motherboardmanufacturer: Filter;
+  motherboardchipset: Filter;
+  motherboardcpusupport: Filter;
+  motherboardformat: Filter;
+  cpuId: Product | undefined;
+  motherboardramslots: Filter;
 }) => {
   const { lang } = useLanguage();
   const ui = UI_TEXT[lang];
+
   const [data, setData] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
+
   const [filterList, setFilterList] = useState<checkItemGroups>({
     motherboardchipset: [],
     motherboardcpusupport: [],
     motherboardformat: [],
     motherboardmanufacturer: [],
     motherboardramslots: [],
-  })
+  });
+
   const [priceFilter, setPriceFilter] = useState<number[]>([0, 5000]);
-  const [selectedSort, setSelectedSort] = useState('Prix : Croissant');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedSort, setSelectedSort] = useState("Prix : Croissant");
+  const [searchTerm, setSearchTerm] = useState("");
   const [searchTime, setSearchTime] = useState(0);
   const [compatible, setcompatible] = useState(false);
 
   const sortOptions = [
-    { name: 'Les plus populaires', href: '#', current: selectedSort === 'Les plus populaires' },
-    { name: 'Les plus récents', href: '#', current: selectedSort === 'Les plus récents' },
-    { name: 'Prix : Croissant', href: '#', current: selectedSort === 'Prix : Croissant' },
-    { name: 'Prix : Décroissant', href: '#', current: selectedSort === 'Prix : Décroissant' },
+    {
+      name: "Les plus populaires",
+      href: "#",
+      current: selectedSort === "Les plus populaires",
+    },
+    {
+      name: "Les plus récents",
+      href: "#",
+      current: selectedSort === "Les plus récents",
+    },
+    {
+      name: "Prix : Croissant",
+      href: "#",
+      current: selectedSort === "Prix : Croissant",
+    },
+    {
+      name: "Prix : Décroissant",
+      href: "#",
+      current: selectedSort === "Prix : Décroissant",
+    },
   ];
-
-  const previewModal = usePreviewModal();
-  const cart = useCart();
-  const router = useRouter();
 
   const fetchData = async () => {
     try {
@@ -109,12 +117,17 @@ export const Motherboard = (props: {
         `&units=10` +
         `&page=${currentPage}` +
         `&filterList=${encodedFilterList}` +
-        `${compatible && props.cpuId ? `&cpuId=${props.cpuId.id}` : ''}`;
+        `${
+          compatible && props.cpuId ? `&cpuId=${props.cpuId.id}` : ""
+        }`;
 
       const response = await fetch(url);
 
       if (!response.ok) {
-        console.error('API /api/motherboard/component failed:', response.status);
+        console.error(
+          "API /api/motherboard/component failed:",
+          response.status
+        );
         setData([]);
         setTotalPages(0);
         setLoading(false);
@@ -125,17 +138,25 @@ export const Motherboard = (props: {
       const endTime = performance.now();
       setSearchTime((endTime - startTime) / 1000);
 
-      const onlyMotherboards = (Array.isArray(dataa.data) ? dataa.data : []).filter((p: any) => {
-        const n = p?.category?.name?.toLowerCase?.() ?? '';
-        const s = p?.category?.slug?.toLowerCase?.() ?? '';
-        return n.includes('carte mère') || n.includes('carte mere') || n.includes('motherboard') ||
-               s.includes('motherboard') || s.includes('carte-mere') || s.includes('carte_mere');
-      });
+      const onlyMotherboards = (Array.isArray(dataa.data) ? dataa.data : []).filter(
+        (p: any) => {
+          const n = p?.category?.name?.toLowerCase?.() ?? "";
+          const s = p?.category?.slug?.toLowerCase?.() ?? "";
+          return (
+            n.includes("carte mère") ||
+            n.includes("carte mere") ||
+            n.includes("motherboard") ||
+            s.includes("motherboard") ||
+            s.includes("carte-mere") ||
+            s.includes("carte_mere")
+          );
+        }
+      );
 
       setData(onlyMotherboards);
       setTotalPages(dataa.total ?? 0);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error fetching data:", error);
       setData([]);
       setTotalPages(0);
     } finally {
@@ -143,18 +164,39 @@ export const Motherboard = (props: {
     }
   };
 
-  const handleCheckboxChange = (filterKey: keyof checkItemGroups, value: string) => {
+  const handleCheckboxChange = (
+    filterKey: keyof checkItemGroups,
+    value: string
+  ) => {
     setFilterList((prev) => {
-      const existingIndex = prev[filterKey].findIndex((item) => item.searchKey === value);
-      if (existingIndex !== -1) prev[filterKey].splice(existingIndex, 1);
-      else prev[filterKey].push({ id: Date.now(), searchKey: value });
-      return { ...prev };
+      const currentList = prev[filterKey];
+      const existingIndex = currentList.findIndex(
+        (item) => item.searchKey === value
+      );
+
+      let nextList: checkItem[];
+      if (existingIndex !== -1) {
+        // remove
+        nextList = [...currentList];
+        nextList.splice(existingIndex, 1);
+      } else {
+        // add
+        nextList = [...currentList, { id: Date.now(), searchKey: value }];
+      }
+
+      return {
+        ...prev,
+        [filterKey]: nextList,
+      };
     });
   };
 
-  const handleSortClick = (name: React.SetStateAction<string>) => setSelectedSort(name);
+  const handleSortClick = (name: string) => setSelectedSort(name);
 
-  useEffect(() => { fetchData(); }, [
+  useEffect(() => {
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
     currentPage,
     selectedSort,
     priceFilter,
@@ -163,7 +205,6 @@ export const Motherboard = (props: {
     compatible,
     props.cpuId?.id,
   ]);
-  useEffect(() => { fetchData(); }, []);
 
   function haveCommonElement<T>(set1: T[], array2: T[]): boolean {
     const array1 = Array.from(set1);
@@ -171,60 +212,84 @@ export const Motherboard = (props: {
     return false;
   }
 
-  const checkcompatibility = (Product: Product) => {
-    const motherboardId = Product
-    const processorId = props.cpuId
+  const checkcompatibility = (product: Product) => {
+    const motherboardId = product;
+    const processorId = props.cpuId;
     if (motherboardId) {
-      const MProfiles = props.profiles.filter((e) => e.motherboards.find((ee) => ee.productId == motherboardId.id));
+      const MProfiles = props.profiles.filter((e) =>
+        e.motherboards.find((ee) => ee.productId == motherboardId.id)
+      );
       if (processorId) {
-        const PProfiles = props.profiles.filter((e) => e.CPUs.find((ee) => ee.productId == processorId.id));
-        return haveCommonElement(MProfiles, PProfiles)
+        const PProfiles = props.profiles.filter((e) =>
+          e.CPUs.find((ee) => ee.productId == processorId.id)
+        );
+        return haveCommonElement(MProfiles, PProfiles);
       }
-      return true
+      return true;
     }
-    return true
-  }
+    return true;
+  };
 
-  const [openDialog, steOpenDialog] = useState(false)
+  const [openDialog, steOpenDialog] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
-  const toggleDescription = () => setShowFullDescription(!showFullDescription);
+  const toggleDescription = () => setShowFullDescription((v) => !v);
+
+  const selectedMb = props.motherboardId;
+  const selectedDesc = selectedMb?.description ?? "";
+  const selectedImg =
+    selectedMb?.images?.[0]?.url || "/placeholder.png";
+
+  const comp = props.selectedCompatibility?.Compatibility;
+  const compatRows = [
+    { key: "motherboardCompatibility", label: "Motherboard :" },
+    { key: "processorCompatibility", label: "Processor:" },
+    { key: "gpuCompatibility", label: "Graphics card:" },
+    { key: "ramCompatibility", label: "RAM :" },
+    { key: "hardDiskCompatibility", label: "Hard drive compatibility:" },
+    { key: "powerCompatibility", label: "Power supply box compatibility:" },
+    { key: "caseCompatibility", label: "Case compatibility:" },
+  ] as const;
 
   return (
     <div className="text-foreground">
       <Card className="m-3 rounded-2xl build-container">
         <CardContent>
-          <div className='flex lg:flex-row flex-col'>
+          <div className="flex lg:flex-row flex-col">
             {/* LEFT SELECTOR CARD */}
             <button
               onClick={() => steOpenDialog(true)}
-              className='lg:w-1/5 w-full min-w-md:max-w-lg m-3 bg-transparent border-transparent hover:bg-[hsl(var(--card)/0.08)] rounded-xl'
+              className="lg:w-1/5 w-full min-w-md:max-w-lg m-3 bg-transparent border-transparent hover:bg-[hsl(var(--card)/0.08)] rounded-xl"
             >
               <Card className="build-selector">
                 <CardHeader>
-                  <CardTitle className='text-center'>
-                  {ui.navMotherboards}
-                    <p className='text-xs text-muted-foreground p-1'>{ui.builderRequiredTag}</p>
-                    
+                  <CardTitle className="text-center">
+                    {ui.navMotherboards}
+                    <p className="text-xs text-muted-foreground p-1">
+                      {ui.builderRequiredTag}
+                    </p>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                <div className="flex items-center justify-center text-[hsl(var(--accent))]">
-                < MotherboardIcon className="w-16 h-16 md:w-20 md:h-20" />
-                </div>
+                  <div className="flex items-center justify-center text-[hsl(var(--accent))]">
+                    <MotherboardIcon className="w-16 h-16 md:w-20 md:h-20" />
+                  </div>
                 </CardContent>
               </Card>
             </button>
 
             {/* RIGHT SUMMARY CARD */}
             <Card className="lg:w-4/5 w-full justify-center flex items-center m-3 build-container">
-              <CardContent className='p-0 w-full h-full'>
-                {props.motherboardId ? (
+              <CardContent className="p-0 w-full h-full">
+                {selectedMb ? (
                   <div className="build-container hover:bg-[#1a1a1a] transition flex justify-between group md:flex-row flex-col items-center rounded-xl space-x-3">
                     {/* Image */}
                     <div className="flex-shrink-0">
-                      <div className="aspect-square rounded-xl mt-3 bg-transparent ml-3 relative" style={{ height: '150px' }}>
+                      <div
+                        className="aspect-square rounded-xl mt-3 bg-transparent ml-3 relative"
+                        style={{ height: "150px" }}
+                      >
                         <Image
-                          src={props.motherboardId.images?.[0]?.url}
+                          src={selectedImg}
                           alt=""
                           fill
                           className="aspect-square object-cover rounded-md h-full w-full"
@@ -234,94 +299,75 @@ export const Motherboard = (props: {
 
                     {/* Description */}
                     <div className="flex-grow p-3">
-                      <p className="font-semibold text-sm text-foreground">{props.motherboardId.name}</p>
+                      <p className="font-semibold text-sm text-foreground">
+                        {selectedMb.name}
+                      </p>
                       <p className="text-xs text-muted-foreground">
-                        {showFullDescription ? props.motherboardId.description : `${props.motherboardId.description.slice(0, 100)}...`}
-                        {props.motherboardId.description.length > 100 && (
-                          <span className="font-bold cursor-pointer text-[#007bff]" onClick={toggleDescription}>
-                            {showFullDescription ? ' See Less' : ' See More'}
+                        {showFullDescription
+                          ? selectedDesc
+                          : `${selectedDesc.slice(0, 100)}...`}
+                        {selectedDesc.length > 100 && (
+                          <span
+                            className="font-bold cursor-pointer text-[#007bff]"
+                            onClick={toggleDescription}
+                          >
+                            {showFullDescription ? " See Less" : " See More"}
                           </span>
                         )}
                       </p>
                     </div>
 
                     {/* Compatibility */}
-                    {props.selectedCompatibility ? (
+                    {comp && (
                       <div className="w-4/5">
-                        <div className='font-bold my-2 text-sm text-foreground'>Compatibility:</div>
+                        <div className="font-bold my-2 text-sm text-foreground">
+                          Compatibility:
+                        </div>
 
                         <div className="text-left grid text-xs max-w-screen-md mx-auto border border-border rounded mb-3 mr-3">
-                          <div className="p-1 pl-3 border-b border-border hover:bg-muted hover:font-bold cursor-pointer">
-                            <p className={`mb-1 ${props.selectedCompatibility.Compatibility.motherboardCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}`}>
-                              Motherboard :
-                            </p>
-                            <p className={props.selectedCompatibility.Compatibility.motherboardCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}>
-                              {props.selectedCompatibility.Compatibility.motherboardCompatibility.message}
-                            </p>
-                          </div>
-                          <div className="p-1 pl-3 border-b border-border hover:bg-muted hover:font-bold cursor-pointer">
-                            <p className={`mb-1 ${props.selectedCompatibility.Compatibility.processorCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}`}>
-                              Processor:
-                            </p>
-                            <p className={props.selectedCompatibility.Compatibility.processorCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}>
-                              {props.selectedCompatibility.Compatibility.processorCompatibility.message}
-                            </p>
-                          </div>
-                          <div className="p-1 pl-3 border-b border-border hover:bg-muted hover:font-bold cursor-pointer">
-                            <p className={`mb-1 ${props.selectedCompatibility.Compatibility.gpuCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}`}>
-                              Graphics card:
-                            </p>
-                            <p className={props.selectedCompatibility.Compatibility.gpuCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}>
-                              {props.selectedCompatibility.Compatibility.gpuCompatibility.message}
-                            </p>
-                          </div>
-                          <div className="p-1 pl-3 border-b border-border hover:bg-muted hover:font-bold cursor-pointer">
-                            <p className={`mb-1 ${props.selectedCompatibility.Compatibility.ramCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}`}>
-                              RAM :
-                            </p>
-                            <p className={props.selectedCompatibility.Compatibility.ramCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}>
-                              {props.selectedCompatibility.Compatibility.ramCompatibility.message}
-                            </p>
-                          </div>
-                          <div className="p-1 pl-3 border-b border-border hover:bg-muted hover:font-bold cursor-pointer">
-                            <p className={`mb-1 ${props.selectedCompatibility.Compatibility.hardDiskCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}`}>
-                              Hard drive compatibility:
+                          {compatRows.map(({ key, label }, index) => {
+                            const item = (comp as any)[key];
+                            const isError = !!item?.error;
+                            const msg = item?.message ?? "";
+                            const isLast = index === compatRows.length - 1;
 
-                            </p>
-                            <p className={props.selectedCompatibility.Compatibility.hardDiskCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}>
-                              {props.selectedCompatibility.Compatibility.hardDiskCompatibility.message}
-                            </p>
-                          </div>
-                          <div className="p-1 pl-3 border-b border-border hover:bg-muted hover:font-bold cursor-pointer">
-                            <p className={`mb-1 ${props.selectedCompatibility.Compatibility.powerCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}`}>
-                              Power supply box compatibility:
-
-                            </p>
-                            <p className={props.selectedCompatibility.Compatibility.powerCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}>
-                              {props.selectedCompatibility.Compatibility.powerCompatibility.message}
-                            </p>
-                          </div>
-                          <div className="p-1 pl-3 hover:bg-muted hover:font-bold cursor-pointer">
-                            <p className={`mb-1 ${props.selectedCompatibility.Compatibility.caseCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}`}>
-                              Case compatibility:
-
-                            </p>
-                            <p className={props.selectedCompatibility.Compatibility.caseCompatibility.error ? 'text-red-400' : 'text-[#007bff]'}>
-                              {props.selectedCompatibility.Compatibility.caseCompatibility.message}
-                            </p>
-                          </div>
+                            return (
+                              <div
+                                key={key}
+                                className={
+                                  "p-1 pl-3 hover:bg-muted hover:font-bold cursor-pointer " +
+                                  (isLast ? "" : "border-b border-border")
+                                }
+                              >
+                                <p
+                                  className={`mb-1 ${
+                                    isError ? "text-red-400" : "text-[#007bff]"
+                                  }`}
+                                >
+                                  {label}
+                                </p>
+                                <p
+                                  className={
+                                    isError ? "text-red-400" : "text-[#007bff]"
+                                  }
+                                >
+                                  {msg}
+                                </p>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
-                    ) : null}
+                    )}
 
                     {/* Price & actions */}
                     <div className="flex-shrink-0 p-3">
-                      <div className='text-center flex flex-col'>
-                        <div className='p-3'>
-                          <Currency value={props.motherboardId?.price} />
+                      <div className="text-center flex flex-col">
+                        <div className="p-3">
+                          <Currency value={selectedMb.price} />
                         </div>
                         <Button
-                          className='mb-3'
+                          className="mb-3"
                           disabled={loading}
                           variant="destructive"
                           size="sm"
@@ -330,22 +376,38 @@ export const Motherboard = (props: {
                           <Trash className="h-4 w-4" />
                         </Button>
                         <Button
-                          onClick={() => steOpenDialog(!openDialog)}
+                          onClick={() => steOpenDialog(true)}
                           className="btn-primary-blue"
                         >
                           {ui.builderBtnChange}
                         </Button>
-                        <a href={"product/" + props.motherboardId.id} className='underline mt-2 text-[#007bff]' target='_blank'>
-                        {ui.builderLinkSeeInStore}
+                        <a
+                          href={"product/" + selectedMb.id}
+                          className="underline mt-2 text-[#007bff]"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {ui.builderLinkSeeInStore}
                         </a>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div onClick={() => steOpenDialog(!openDialog)} className='cursor-pointer w-full h-full flex justify-center items-center'>
+                  <div
+                    onClick={() => steOpenDialog(true)}
+                    className="cursor-pointer w-full h-full flex justify-center items-center"
+                  >
                     {/* Plus icon in accent blue */}
-                    <svg xmlns="http://www.w3.org/2000/svg" width={40} height={40} viewBox="0 0 44 55" className="fill-current text-[hsl(var(--accent))]">
-                      <g><path  d="M41.9,21H23V2.1c0-0.6-0.5-1-1-1c-0.6,0-1,0.5-1,1V21H2.1c-0.6,0-1,0.5-1,1s0.5,1,1,1H21v18.8c0,0.6,0.5,1,1,1c0.6,0,1-0.5,1-1V23h18.8c0.6,0,1-0.5,1-1S42.5,21,41.9,21z" /></g>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width={40}
+                      height={40}
+                      viewBox="0 0 44 55"
+                      className="fill-current text-[hsl(var(--accent))]"
+                    >
+                      <g>
+                        <path d="M41.9,21H23V2.1c0-0.6-0.5-1-1-1c-0.6,0-1,0.5-1,1V21H2.1c-0.6,0-1,0.5-1,1s0.5,1,1,1H21v18.8c0,0.6,0.5,1,1,1c0.6,0,1-0.5,1-1V23h18.8c0.6,0,1-0.5,1-1S42.5,21,41.9,21z" />
+                      </g>
                     </svg>
                   </div>
                 )}
@@ -355,224 +417,295 @@ export const Motherboard = (props: {
         </CardContent>
       </Card>
 
-      {/* DIALOG (compact, sticky header/footer, dual-scroll) */}
-      <Dialog open={openDialog} onOpenChange={(v) => steOpenDialog(v)}>
-        <DialogTrigger asChild />
-        <DialogContent
-          className="
-            w-[95vw] max-w-[1200px]
-            h-[85vh] md:h-[80vh]
-            p-0 overflow-hidden
-            flex flex-col
-            bg-[#101218] text-[#e6e8ee]
-            border border-border rounded-2xl
-          "
-        >
-          {/* Sticky header */}
-          <DialogHeader className="sticky top-0 z-10 bg-[#101218] border-b border-border px-4 py-3">
-            <DialogTitle>
-              <div className='flex items-center justify-between gap-3'>
-                <h1 className="text-lg font-semibold">Motherboard store</h1>
+      {/* DIALOG (only mounted when open) */}
+      {openDialog && (
+        <Dialog open={openDialog} onOpenChange={steOpenDialog}>
+          <DialogContent
+            className="
+              w-[95vw] max-w-[1200px]
+              h-[85vh] md:h-[80vh]
+              p-0 overflow-hidden
+              flex flex-col
+              bg-[#101218] text-[#e6e8ee]
+              border border-border rounded-2xl
+            "
+          >
+            {/* Sticky header */}
+            <DialogHeader className="sticky top-0 z-10 bg-[#101218] border-b border-border px-4 py-3">
+              <DialogTitle>
+                <div className="flex items-center justify-between gap-3">
+                  <h1 className="text-lg font-semibold">Motherboard store</h1>
 
-                <Menu as="div" className="relative inline-block text-left">
-                  <div className='flex'>
-                    <Menu.Button className="group inline-flex items-center text-sm font-medium">
-                      Sort&nbsp;<span className="text-[#e6e8ee]">{selectedSort}</span>
-                      <ChevronDownIcon className="ml-1 h-5 w-5 text-[#a6adc8]" aria-hidden="true" />
-                    </Menu.Button>
-                  </div>
-
-                  <Transition
-                    as={Fragment}
-                    enter="transition ease-out duration-100"
-                    enterFrom="transform opacity-0 scale-95"
-                    enterTo="transform opacity-100 scale-100"
-                    leave="transition ease-in duration-75"
-                    leaveFrom="transform opacity-100 scale-100"
-                    leaveTo="transform opacity-0 scale-95"
-                  >
-                    <Menu.Items className="absolute right-0 z-10 mt-2 w-44 origin-top-right rounded-md bg-[#12141b] text-[#e6e8ee] border border-border shadow-2xl focus:outline-none">
-                      <div className="py-1">
-                        {sortOptions.map((option) => (
-                          <Menu.Item key={option.name}>
-                            {({ active }) => (
-                              <a
-                                onClick={() => { handleSortClick(option.name); setCurrentPage(0); }}
-                                className={classNames(
-                                  option.current ? 'cursor-pointer text-[#00e0ff] font-medium' : 'cursor-pointer text-[#a6adc8]',
-                                  active ? 'bg-[#101218]' : '',
-                                  'block px-4 py-2 text-sm'
-                                )}
-                              >
-                                {option.name}
-                              </a>
-                            )}
-                          </Menu.Item>
-                        ))}
-                      </div>
-                    </Menu.Items>
-                  </Transition>
-                </Menu>
-              </div>
-            </DialogTitle>
-          </DialogHeader>
-
-          {/* Body: two independent scroll panes */}
-          <div className="flex-1 grid grid-cols-12 gap-4 px-4 py-4 overflow-hidden text-[13px]">
-            {/* FILTERS PANEL */}
-            <div className='col-span-12 md:col-span-4 lg:col-span-3 overflow-y-auto pr-1'>
-              <SearchComponent
-                priceFilter={priceFilter}
-                setPriceFilter={setPriceFilter}
-                fetchData={fetchData}
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                setLoading={setLoading}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                setTotalPages={setTotalPages}
-                totalPages={totalPages}
-              />
-
-              {props.motherboardmanufacturer.list.length > 0 && (
-                <>
-                  {props.cpuId ? (
-                    <div className="mt-2">
-                      <label className='text-sm inline-flex items-center gap-2'>
-                        <Input
-                          type='checkbox'
-                          className='w-3 h-3 m-0'
-                          checked={compatible}
-                          onChange={(e) => setcompatible(e.target.checked)}
+                  <Menu as="div" className="relative inline-block text-left">
+                    <div className="flex">
+                      <Menu.Button className="group inline-flex items-center text-sm font-medium">
+                        Sort&nbsp;
+                        <span className="text-[#e6e8ee]">
+                          {selectedSort}
+                        </span>
+                        <ChevronDownIcon
+                          className="ml-1 h-5 w-5 text-[#a6adc8]"
+                          aria-hidden="true"
                         />
-                        Compatible Processor
-                      </label>
+                      </Menu.Button>
                     </div>
-                  ) : null}
 
-                  {Object.entries(props).reverse().map(([filterKey, filter]) => {
-                    if (['motherboardmanufacturer', 'motherboardchipset', 'motherboardcpusupport', 'motherboardformat', 'motherboardramslots'].includes(filterKey)) {
-                      const filterData = filter as Filter;
-                      return (
-                        <CheckboxGroup
-                          key={filterKey}
-                          label={filterData.title.toString()}
-                          items={filterData.list}
-                          onChange={(value) => handleCheckboxChange(filterKey as keyof checkItemGroups, value)}
-                          selectedItems={filterList[filterKey as keyof checkItemGroups].map((item) => item.searchKey)}
-                        />
-                      );
-                    }
-                    return null;
-                  })}
-                </>
-              )}
-            </div>
-
-            {/* RESULTS GRID */}
-            <div className='col-span-12 md:col-span-8 lg:col-span-9 overflow-y-auto'>
-              {loading ? (
-                <div>
-                  <Container>
-                    <div className="w-full h-full p-6">
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-                        {Array.from({ length: 10 }).map((_, i) => (
-                          <Skeleton key={i} className="w-full h-48 rounded-xl" />
-                        ))}
-                      </div>
-                    </div>
-                  </Container>
+                    <Transition
+                      as={Fragment}
+                      enter="transition ease-out duration-100"
+                      enterFrom="transform opacity-0 scale-95"
+                      enterTo="transform opacity-100 scale-100"
+                      leave="transition ease-in duration-75"
+                      leaveFrom="transform opacity-100 scale-100"
+                      leaveTo="transform opacity-0 scale-95"
+                    >
+                      <Menu.Items className="absolute right-0 z-10 mt-2 w-44 origin-top-right rounded-md bg-[#12141b] text-[#e6e8ee] border border-border shadow-2xl focus:outline-none">
+                        <div className="py-1">
+                          {sortOptions.map((option) => (
+                            <Menu.Item key={option.name}>
+                              {({ active }) => (
+                                <a
+                                  onClick={() => {
+                                    handleSortClick(option.name);
+                                    setCurrentPage(0);
+                                  }}
+                                  className={classNames(
+                                    option.current
+                                      ? "cursor-pointer text-[#00e0ff] font-medium"
+                                      : "cursor-pointer text-[#a6adc8]",
+                                    active ? "bg-[#101218]" : "",
+                                    "block px-4 py-2 text-sm"
+                                  )}
+                                >
+                                  {option.name}
+                                </a>
+                              )}
+                            </Menu.Item>
+                          ))}
+                        </div>
+                      </Menu.Items>
+                    </Transition>
+                  </Menu>
                 </div>
-              ) : (
-                <>
-                  {data.length === 0 && <p className="text-[#a6adc8]">{ui.builderNoResults}.</p>}
-                  {data.length > 0 && (
+              </DialogTitle>
+            </DialogHeader>
+
+            {/* Body: two independent scroll panes */}
+            <div className="flex-1 grid grid-cols-12 gap-4 px-4 py-4 overflow-hidden text-[13px]">
+              {/* FILTERS PANEL */}
+              <div className="col-span-12 md:col-span-4 lg:col-span-3 overflow-y-auto pr-1">
+                <SearchComponent
+                  priceFilter={priceFilter}
+                  setPriceFilter={setPriceFilter}
+                  fetchData={fetchData}
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  setLoading={setLoading}
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                  setTotalPages={setTotalPages}
+                  totalPages={totalPages}
+                />
+
+                {props.motherboardmanufacturer?.list &&
+                  props.motherboardmanufacturer.list.length > 0 && (
                     <>
-                      <div className='text-xs text-[#a6adc8] mb-2'>({totalPages}) {ui.builderResultsSummary(totalPages, searchTime)}</div>
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                        {data.map((item, key) => (
-                          <div
-                            key={key}
-                            className={`${checkcompatibility(item) ? 'ring-1 ring-[#00e0ff]/50' : 'ring-1 ring-red-500/40'} bg-[#12141b] hover:bg-[#101218] transition flex flex-col justify-between group cursor-pointer rounded-xl border border-white/5 p-3 space-y-1 text-[#e6e8ee]`}
-                          >
-                            <div>
-                              <div className="aspect-square rounded-xl bg-transparent relative">
-                                <Image
-                                  src={item.images?.[0]?.url}
-                                  alt=""
-                                  fill
-                                  className="aspect-square object-cover rounded-md"
-                                />
-                              </div>
-                              <div className="mt-1">
-                                <p className="font-semibold text-sm text-[#e6e8ee] leading-tight">{item.name}</p>
-                                <p className="text-xs text-[#a6adc8]">{item.category?.name}</p>
-                              </div>
-                              <div className="flex items-center justify-between text-xs">
-                                <Currency value={item?.price} />
-                              </div>
-                            </div>
+                      {props.cpuId ? (
+                        <div className="mt-2">
+                          <label className="text-sm inline-flex items-center gap-2">
+                            <Input
+                              type="checkbox"
+                              className="w-3 h-3 m-0"
+                              checked={compatible}
+                              onChange={(e) =>
+                                setcompatible(e.target.checked)
+                              }
+                            />
+                            Compatible Processor
+                          </label>
+                        </div>
+                      ) : null}
 
-                            <div className='w-full'>
-                            <InlineDetails text={item.description} />
-
-                              <Button
-                                type='submit'
-                                onClick={() => { props.setMotherboardId(item); steOpenDialog(false) }}
-                                className={'w-full ' + (checkcompatibility(item) ? 'bg-[#00a2ff] hover:bg-[#0092e6] text-foreground' : 'bg-red-500 hover:bg-red-600 text-foreground')}
-                              >
-                                {ui.builderBtnAdd}
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                      {Object.entries(props)
+                        .reverse()
+                        .map(([filterKey, filter]) => {
+                          if (
+                            [
+                              "motherboardmanufacturer",
+                              "motherboardchipset",
+                              "motherboardcpusupport",
+                              "motherboardformat",
+                              "motherboardramslots",
+                            ].includes(filterKey)
+                          ) {
+                            const filterData = filter as Filter;
+                            return (
+                              <CheckboxGroup
+                                key={filterKey}
+                                label={filterData.title.toString()}
+                                items={filterData.list}
+                                onChange={(value) =>
+                                  handleCheckboxChange(
+                                    filterKey as keyof checkItemGroups,
+                                    value
+                                  )
+                                }
+                                selectedItems={filterList[
+                                  filterKey as keyof checkItemGroups
+                                ].map((item) => item.searchKey)}
+                              />
+                            );
+                          }
+                          return null;
+                        })}
                     </>
                   )}
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Sticky footer inside dialog */}
-          <DialogFooter className="sticky bottom-0 bg-[#101218] border-t border-border px-4 py-3">
-            <div className='grid grid-cols-12 gap-4 w-full items-center'>
-              <div className='col-span-12 md:col-span-4 lg:col-span-3'>
-              <Button
-  className='w-full px-6 py-2 bg-[#00a2ff] hover:bg-[#0092e6] text-foreground'
-  onClick={() => { setCurrentPage(0); fetchData(); }}
->
-  {ui.filterButton}
-</Button>
-
               </div>
 
-              <div className='col-span-12 md:col-span-8 lg:col-span-9 flex justify-end'>
-                {totalPages > 0 && !loading && data.length > 0 && (
-                  <Pagination
-                    isCompact
-                    showControls
-                    total={parseInt((totalPages / 10).toFixed(0)) + (totalPages % 10 === 0 ? 0 : 1)}
-                    color="default"
-                    page={currentPage + 1}
-                    onChange={(e) => { setCurrentPage(e - 1) }}
-                    classNames={{
-                      wrapper: "gap-2",
-                      item: "w-8 h-8 text-foreground bg-white/10 border border-border hover:bg-white/20",
-                      cursor: "bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] font-semibold shadow-[0_0_20px_hsl(var(--accent)/0.15)]",
-                      prev: "bg-white/10 border border-border text-foreground hover:bg-white/20",
-                      next: "bg-white/10 border border-border text-foreground hover:bg-white/20"
-                    }}
-                  />
+              {/* RESULTS GRID */}
+              <div className="col-span-12 md:col-span-8 lg:col-span-9 overflow-y-auto">
+                {loading ? (
+                  <div>
+                    <Container>
+                      <div className="w-full h-full p-6">
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                          {Array.from({ length: 10 }).map((_, i) => (
+                            <Skeleton
+                              key={i}
+                              className="w-full h-48 rounded-xl"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </Container>
+                  </div>
+                ) : (
+                  <>
+                    {data.length === 0 && (
+                      <p className="text-[#a6adc8]">
+                        {ui.builderNoResults}.
+                      </p>
+                    )}
+                    {data.length > 0 && (
+                      <>
+                        <div className="text-xs text-[#a6adc8] mb-2">
+                          ({totalPages}){" "}
+                          {ui.builderResultsSummary(totalPages, searchTime)}
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                          {data.map((item, key) => {
+                            const imgSrc =
+                              item.images?.[0]?.url || "/placeholder.png";
+                            const desc = item.description ?? "";
+
+                            return (
+                              <div
+                                key={key}
+                                className={`${
+                                  checkcompatibility(item)
+                                    ? "ring-1 ring-[#00e0ff]/50"
+                                    : "ring-1 ring-red-500/40"
+                                } bg-[#12141b] hover:bg-[#101218] transition flex flex-col justify-between group cursor-pointer rounded-xl border border-white/5 p-3 space-y-1 text-[#e6e8ee]`}
+                              >
+                                <div>
+                                  <div className="aspect-square rounded-xl bg-transparent relative">
+                                    <Image
+                                      src={imgSrc}
+                                      alt=""
+                                      fill
+                                      className="aspect-square object-cover rounded-md"
+                                    />
+                                  </div>
+                                  <div className="mt-1">
+                                    <p className="font-semibold text-sm text-[#e6e8ee] leading-tight">
+                                      {item.name}
+                                    </p>
+                                    <p className="text-xs text-[#a6adc8]">
+                                      {item.category?.name}
+                                    </p>
+                                  </div>
+                                  <div className="flex items-center justify-between text-xs">
+                                    <Currency value={item.price} />
+                                  </div>
+                                </div>
+
+                                <div className="w-full">
+                                  <InlineDetails text={desc} />
+                                  <Button
+                                    type="submit"
+                                    onClick={() => {
+                                      props.setMotherboardId(item);
+                                      steOpenDialog(false);
+                                    }}
+                                    className={
+                                      "w-full " +
+                                      (checkcompatibility(item)
+                                        ? "bg-[#00a2ff] hover:bg-[#0092e6] text-foreground"
+                                        : "bg-red-500 hover:bg-red-600 text-foreground")
+                                    }
+                                  >
+                                    {ui.builderBtnAdd}
+                                  </Button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+                  </>
                 )}
               </div>
             </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+            {/* Sticky footer inside dialog */}
+            <DialogFooter className="sticky bottom-0 bg-[#101218] border-t border-border px-4 py-3">
+              <div className="grid grid-cols-12 gap-4 w-full items-center">
+                <div className="col-span-12 md:col-span-4 lg:col-span-3">
+                  <Button
+                    className="w-full px-6 py-2 bg-[#00a2ff] hover:bg-[#0092e6] text-foreground"
+                    onClick={() => {
+                      setCurrentPage(0);
+                      fetchData();
+                    }}
+                  >
+                    {ui.filterButton}
+                  </Button>
+                </div>
+
+                <div className="col-span-12 md:col-span-8 lg:col-span-9 flex justify-end">
+                  {totalPages > 0 && !loading && data.length > 0 && (
+                    <Pagination
+                      isCompact
+                      showControls
+                      total={
+                        parseInt((totalPages / 10).toFixed(0)) +
+                        (totalPages % 10 === 0 ? 0 : 1)
+                      }
+                      color="default"
+                      page={currentPage + 1}
+                      onChange={(e) => {
+                        setCurrentPage(e - 1);
+                      }}
+                      classNames={{
+                        wrapper: "gap-2",
+                        item: "w-8 h-8 text-foreground bg-white/10 border border-border hover:bg-white/20",
+                        cursor:
+                          "bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] font-semibold shadow-[0_0_20px_hsl(var(--accent)/0.15)]",
+                        prev: "bg-white/10 border border-border text-foreground hover:bg-white/20",
+                        next: "bg-white/10 border border-border text-foreground hover:bg-white/20",
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
-  )
-}
+  );
+};
 
 // Checkbox group
 const CheckboxGroup = (props: {
@@ -587,15 +720,15 @@ const CheckboxGroup = (props: {
       <p className="text-sm font-semibold">{props.label}</p>
       {props.items.map((item) => (
         <div key={item.name}>
-          <div className='flex items-center'>
+          <div className="flex items-center">
             <Input
-              type='checkbox'
-              className='appearance-none focus:outline-none focus-visible:outline-none w-3 h-3 m-2 outline-none'
+              type="checkbox"
+              className="appearance-none focus:outline-none focus-visible:outline-none w-3 h-3 m-2 outline-none"
               value={item.name}
               checked={props.selectedItems.includes(item.name)}
               onChange={() => props.onChange(item.name)}
             />
-            <label className='text-sm text-[#a6adc8]'>
+            <label className="text-sm text-[#a6adc8]">
               {item.name} ({item.number})
             </label>
           </div>
