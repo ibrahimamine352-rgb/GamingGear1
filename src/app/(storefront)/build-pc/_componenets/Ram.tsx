@@ -106,27 +106,46 @@ export const Ram: React.FC<YourComponentProps> = (props) => {
 
   const fetchData = async () => {
     try {
-      setLoading(true)
-      const encodedFilterList = encodeURIComponent(JSON.stringify(filterList))
-      const startTime = performance.now()
+      setLoading(true);
+
+      const encodedFilterList = encodeURIComponent(JSON.stringify(filterList));
+      const startTime = performance.now();
+
       const response = await fetch(
-        `/api/memory/component?q=${searchTerm}&sort=${selectedSort}&units=10&page=${currentPage}&filterList=${encodedFilterList}${compatible && props.motherboardId ? `&motherboardId=${props.motherboardId.id}` : ''}`
-      )
-      const dataa = await response.json() as reslt
-      const endTime = performance.now()
-      setSearchTime((endTime - startTime) / 1000)
+        `/api/memory/component?q=${searchTerm}&sort=${selectedSort}&units=10&page=${currentPage}&filterList=${encodedFilterList}${
+          compatible && props.motherboardId ? `&motherboardId=${props.motherboardId.id}` : ""
+        }`
+      );
 
-      setData(dataa.data)
-      setTotalPages(dataa.total)
-      setLoading(false)
+      const dataa = (await response.json()) as reslt;
+      const endTime = performance.now();
+      setSearchTime((endTime - startTime) / 1000);
 
-      const res = await getRecommendations(props.selectedFeatures)
-      setRecommendedram(res.recommendations[0].memorySpeed)
+      setData(dataa.data);
+      setTotalPages(dataa.total);
+      setLoading(false);
+
+      // ✅ SAFE: try to get AI recommendation, but NEVER crash if it’s missing
+      try {
+        const res = await getRecommendations(props.selectedFeatures);
+
+        const firstRec = res?.recommendations?.[0];
+        if (firstRec && typeof firstRec.memorySpeed === "number") {
+          setRecommendedram(firstRec.memorySpeed);
+        } else {
+          // no valid recommendation returned
+          setRecommendedram(undefined);
+        }
+      } catch (err) {
+        console.error("Error fetching recommendations:", err);
+        setRecommendedram(undefined);
+      }
     } catch (error) {
-      setLoading(false)
-      console.error('Error fetching data:', error)
+      setLoading(false);
+      console.error("Error fetching data:", error);
     }
-  }
+  };
+
 
   const handleCheckboxChange = (filterKey: keyof checkItemGroupsRam, value: string) => {
     setFilterList((prev) => {
