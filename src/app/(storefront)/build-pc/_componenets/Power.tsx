@@ -1,8 +1,7 @@
 "use client";
 
-import React, { Fragment, MouseEventHandler, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { Menu, Transition } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { Trash } from "lucide-react";
@@ -56,6 +55,49 @@ function haveCommonElement<T>(set1: T[], array2: T[]) {
   return false;
 }
 
+/* ---------- Compatibility block (SAFE OPTION 1) ---------- */
+
+const CompatibilityBlock: React.FC<{
+  selected: AllProductsCompatibility;
+}> = ({ selected }) => {
+  const { Compatibility } = selected;
+
+  const rows: [keyof typeof Compatibility, string][] = [
+    ["motherboardCompatibility", "Motherboard :"],
+    ["processorCompatibility", "Processor :"],
+    ["gpuCompatibility", "Graphic Card :"],
+    ["ramCompatibility", "RAM :"],
+    ["hardDiskCompatibility", "Hard drive compatibility :"],
+    ["powerCompatibility", "Power supply box compatibility :"],
+    ["caseCompatibility", "Case compatibility:"],
+  ];
+
+  return (
+    <div className="w-4/5">
+      <div className="font-bold my-2 text-sm">Compatibility:</div>
+      <div className="text-left grid text-xs max-w-screen-md mx-auto border border-white rounded mb-3 mr-3">
+        {rows.map(([key, label]) => {
+          const comp = Compatibility[key];
+
+          return (
+            <div
+              key={key}
+              className="p-1 pl-3 border-b last:border-b-0 border-white hover:bg-[#101218] hover:font-bold cursor-pointer"
+            >
+              <p className={`mb-1 ${comp.error ? "text-red-400" : "text-primary"}`}>
+                {label}
+              </p>
+              <p className={comp.error ? "text-red-400" : "text-primary"}>
+                {comp.message}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 /* ====================================================================== */
 /* =============================== POWER ================================= */
 /* ====================================================================== */
@@ -102,8 +144,6 @@ export const Power = (props: {
     { name: "Prix : Décroissant", href: "#", current: selectedSort === "Prix : Décroissant" },
   ];
 
-  const router = useRouter();
-
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -128,7 +168,7 @@ export const Power = (props: {
       try {
         const rec = await getRecommendations(props.selectedFeatures);
         setRecommendedWattage(rec?.recommendations?.[0]?.powerSupplyWattage ?? null);
-      } catch (e) {
+      } catch {
         setRecommendedWattage(null);
       }
     } catch (error) {
@@ -156,8 +196,6 @@ export const Power = (props: {
     });
   };
 
-  const onPreview: MouseEventHandler<HTMLButtonElement> = (e) => e.stopPropagation();
-  const onAddToCart: MouseEventHandler<HTMLButtonElement> = (e) => e.stopPropagation();
   const handleSortClick = (name: React.SetStateAction<string>) => setSelectedSort(name);
 
   useEffect(() => {
@@ -261,46 +299,9 @@ export const Power = (props: {
                           </p>
                         </div>
 
-                        {/* Compatibility */}
+                        {/* Compatibility (SAFE helper component) */}
                         {props.selectedCompatibility && (
-                          <div className="w-4/5">
-                            <div className="font-bold my-2 text-sm">Compatibility:</div>
-                            <div className="text-left grid text-xs max-w-screen-md mx-auto border border-white rounded mb-3 mr-3">
-                              {[
-                                ["motherboardCompatibility", "Motherboard :"],
-                                ["processorCompatibility", "Processor :"],
-                                ["gpuCompatibility", "Graphic Card :"],
-                                ["ramCompatibility", "RAM :"],
-                                ["hardDiskCompatibility", "Hard drive compatibility :"],
-                                ["powerCompatibility", "Power supply box compatibility :"],
-                                ["caseCompatibility", "Case compatibility:"],
-                              ].map(([key, label]) => {
-                                const k = key as keyof AllProductsCompatibility["Compatibility"];
-                                const comp = props.selectedCompatibility.Compatibility[k];
-                                return (
-                                  <div
-                                    key={key}
-                                    className="p-1 pl-3 border-b last:border-b-0 border-white hover:bg-[#101218] hover:font-bold cursor-pointer"
-                                  >
-                                    <p
-                                      className={`mb-1 ${
-                                        comp.error ? "text-red-400" : "text-primary"
-                                      }`}
-                                    >
-                                      {label}
-                                    </p>
-                                    <p
-                                      className={
-                                        comp.error ? "text-red-400" : "text-primary"
-                                      }
-                                    >
-                                      {comp.message}
-                                    </p>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
+                          <CompatibilityBlock selected={props.selectedCompatibility} />
                         )}
 
                         {/* Price & actions */}
@@ -398,7 +399,7 @@ export const Power = (props: {
                     </div>
 
                     <Transition
-                      as={Fragment}
+                      as="div"
                       enter="transition ease-out duration-100"
                       enterFrom="transform opacity-0 scale-95"
                       enterTo="transform opacity-100 scale-100"
@@ -628,7 +629,8 @@ export const Power = (props: {
                       total={totalPagesForPagination}
                       classNames={{
                         wrapper: "gap-2",
-                        item: "w-8 h-8 text-foreground bg-white/10 border border-white/20 hover:bg-white/20",
+                        item:
+                          "w-8 h-8 text-foreground bg-white/10 border border-white/20 hover:bg-white/20",
                         cursor:
                           "bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] font-semibold shadow-[0_0_20px_hsl(var(--accent)/0.15)]",
                         prev: "bg-white/10 border border-white/20 text-foreground hover:bg-white/20",
