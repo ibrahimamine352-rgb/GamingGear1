@@ -1,8 +1,21 @@
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
-import { NextApiResponse } from 'next';
-import { checkItemGroupsScreen } from '@/app/(storefront)/build-pc/_componenets/Screen';
 import { slugify } from '@/lib/slugify';
+
+/* ---------- shared filter types (local, no client import) ---------- */
+type CheckItem = {
+  id: number;
+  searchKey: string;
+};
+
+type CheckItemGroupsScreen = {
+  mark: CheckItem[];
+  pouce: CheckItem[];
+  refreshRate: CheckItem[];
+  resolution: CheckItem[];
+};
+
+/* =============================== POST =============================== */
 
 export async function POST(
   req: Request,
@@ -55,8 +68,7 @@ export async function POST(
     const product = await prismadb.camera.create({
       data: {
         manufacturerId,
-        // This is the actual field name in your Prisma model:
-        // model Camera { mousepadModelId String? ... }
+        // or whatever your Prisma field actually is:
         mousepadModelId: CameraTypeId,
         product: {
           create: {
@@ -70,7 +82,6 @@ export async function POST(
             description,
             stock,
             dicountPrice,
-            // connect to category relation
             category: {
               connect: { id: categoryId },
             },
@@ -100,12 +111,14 @@ export async function POST(
   }
 }
 
-export async function GET(req: Request, res: NextApiResponse) {
+/* =============================== GET ================================ */
+
+export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url || '', 'http://localhost');
 
-    const page = parseInt(searchParams.get('page') || '0');
-    const units = parseInt(searchParams.get('units') || '14') || 14;
+    const page = parseInt(searchParams.get('page') || '0', 10);
+    const units = parseInt(searchParams.get('units') || '14', 10) || 14;
     const q = searchParams.get('q') || '';
     const isFeatured = searchParams.get('isFeatured');
     const sort = searchParams.get('sort') || '';
@@ -132,35 +145,23 @@ export async function GET(req: Request, res: NextApiResponse) {
     if (sort && sort.length > 0) {
       switch (sort) {
         case 'Les plus populaires':
-          orderByClause = {
-            soldnumber: 'desc',
-          };
+          orderByClause = { soldnumber: 'desc' };
           break;
         case 'Les plus récents':
-          orderByClause = {
-            price: 'desc',
-          };
-          break;
-        case 'Les plus récents':
-          orderByClause = {
-            createdAt: 'asc',
-          };
+          orderByClause = { createdAt: 'desc' }; // or 'asc' if you want oldest first
           break;
         case 'Prix : Croissant':
-          orderByClause = {
-            price: 'asc',
-          };
+          orderByClause = { price: 'asc' };
           break;
         case 'Prix : Décroissant':
-          orderByClause = {
-            price: 'desc',
-          };
+          orderByClause = { price: 'desc' };
           break;
         default:
-          orderByClause = {
-            createdAt: 'desc',
-          };
+          orderByClause = { createdAt: 'desc' };
       }
+    } else {
+      // default sort
+      orderByClause = { createdAt: 'desc' };
     }
 
     const filterListParam = searchParams.get('filterList');
@@ -168,9 +169,9 @@ export async function GET(req: Request, res: NextApiResponse) {
     if (filterListParam) {
       const decodedFilterList = JSON.parse(
         decodeURIComponent(filterListParam)
-      ) as checkItemGroupsScreen;
+      ) as CheckItemGroupsScreen;
 
-      const cpuFilters = [];
+      const cpuFilters: any[] = [];
 
       const chipsetFilter = decodedFilterList.mark;
       if (chipsetFilter && chipsetFilter.length > 0) {
@@ -216,14 +217,14 @@ export async function GET(req: Request, res: NextApiResponse) {
         });
       }
 
-      if (maxDt.length > 0 && maxDt.length) {
+      if (maxDt.length > 0) {
         whereClause.price = {
-          lte: parseInt(maxDt),
+          lte: parseInt(maxDt, 10),
         };
-        if (minDt.length > 0 && minDt.length) {
+        if (minDt.length > 0) {
           whereClause.price = {
             ...(whereClause.price || {}),
-            gte: parseInt(minDt),
+            gte: parseInt(minDt, 10),
           };
         }
       }
@@ -237,7 +238,6 @@ export async function GET(req: Request, res: NextApiResponse) {
       }
     }
 
-    console.log(whereClause);
     const products = await prismadb.product.findMany({
       where: whereClause,
       include: {
@@ -252,10 +252,9 @@ export async function GET(req: Request, res: NextApiResponse) {
       where: whereClause,
     });
 
-    console.log();
     return NextResponse.json({ data: products, total });
   } catch (error) {
     console.error('[PRODUCTS_GET]', error);
-    res.status(500).json({ error: 'Internal error' });
+    return new NextResponse('Internal error', { status: 500 });
   }
 }

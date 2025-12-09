@@ -1,7 +1,21 @@
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
-import { checkItemGroupsScreen } from '@/app/(storefront)/build-pc/_componenets/Screen';
 import { slugify } from '@/lib/slugify';
+
+/* ---------- shared filter types (local, no client import) ---------- */
+type CheckItem = {
+  id: number;
+  searchKey: string;
+};
+
+type CheckItemGroupsScreen = {
+  mark: CheckItem[];
+  pouce: CheckItem[];
+  refreshRate: CheckItem[];
+  resolution: CheckItem[];
+};
+
+/* =============================== POST =============================== */
 
 export async function POST(
   req: Request,
@@ -17,13 +31,13 @@ export async function POST(
       images,
       isFeatured,
       isArchived,
+      description,
       comingSoon,
       outOfStock,
-      description,
       stock,
       additionalDetails = [],
+      CameraTypeId,
       manufacturerId,
-      RgbTypeId,
       dicountPrice = 0,
     } = body;
 
@@ -47,14 +61,15 @@ export async function POST(
       return new NextResponse('Stock is required', { status: 400 });
     }
 
-    // SEO slug for Product
+    // slug for SEO
     const baseSlug = slugify(name);
     const slug = `${baseSlug}-${Date.now()}`;
 
-    const product = await prismadb.chaisegaming.create({
+    const product = await prismadb.camera.create({
       data: {
         manufacturerId,
-        RgbTypeId,
+        // make sure this matches your Prisma schema field:
+        mousepadModelId: CameraTypeId,
         product: {
           create: {
             slug,
@@ -67,7 +82,6 @@ export async function POST(
             description,
             stock,
             dicountPrice,
-            // connect to Category relation
             category: {
               connect: { id: categoryId },
             },
@@ -97,18 +111,19 @@ export async function POST(
   }
 }
 
+/* =============================== GET ================================ */
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url || '', 'http://localhost');
 
-    const page = parseInt(searchParams.get('page') || '0');
-    const units = parseInt(searchParams.get('units') || '14') || 14;
+    const page = parseInt(searchParams.get('page') || '0', 10);
+    const units = parseInt(searchParams.get('units') || '14', 10) || 14;
     const q = searchParams.get('q') || '';
-    const isFeatured = searchParams.get('isFeatured');
     const sort = searchParams.get('sort') || '';
     const maxDt = searchParams.get('maxDt') || '';
     const minDt = searchParams.get('minDt') || '';
-    const motherboardId = searchParams.get('motherboardId') || '';
+    const filterListParam = searchParams.get('filterList');
 
     const whereClause: Record<string, any> = {
       isArchived: false,
@@ -129,43 +144,29 @@ export async function GET(req: Request) {
     if (sort && sort.length > 0) {
       switch (sort) {
         case 'Les plus populaires':
-          orderByClause = {
-            soldnumber: 'desc',
-          };
+          orderByClause = { soldnumber: 'desc' };
           break;
         case 'Les plus récents':
-          orderByClause = {
-            price: 'desc',
-          };
-          break;
-        case 'Les plus récents':
-          orderByClause = {
-            createdAt: 'asc',
-          };
+          orderByClause = { createdAt: 'desc' };
           break;
         case 'Prix : Croissant':
-          orderByClause = {
-            price: 'asc',
-          };
+          orderByClause = { price: 'asc' };
           break;
         case 'Prix : Décroissant':
-          orderByClause = {
-            price: 'desc',
-          };
+          orderByClause = { price: 'desc' };
           break;
         default:
-          orderByClause = {
-            createdAt: 'desc',
-          };
+          orderByClause = { createdAt: 'desc' };
       }
+    } else {
+      // default sort
+      orderByClause = { createdAt: 'desc' };
     }
-
-    const filterListParam = searchParams.get('filterList');
 
     if (filterListParam) {
       const decodedFilterList = JSON.parse(
         decodeURIComponent(filterListParam)
-      ) as checkItemGroupsScreen;
+      ) as CheckItemGroupsScreen;
 
       const cpuFilters: any[] = [];
 
@@ -213,14 +214,14 @@ export async function GET(req: Request) {
         });
       }
 
-      if (maxDt.length > 0 && maxDt.length) {
+      if (maxDt.length > 0) {
         whereClause.price = {
-          lte: parseInt(maxDt),
+          lte: parseInt(maxDt, 10),
         };
-        if (minDt.length > 0 && minDt.length) {
+        if (minDt.length > 0) {
           whereClause.price = {
             ...(whereClause.price || {}),
-            gte: parseInt(minDt),
+            gte: parseInt(minDt, 10),
           };
         }
       }
@@ -234,7 +235,6 @@ export async function GET(req: Request) {
       }
     }
 
-    console.log(whereClause);
     const products = await prismadb.product.findMany({
       where: whereClause,
       include: {
@@ -244,6 +244,7 @@ export async function GET(req: Request) {
       take: units,
       skip: page * units,
     });
+
     const total = await prismadb.product.count({
       where: whereClause,
     });
@@ -251,6 +252,6 @@ export async function GET(req: Request) {
     return NextResponse.json({ data: products, total });
   } catch (error) {
     console.error('[PRODUCTS_GET]', error);
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+    return new NextResponse('Internal error', { status: 500 });
   }
 }
