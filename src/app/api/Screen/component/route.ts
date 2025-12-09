@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
-import { checkItemGroupsScreen } from '@/app/(storefront)/build-pc/_componenets/Screen';
+import type { CheckItemGroupsScreen } from '@/app/(storefront)/build-pc/_componenets/Screen';
 import { slugify } from '@/lib/slugify';
 
 export async function POST(
@@ -71,7 +71,6 @@ export async function POST(
             outOfStock,
             description,
             stock,
-            // connect Category relation
             category: {
               connect: { id: categoryId },
             },
@@ -156,7 +155,7 @@ export async function GET(req: Request) {
     if (filterListParam) {
       const decodedFilterList = JSON.parse(
         decodeURIComponent(filterListParam)
-      ) as checkItemGroupsScreen;
+      ) as CheckItemGroupsScreen; // ✅ correct type name
 
       const cpuFilters: any[] = [];
 
