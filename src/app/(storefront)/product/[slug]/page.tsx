@@ -194,7 +194,7 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
     stock: parseInt(item.stock.toString()),
     category: item.category,
     description: item.description,
-    additionalDetails: item?.additionalDetails,
+    additionalDetails: item?.additionalDetails ?? [],
     comingSoon: item.comingSoon,
     outOfStock: item.outOfStock,
   }));
@@ -208,14 +208,15 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
     price: parseFloat(product.price.toString()),
     category: product.category,
     description: product.description,
-    additionalDetails: product.additionalDetails,
+    additionalDetails: product.additionalDetails ?? [],
     comingSoon: product.comingSoon,
     outOfStock: product.outOfStock,
-  }
+  };
 
   const productUrl = `https://gaminggeartn.tn/product/${params.slug}`;
+  const categoryName = product.category?.name || "Produit Gaming";
 
-  // ✅ JSON-LD structured data for Google
+  // ✅ JSON-LD structured data for Google (Product)
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -225,8 +226,8 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
       "Produit gaming disponible en Tunisie chez Gaming Gear TN.",
     image: formattedproduct.images?.map((img) => img.url) ?? [],
     sku: formattedproduct.id,
-    brand: product.category?.name || "Gaming Gear TN",
-    category: product.category?.name || "Gaming",
+    brand: categoryName || "Gaming Gear TN",
+    category: categoryName || "Gaming",
     offers: {
       "@type": "Offer",
       url: productUrl,
@@ -237,6 +238,33 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
         : "https://schema.org/InStock",
       itemCondition: "https://schema.org/NewCondition",
     },
+  };
+
+  // ✅ JSON-LD structured data for Google (Breadcrumbs)
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Accueil",
+        item: "https://gaminggeartn.tn",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: categoryName,
+        // 👉 adapt this if you have real category URLs
+        item: "https://gaminggeartn.tn/shop",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: formattedproduct.name,
+        item: productUrl,
+      },
+    ],
   };
 
   const dataa: Field[] = formattedproduct.additionalDetails.map((item) => ({
@@ -319,6 +347,11 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
           suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        <script
+          type="application/ld+json"
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+        />
         <div className="container mx-auto px-6 py-8">
           <div className="rounded-2xl border border-border bg-card/70 backdrop-blur-sm shadow-[0_0_0_1px_rgba(255,255,255,0.02)] glass-card p-8">
             <CustomPcTemplate
@@ -348,6 +381,11 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
             suppressHydrationWarning
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
           />
+          <script
+            type="application/ld+json"
+            suppressHydrationWarning
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+          />
           <Container>
             <div className="px-4 py-10 sm:px-6 lg:px-8">
               {product.PackProduct ? (
@@ -366,16 +404,16 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
                       Manette: ProdCol[],
                       Chair: ProdCol[],
                       Camera: ProdCol[],
-                      DefaultClavier: String
-                      DefaultMouse: String
-                      DefaultMousePad: String
-                      DefaultMic: String
-                      DefaultHeadset: String
-                      DefaultCamera: String
-                      DefaultScreen: String
-                      DefaultSpeaker: String
-                      DefaultManette: String
-                      DefaultChair: String
+                      DefaultClavier: string
+                      DefaultMouse: string
+                      DefaultMousePad: string
+                      DefaultMic: string
+                      DefaultHeadset: string
+                      DefaultCamera: string
+                      DefaultScreen: string
+                      DefaultSpeaker: string
+                      DefaultManette: string
+                      DefaultChair: string
                       discountOnPack: number
                     }[]
                   }}
@@ -404,6 +442,11 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
             suppressHydrationWarning
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
           />
+          <script
+            type="application/ld+json"
+            suppressHydrationWarning
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+          />
           <Container>
             <div className="px-4 py-10 sm:px-6 lg:px-8">
               <div className="lg:grid lg:grid-cols-3 lg:items-start lg:gap-x-8">
@@ -423,7 +466,9 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
                 </div>
               </div>
               <hr className="my-10 border-border" />
-              {details.length > 0 ? <DataTableDetails columns={columns} data={[...details, ...dataa]} /> : null}
+              {details.length > 0 ? (
+                <DataTableDetails columns={columns} data={[...details, ...dataa]} />
+              ) : null}
               <ProductList title="Similar Products" items={formattedproducts} />
             </div>
           </Container>

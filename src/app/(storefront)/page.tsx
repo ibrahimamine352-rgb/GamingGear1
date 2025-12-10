@@ -1,3 +1,4 @@
+// src/app/(storefront)/page.tsx
 import NewLanding from "@/components/front/new-landing";
 import prismadb from "@/lib/prismadb";
 
@@ -23,6 +24,7 @@ type SlidesColumn = {
   DeletedPriceColor: string;
 };
 
+/* ------------------- SEO Keywords ------------------- */
 const keywords = [
   // Arabic
   "أجهزة كمبيوتر",
@@ -139,11 +141,14 @@ const keywords = [
   "configurations",
 ];
 
+/* ------------------- Metadata ------------------- */
 export const metadata: Metadata = {
+  metadataBase: new URL("https://gaminggeartn.tn"),
   title: "PC Gamer & PC Portable Tunisie | Gaming Gear TN",
   description:
     "Gaming Gear TN : PC Gamer, PC portables, composants, écrans et accessoires en Tunisie. Configurations sur mesure, livraison rapide, garantie locale.",
   keywords,
+
   openGraph: {
     title: "PC Gamer & PC Portable Tunisie | Gaming Gear TN",
     description:
@@ -153,9 +158,60 @@ export const metadata: Metadata = {
     locale: "fr_TN",
     type: "website",
   },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "PC Gamer & PC Portable Tunisie | Gaming Gear TN",
+    description:
+      "PC Gamer, PC portables, composants, écrans et accessoires en Tunisie. Configurations sur mesure, livraison rapide.",
+  },
+
+  alternates: {
+    canonical: "https://gaminggeartn.tn/",
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      ...( {
+        maxSnippet: -1,
+        maxImagePreview: "large",
+        maxVideoPreview: -1,
+      } as any ),
+    },
+  },
 };
 
+/* ====================================================== */
+/* ========================= PAGE ======================== */
+/* ====================================================== */
+
 export default async function Home() {
+  /* ---------- JSON-LD structured data ---------- */
+  const jsonLdWebsite = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Gaming Gear TN",
+    url: "https://gaminggeartn.tn",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: "https://gaminggeartn.tn/search?q={search_term_string}",
+      "query-input": "required name=search_term_string",
+    },
+  };
+
+  const jsonLdOrganization = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Gaming Gear TN",
+    url: "https://gaminggeartn.tn",
+    logo: "https://gaminggeartn.tn/logo.png",
+  };
+
+  /* ---------- DB Fetch ---------- */
   const slides = await prismadb.slide.findMany({});
   const formattedslides: SlidesColumn[] = slides.map((item) => ({
     id: item.id,
@@ -203,7 +259,19 @@ export default async function Home() {
 
   return (
     <>
-      {/* Hidden H1 for SEO – Google sees it, users don't */}
+      {/* JSON-LD */}
+      <script
+        type="application/ld+json"
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebsite) }}
+      />
+      <script
+        type="application/ld+json"
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdOrganization) }}
+      />
+
+      {/* Hidden H1 for SEO */}
       <h1
         style={{
           position: "absolute",
@@ -215,6 +283,26 @@ export default async function Home() {
       </h1>
 
       <NewLanding slides={formattedslides} featured={formattedproducts} />
+
+      {/* SEO Content Block */}
+      <section className="max-w-5xl mx-auto px-4 pb-10 pt-6 text-sm text-muted-foreground">
+        <h2 className="text-lg font-semibold mb-2">
+          Boutique PC Gamer, PC portables et composants en Tunisie
+        </h2>
+        <p className="mb-2">
+          Gaming Gear TN est votre boutique spécialisée en{" "}
+          <strong>PC Gamer</strong>, <strong>PC portables</strong>, composants,
+          écrans et accessoires en Tunisie. Configurez un PC sur mesure pour le
+          gaming, la création de contenu ou le travail professionnel, avec des
+          composants de grandes marques et une <strong>garantie locale</strong>.
+        </p>
+        <p>
+          Découvrez nos <strong>configurations PC complètes</strong>, nos écrans
+          144Hz / 165Hz, nos claviers mécaniques, souris gaming, casques,
+          chaises et accessoires pour créer votre setup idéal. Livraison rapide
+          partout en Tunisie.
+        </p>
+      </section>
     </>
   );
 }

@@ -1,54 +1,45 @@
 // src/app/sitemap.ts
-import type { MetadataRoute } from "next";
-import prismadb from "@/lib/prismadb";
-import { slugify } from "@/lib/slugify";
+import { MetadataRoute } from "next"
+import prismadb from "@/lib/prismadb"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://gaminggeartn.tn";
+  const baseUrl = "https://gaminggeartn.tn"
 
-  // 🔹 Static pages
-  const staticRoutes: MetadataRoute.Sitemap = [
-    {
-      url: `${baseUrl}/`,
-      lastModified: new Date(),
-    },
-    {
-      url: `${baseUrl}/storefront`,
-      lastModified: new Date(),
-    },
-    {
-      url: `${baseUrl}/builds`,
-      lastModified: new Date(),
-    },
-    {
-      url: `${baseUrl}/full-setup`,
-      lastModified: new Date(),
-    },
-  ];
+  // 1️⃣ Categories
+  const categories = await prismadb.category.findMany({
+    select: { name: true, updatedAt: true },
+  })
 
-  // 🔹 Dynamic product URLs
+  const categoryUrls = categories.map((c) => ({
+    url: `${baseUrl}/shop?categorie=${encodeURIComponent(c.name)}`,
+    lastModified: c.updatedAt,
+  }))
+
+  // 2️⃣ Products
   const products = await prismadb.product.findMany({
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      updatedAt: true,
+    select: { slug: true, id: true, updatedAt: true },
+  })
+
+  const productUrls = products.map((p) => ({
+    url: `${baseUrl}/product/${p.slug ?? p.id}`,
+    lastModified: p.updatedAt,
+  }))
+
+  // 3️⃣ Static pages
+  const staticUrls: MetadataRoute.Sitemap = [
+    {
+      url: baseUrl,
+      lastModified: new Date(),
     },
-    where: {
-      isArchived: false,
+    {
+      url: `${baseUrl}/shop`,
+      lastModified: new Date(),
     },
-  });
+    {
+      url: `${baseUrl}/build-pc`,
+      lastModified: new Date(),
+    },
+  ]
 
-  const productRoutes: MetadataRoute.Sitemap = products.map((product) => {
-    const slug =
-      (product as any).slug ??
-      `${slugify(product.name)}-${product.id}`;
-
-    return {
-      url: `${baseUrl}/product/${slug}`,
-      lastModified: product.updatedAt,
-    };
-  });
-
-  return [...staticRoutes, ...productRoutes];
+  return [...staticUrls, ...categoryUrls, ...productUrls]
 }
