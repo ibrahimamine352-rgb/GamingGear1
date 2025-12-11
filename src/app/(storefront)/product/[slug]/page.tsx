@@ -12,6 +12,7 @@ import { DataTableDetails } from '@/components/front/Prod-data-table'
 import CustomPcTemplate from './_components/customPcTemplate'
 import CustomPackTemplate from './_components/customPackTemplate'
 import { Image as IImage } from '@prisma/client'
+import type { Metadata } from 'next'
 
 // 🔥 make this route fully dynamic
 export const dynamic = 'force-dynamic'
@@ -42,7 +43,9 @@ interface Props {
 
 /* ================== SEO: generateMetadata with OG images ================== */
 
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata(
+  { params }: Props
+): Promise<Metadata> {
   const baseUrl = 'https://gaminggeartn.tn'
 
   try {
@@ -119,7 +122,7 @@ export async function generateMetadata({ params }: Props) {
 
     const fullTitle = `${name} – ${categoryName} Tunisie | Gaming Gear TN`
 
-    return {
+    const metadata: Metadata = {
       metadataBase: new URL(baseUrl),
       title: fullTitle,
       description: shortDesc,
@@ -130,7 +133,8 @@ export async function generateMetadata({ params }: Props) {
         title: fullTitle,
         description: shortDesc,
         url: productUrl,
-        type: 'product',
+        // ✅ IMPORTANT: use a valid type (or omit). "product" is NOT allowed by Next.
+        type: 'website',
         siteName: 'Gaming Gear TN',
         images: [
           {
@@ -149,6 +153,8 @@ export async function generateMetadata({ params }: Props) {
         follow: true,
       },
     }
+
+    return metadata
   } catch (error) {
     console.error('[PRODUCT_METADATA_ERROR]', error)
 
