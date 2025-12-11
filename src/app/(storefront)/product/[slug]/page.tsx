@@ -17,6 +17,8 @@ import { Image as IImage } from '@prisma/client';
 
 // 🔥 make this route fully dynamic
 export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+
 export const revalidate = 0;
 
 // ✅ CORRECT helper: extract full UUID from the slug

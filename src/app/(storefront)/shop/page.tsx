@@ -45,6 +45,8 @@ import {
 
 // 🔥 Force this route to be fully dynamic (fixes DYNAMIC_SERVER_USAGE in prod)
 export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+
 export const revalidate = 0
 
 interface Props {

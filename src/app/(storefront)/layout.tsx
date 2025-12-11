@@ -124,6 +124,10 @@ const keywords = [
   "bundles",
   "configurations"
 ];
+export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+export const revalidate = 0
+
 
 export const metadata: Metadata = {
   title: { default: "Gaming Gear TN", template: `%s | Gaming Gear TN` },
