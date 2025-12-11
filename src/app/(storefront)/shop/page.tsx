@@ -437,73 +437,87 @@ const Home = async ({
   }
 
   // --- decode & apply FILTERS coming from UI (route param “filterList”) ---
+  // --- decode & apply FILTERS coming from UI (route param “filterList”) ---
   let fList: FilterList | undefined = undefined
 
-  if (filterListParam && filterListParam.toString().length > 0) {
-    const decoded = JSON.parse(
-      decodeURIComponent(filterListParam.toString())
-    ) as compFilter
-    fList = decoded.data
+  if (filterListParam) {
+    // Normalize to a single string
+    const raw =
+      Array.isArray(filterListParam) ? filterListParam[0] : filterListParam
 
-    const activeKey = catKey || resolveCategoryKey(categoryy)
+    if (typeof raw === 'string' && raw.length > 0) {
+      try {
+        const decoded = JSON.parse(
+          decodeURIComponent(raw)
+        ) as compFilter
 
-    switch (activeKey) {
-      case 'motherboard':
-        whereClause.motherboard = addmotherboardFitlters(fList).data
-        break
-      case 'cpu':
-        whereClause.cpus = addcpuFitlters(fList).data
-        break
-      case 'gpu':
-        whereClause.gpus = addgpuitlters(fList).data
-        break
-      case 'ram':
-        whereClause.memories = addRamFitlters(fList).data
-        break
-      case 'hardDisk':
-        whereClause.storages = addHardDiskFitlters(fList).data
-        break
-      case 'cooling':
-        whereClause.cooling = addCoolingFitlters(fList).data
-        break
-      case 'case':
-        whereClause.cases = addCaseFitlters(fList).data
-        break
-      case 'power':
-        whereClause.powersupplies = addPowerFitlters(fList).data
-        break
-      case 'screen':
-        whereClause.screens = addScreenFitlters(fList).data
-        break
-      case 'laptop':
-        whereClause.Laptop = addLaptopFitlters(fList).data
-        break
-      case 'keyboard':
-        whereClause.keyboard = addKeyboardFitlters(fList).data
-        break
-      case 'mic':
-        whereClause.Mic = addMicFitlters(fList).data
-        break
-      case 'casque':
-        whereClause.Headset = addHeadsetFitlters(fList).data
-        break
-      case 'mouse':
-        whereClause.Mouse = addMouseFitlters(fList).data
-        break
-      case 'mousePad':
-        whereClause.Mousepad = addMousepadFitlters(fList).data
-        break
-      case 'camera':
-        whereClause.Camera = addCameraFitlters(fList).data
-        break
-      case 'controller':
-        // use the Manette relation, NOT Controller
-        whereClause.Manette = addControllerFitlters(fList).data
-        break
-      default:
-        break
+        fList = decoded.data
+
+        const activeKey = catKey || resolveCategoryKey(categoryy)
+
+        switch (activeKey) {
+          case 'motherboard':
+            whereClause.motherboard = addmotherboardFitlters(fList).data
+            break
+          case 'cpu':
+            whereClause.cpus = addcpuFitlters(fList).data
+            break
+          case 'gpu':
+            whereClause.gpus = addgpuitlters(fList).data
+            break
+          case 'ram':
+            whereClause.memories = addRamFitlters(fList).data
+            break
+          case 'hardDisk':
+            whereClause.storages = addHardDiskFitlters(fList).data
+            break
+          case 'cooling':
+            whereClause.cooling = addCoolingFitlters(fList).data
+            break
+          case 'case':
+            whereClause.cases = addCaseFitlters(fList).data
+            break
+          case 'power':
+            whereClause.powersupplies = addPowerFitlters(fList).data
+            break
+          case 'screen':
+            whereClause.screens = addScreenFitlters(fList).data
+            break
+          case 'laptop':
+            whereClause.Laptop = addLaptopFitlters(fList).data
+            break
+          case 'keyboard':
+            whereClause.keyboard = addKeyboardFitlters(fList).data
+            break
+          case 'mic':
+            whereClause.Mic = addMicFitlters(fList).data
+            break
+          case 'casque':
+            whereClause.Headset = addHeadsetFitlters(fList).data
+            break
+          case 'mouse':
+            whereClause.Mouse = addMouseFitlters(fList).data
+            break
+          case 'mousePad':
+            whereClause.Mousepad = addMousepadFitlters(fList).data
+            break
+          case 'camera':
+            whereClause.Camera = addCameraFitlters(fList).data
+            break
+          case 'controller':
+            whereClause.Manette = addControllerFitlters(fList).data
+            break
+          default:
+            break
+        }
+      } catch (err) {
+        // If filterList is invalid, just ignore it instead of crashing the page
+        console.error('Invalid filterList param', raw, err)
+        fList = undefined
+      }
     }
   }
+
 
   // ---- sorting ----
   let orderByClause: Record<string, 'asc' | 'desc'> = {}
