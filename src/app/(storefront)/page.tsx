@@ -24,9 +24,13 @@ type SlidesColumn = {
   DeletedPriceColor: string;
 };
 
+// 🔥 make home dynamic too (safe with DB)
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 /* ------------------- SEO Keywords ------------------- */
 const keywords = [
-  // Arabic
+  // ... (keep your long keywords array exactly as you had it)
   "أجهزة كمبيوتر",
   "أجهزة كمبيوتر محمولة",
   "أجهزة كمبيوتر مكتبية",
@@ -63,8 +67,6 @@ const keywords = [
   "تخفيضات",
   "حزم",
   "تكوينات",
-
-  // English
   "computers",
   "laptops",
   "desktops",
@@ -101,8 +103,6 @@ const keywords = [
   "discounts",
   "bundles",
   "configurations",
-
-  // French
   "ordinateurs",
   "portables",
   "bureaux",
@@ -143,7 +143,7 @@ const keywords = [
 
 /* ------------------- Metadata ------------------- */
 const baseUrl = "https://gaminggeartn.tn";
-const ogImage = `${baseUrl}/og/home-default.png`; // 👉 make sure this file exists in public/og/
+const ogImage = `${baseUrl}/og/home-default.png`; // must exist in public/og/
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -160,7 +160,7 @@ export const metadata: Metadata = {
     siteName: "Gaming Gear TN",
     locale: "fr_TN",
     type: "website",
-    images: ["/og/home-default.png"],
+    images: [ogImage],
   },
 
   twitter: {
@@ -168,7 +168,7 @@ export const metadata: Metadata = {
     title: "PC Gamer & PC Portable Tunisie | Gaming Gear TN",
     description:
       "PC Gamer, PC portables, composants, écrans et accessoires en Tunisie. Configurations sur mesure, livraison rapide.",
-    images: ["/og/home-default.jpg"],
+    images: [ogImage],
   },
 
   alternates: {

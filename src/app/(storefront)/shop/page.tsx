@@ -43,6 +43,10 @@ import {
   addControllerFitlters,
 } from './_componenets/FilterFunctions'
 
+// 🔥 Force this route to be fully dynamic (fixes DYNAMIC_SERVER_USAGE in prod)
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 interface Props {
   searchParams: { [key: string]: string | string[] | undefined }
 }
@@ -70,9 +74,6 @@ export async function generateMetadata(
   const categorySlug = categoryRawStr ? categoryRawStr.toLowerCase() : ''
 
   // Build canonical URL
-  // - default: /shop
-  // - category: /shop/:category-slug
-  // - optional query params: search, page>1
   const url = new URL(baseUrl)
 
   if (categorySlug) {
@@ -92,7 +93,7 @@ export async function generateMetadata(
   const canonical = url.toString()
 
   // 🖼️ OG image (shop/category default)
-  const ogImage = `${baseUrl}/og/shop-default.png` // 👉 make sure this file exists, or change the path
+  const ogImage = `${baseUrl}/og/shop-default.png` // make sure this exists
   const ogImages = [{ url: ogImage }]
 
   try {

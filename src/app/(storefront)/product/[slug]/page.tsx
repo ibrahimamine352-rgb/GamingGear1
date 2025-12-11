@@ -15,6 +15,10 @@ import CustomPcTemplate from './_components/customPcTemplate';
 import CustomPackTemplate from './_components/customPackTemplate';
 import { Image as IImage } from '@prisma/client';
 
+// 🔥 make this route fully dynamic
+export const dynamic = 'force-dynamic'
+export const revalidate = 0;
+
 // ✅ CORRECT helper: extract full UUID from the slug
 function extractIdFromParam(slugParam: string): string | null {
   if (!slugParam) return null;
@@ -148,8 +152,6 @@ export async function generateMetadata({ params }: Props) {
     };
   }
 }
-
-export const revalidate = 0;
 
 interface ProductPageProps {
   params: {
@@ -466,16 +468,16 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
                       Manette: ProdCol[],
                       Chair: ProdCol[],
                       Camera: ProdCol[],
-                      DefaultClavier: string
-                      DefaultMouse: string
-                      DefaultMousePad: string
-                      DefaultMic: string
-                      DefaultHeadset: string
-                      DefaultCamera: string
-                      DefaultScreen: string
-                      DefaultSpeaker: string
-                      DefaultManette: string
-                      DefaultChair: string
+                      DefaultClavier: string,
+                      DefaultMouse: string,
+                      DefaultMousePad: string,
+                      DefaultMic: string,
+                      DefaultHeadset: string,
+                      DefaultCamera: string,
+                      DefaultScreen: string,
+                      DefaultSpeaker: string,
+                      DefaultManette: string,
+                      DefaultChair: string,
                       discountOnPack: number
                     }[]
                   }}
