@@ -142,8 +142,11 @@ const keywords = [
 ];
 
 /* ------------------- Metadata ------------------- */
+const baseUrl = "https://gaminggeartn.tn";
+const ogImage = `${baseUrl}/og/home-default.png`; // 👉 make sure this file exists in public/og/
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://gaminggeartn.tn"),
+  metadataBase: new URL(baseUrl),
   title: "PC Gamer & PC Portable Tunisie | Gaming Gear TN",
   description:
     "Gaming Gear TN : PC Gamer, PC portables, composants, écrans et accessoires en Tunisie. Configurations sur mesure, livraison rapide, garantie locale.",
@@ -153,10 +156,11 @@ export const metadata: Metadata = {
     title: "PC Gamer & PC Portable Tunisie | Gaming Gear TN",
     description:
       "Gaming Gear TN : PC Gamer, PC portables, composants, écrans et accessoires en Tunisie. Configurations sur mesure, livraison rapide.",
-    url: "https://gaminggeartn.tn",
+    url: baseUrl,
     siteName: "Gaming Gear TN",
     locale: "fr_TN",
     type: "website",
+    images: ["/og/home-default.png"],
   },
 
   twitter: {
@@ -164,10 +168,11 @@ export const metadata: Metadata = {
     title: "PC Gamer & PC Portable Tunisie | Gaming Gear TN",
     description:
       "PC Gamer, PC portables, composants, écrans et accessoires en Tunisie. Configurations sur mesure, livraison rapide.",
+    images: ["/og/home-default.jpg"],
   },
 
   alternates: {
-    canonical: "https://gaminggeartn.tn/",
+    canonical: baseUrl,
   },
 
   robots: {
@@ -176,11 +181,6 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      ...( {
-        maxSnippet: -1,
-        maxImagePreview: "large",
-        maxVideoPreview: -1,
-      } as any ),
     },
   },
 };
@@ -195,10 +195,10 @@ export default async function Home() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Gaming Gear TN",
-    url: "https://gaminggeartn.tn",
+    url: baseUrl,
     potentialAction: {
       "@type": "SearchAction",
-      target: "https://gaminggeartn.tn/search?q={search_term_string}",
+      target: `${baseUrl}/search?q={search_term_string}`,
       "query-input": "required name=search_term_string",
     },
   };
@@ -207,8 +207,8 @@ export default async function Home() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Gaming Gear TN",
-    url: "https://gaminggeartn.tn",
-    logo: "https://gaminggeartn.tn/logo.png",
+    url: baseUrl,
+    logo: `${baseUrl}/logo.png`,
   };
 
   /* ---------- DB Fetch ---------- */

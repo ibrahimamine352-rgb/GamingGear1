@@ -1,27 +1,27 @@
-import NextImage from "next/image";
+import Image from "next/image";
 import { Tab } from "@headlessui/react";
 
 import { cn } from "@/lib/utils";
-import { Image } from "@/types";
+import { Image as TImage } from "@/types";
 
 interface GalleryTabProps {
-  image: Image;
+  image: TImage;
 }
 
 const GalleryTab: React.FC<GalleryTabProps> = ({ image }) => {
   return (
-    <Tab
-      className="relative flex aspect-square cursor-pointer items-center justify-center rounded-xl border border-border bg-card/70 backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
-    >
+    <Tab className="relative flex aspect-square cursor-pointer items-center justify-center rounded-xl border border-border bg-card/70 backdrop-blur-sm hover:bg-white/10 transition-all duration-300 focus:outline-none">
       {({ selected }) => (
-        <div>
-          <span className="absolute h-full w-full aspect-square inset-0 overflow-hidden rounded-xl">
-            <NextImage
+        <div className="relative h-full w-full">
+          <span className="absolute inset-0 overflow-hidden rounded-xl">
+            <Image
               fill
               src={image.url}
-              // ✅ SEO-FRIENDLY ALT INSTEAD OF EMPTY STRING
-              alt="Gaming Gear TN product image"
-              className="object-cover object-center rounded-xl"
+              alt="Miniature produit Gaming Gear TN"
+              className="object-cover object-center"
+              sizes="80px"
+              loading="lazy"
+              decoding="async"
             />
           </span>
           <span

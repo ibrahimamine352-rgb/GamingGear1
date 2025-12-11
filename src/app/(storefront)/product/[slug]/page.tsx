@@ -12,7 +12,6 @@ import PCInfos from '@/components/front/PCInfos';
 import { DataTableDetails } from '@/components/front/Prod-data-table';
 import Image from 'next/image';
 import CustomPcTemplate from './_components/customPcTemplate';
-import { Metadata } from 'next';
 import CustomPackTemplate from './_components/customPackTemplate';
 import { Image as IImage } from '@prisma/client';
 
@@ -37,7 +36,11 @@ interface Props {
   }
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+/* ================== SEO: generateMetadata with OG images ================== */
+
+export async function generateMetadata({ params }: Props) {
+  const baseUrl = 'https://gaminggeartn.tn';
+
   try {
     const idCandidate = extractIdFromParam(params.slug);
 
@@ -49,16 +52,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         ],
       },
       select: {
+        id: true,
+        slug: true,
         name: true,
         description: true,
         category: { select: { name: true } },
+        images: {
+          select: { url: true },
+        },
       },
     });
 
     if (!product) {
       return {
+        metadataBase: new URL(baseUrl),
         title: "Produit introuvable | Gaming Gear TN",
         description: "Ce produit n'existe plus ou a été retiré.",
+        robots: {
+          index: false,
+          follow: true,
+        },
       };
     }
 
@@ -72,9 +85,55 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         .slice(0, 150) ||
       `${name} disponible en Tunisie chez Gaming Gear TN. Livraison rapide et garantie.`;
 
+    const productSlugOrId = product.slug ?? product.id;
+    const productUrl = `${baseUrl}/product/${productSlugOrId}`;
+
+    // Normalize image URLs to absolute (required for OG)
+    const rawImages = product.images ?? [];
+    const absoluteImageUrls = rawImages
+      .map((img) => img.url)
+      .filter(Boolean)
+      .map((url) => {
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+          return url;
+        }
+        const clean = url.startsWith('/') ? url : `/${url}`;
+        return `${baseUrl}${clean}`;
+      });
+
+    // ✅ For Next Metadata typings: use string[]
+    const ogImages: string[] =
+      absoluteImageUrls.length > 0
+        ? absoluteImageUrls
+        : [`${baseUrl}/og/default-product.png`]; // make sure this file exists
+
+    const fullTitle = `${name} – ${categoryName} Tunisie | Gaming Gear TN`;
+
     return {
-      title: `${name} – ${categoryName} Tunisie | Gaming Gear TN`,
+      metadataBase: new URL(baseUrl),
+      title: fullTitle,
       description: shortDesc,
+      alternates: {
+        canonical: productUrl,
+      },
+      openGraph: {
+        title: fullTitle,
+        description: shortDesc,
+        url: productUrl,
+        type: 'product',
+        siteName: 'Gaming Gear TN',
+        images: ogImages,
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: fullTitle,
+        description: shortDesc,
+        images: ogImages,
+      },
+      robots: {
+        index: true,
+        follow: true,
+      },
     };
   } catch (error) {
     console.error("[PRODUCT_METADATA_ERROR]", error);
@@ -82,6 +141,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
       title: "Erreur | Gaming Gear TN",
       description: "Impossible de charger les informations produit.",
+      robots: {
+        index: false,
+        follow: true,
+      },
     };
   }
 }
@@ -255,7 +318,6 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
         "@type": "ListItem",
         position: 2,
         name: categoryName,
-        // 👉 adapt this if you have real category URLs
         item: "https://gaminggeartn.tn/shop",
       },
       {

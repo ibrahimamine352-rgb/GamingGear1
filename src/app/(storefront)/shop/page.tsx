@@ -47,33 +47,81 @@ interface Props {
   searchParams: { [key: string]: string | string[] | undefined }
 }
 
-/* ----------------- SEO: generateMetadata ----------------- */
+/* ----------------- SEO: generateMetadata (category + search + pagination canonicals + OG images) ----------------- */
 
 export async function generateMetadata(
   { searchParams }: Props
 ): Promise<Metadata> {
+  const baseUrl = 'https://gaminggeartn.tn'
+
+  // Normalize params
+  const searchRaw = searchParams['search'] ?? ''
+  const categoryRaw = searchParams['categorie'] ?? ''
+  const pageRaw = searchParams['page'] ?? '1'
+
+  const search =
+    Array.isArray(searchRaw) ? searchRaw[0].trim() : searchRaw.toString().trim()
+  const categoryRawStr =
+    Array.isArray(categoryRaw) ? categoryRaw[0].trim() : categoryRaw.toString().trim()
+  const page =
+    Array.isArray(pageRaw) ? pageRaw[0].trim() : pageRaw.toString().trim() || '1'
+
+  // ✅ force category slug to lowercase for canonical (avoid /GPU vs /gpu duplicates)
+  const categorySlug = categoryRawStr ? categoryRawStr.toLowerCase() : ''
+
+  // Build canonical URL
+  // - default: /shop
+  // - category: /shop/:category-slug
+  // - optional query params: search, page>1
+  const url = new URL(baseUrl)
+
+  if (categorySlug) {
+    url.pathname = `/shop/${encodeURIComponent(categorySlug)}`
+  } else {
+    url.pathname = '/shop'
+  }
+
+  if (search) {
+    url.searchParams.set('search', search)
+  }
+  // Only keep page in canonical if > 1
+  if (page !== '1') {
+    url.searchParams.set('page', page)
+  }
+
+  const canonical = url.toString()
+
+  // 🖼️ OG image (shop/category default)
+  const ogImage = `${baseUrl}/og/shop-default.png` // 👉 make sure this file exists, or change the path
+  const ogImages = [{ url: ogImage }]
+
   try {
-    const searchRaw = searchParams['search'] ?? ''
-    const categoryRaw = searchParams['categorie'] ?? ''
-
-    const search = searchRaw.toString().trim()
-    const category = categoryRaw.toString().trim()
-
     // 1) Search page
     if (search.length > 0) {
       const title = `Résultats pour "${search}" | Gaming Gear TN`
       const description = `Découvrez les résultats pour "${search}" sur Gaming Gear TN : PC Gamer, PC portables, composants, écrans et accessoires en Tunisie.`
 
       return {
+        metadataBase: new URL(baseUrl),
         title,
         description,
+        alternates: {
+          canonical,
+        },
         openGraph: {
           title,
           description,
-          url: `https://gaminggeartn.tn/store?search=${encodeURIComponent(search)}`,
+          url: canonical,
           siteName: 'Gaming Gear TN',
           locale: 'fr_TN',
           type: 'website',
+          images: ogImages,
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title,
+          description,
+          images: [ogImage],
         },
         robots: {
           index: true,
@@ -83,20 +131,41 @@ export async function generateMetadata(
     }
 
     // 2) Category page
-    if (category.length > 0) {
-      const title = `${category} Tunisie – Prix & Achat | Gaming Gear TN`
-      const description = `Achetez ${category} en Tunisie chez Gaming Gear TN : produits gaming, composants et accessoires avec livraison rapide et garantie locale.`
+    if (categoryRawStr.length > 0) {
+      const title = `${categoryRawStr} Tunisie – Prix & Achat | Gaming Gear TN`
+      const description = `Achetez ${categoryRawStr} en Tunisie chez Gaming Gear TN : produits gaming, composants et accessoires avec livraison rapide et garantie locale.`
+
+      const keywords: string[] = [
+        `${categoryRawStr} Tunisie`,
+        `Achat ${categoryRawStr} Tunisie`,
+        `${categoryRawStr} gaming`,
+        `Prix ${categoryRawStr} Tunisie`,
+        'Gaming Gear TN',
+        'PC Gamer Tunisie',
+      ]
 
       return {
+        metadataBase: new URL(baseUrl),
         title,
         description,
+        keywords,
+        alternates: {
+          canonical,
+        },
         openGraph: {
           title,
           description,
-          url: `https://gaminggeartn.tn/store?categorie=${encodeURIComponent(category)}`,
+          url: canonical,
           siteName: 'Gaming Gear TN',
           locale: 'fr_TN',
           type: 'website',
+          images: ogImages,
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title,
+          description,
+          images: [ogImage],
         },
         robots: {
           index: true,
@@ -112,15 +181,26 @@ export async function generateMetadata(
       'Découvrez notre boutique gaming en Tunisie : PC Gamer, PC portables, composants, écrans et périphériques. Livraison rapide et garantie locale chez Gaming Gear TN.'
 
     return {
+      metadataBase: new URL(baseUrl),
       title: defaultTitle,
       description: defaultDescription,
+      alternates: {
+        canonical,
+      },
       openGraph: {
         title: defaultTitle,
         description: defaultDescription,
-        url: 'https://gaminggeartn.tn/store',
+        url: canonical,
         siteName: 'Gaming Gear TN',
         locale: 'fr_TN',
         type: 'website',
+        images: ogImages,
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: defaultTitle,
+        description: defaultDescription,
+        images: [ogImage],
       },
       robots: {
         index: true,
@@ -129,11 +209,35 @@ export async function generateMetadata(
     }
   } catch {
     // Safe fallback
+    const canonicalFallback = `${baseUrl}/shop`
+
+    const fallbackTitle =
+      'Boutique Gaming Tunisie – PC Gamer, Laptops & Composants | Gaming Gear TN'
+    const fallbackDescription =
+      'PC Gamer, PC portables, composants, écrans et périphériques en Tunisie. Livraison rapide et garantie locale.'
+
     return {
-      title:
-        'Boutique Gaming Tunisie – PC Gamer, Laptops & Composants | Gaming Gear TN',
-      description:
-        'PC Gamer, PC portables, composants, écrans et périphériques en Tunisie. Livraison rapide et garantie locale.',
+      metadataBase: new URL(baseUrl),
+      title: fallbackTitle,
+      description: fallbackDescription,
+      alternates: {
+        canonical: canonicalFallback,
+      },
+      openGraph: {
+        title: fallbackTitle,
+        description: fallbackDescription,
+        url: canonicalFallback,
+        siteName: 'Gaming Gear TN',
+        locale: 'fr_TN',
+        type: 'website',
+        images: ogImages,
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: fallbackTitle,
+        description: fallbackDescription,
+        images: [ogImage],
+      },
       robots: {
         index: true,
         follow: true,
@@ -167,12 +271,16 @@ const resolveCategoryKey = (label: string): string => {
   if (['gpu', 'gpus', 'graphics cards (gpu)'].includes(k)) return 'gpu'
   if (['cpu', 'cpus', 'processor', 'processors (cpu)'].includes(k)) return 'cpu'
   if (['ram', 'memory', 'memories', 'memory (ram)'].includes(k)) return 'ram'
-  if (['storage', 'storages', 'disk', 'disks', 'harddisk', 'hard disk'].includes(k)) return 'hardDisk'
-  if (['motherboard', 'motherboards', 'carte mere', 'carte mére'].includes(k)) return 'motherboard'
+  if (['storage', 'storages', 'disk', 'disks', 'harddisk', 'hard disk'].includes(k))
+    return 'hardDisk'
+  if (['motherboard', 'motherboards', 'carte mere', 'carte mére'].includes(k))
+    return 'motherboard'
   if (['cases', 'case', 'pc case', 'pccase'].includes(k)) return 'case'
-  if (['power', 'powersupply', 'power supply', 'power supplies', 'psu', 'psus'].includes(k)) return 'power'
+  if (['power', 'powersupply', 'power supply', 'power supplies', 'psu', 'psus'].includes(k))
+    return 'power'
   if (['cooling', 'cooler', 'coolers'].includes(k)) return 'cooling'
-  if (['monitor', 'monitors', 'screen', 'screens', 'display', 'displays'].includes(k)) return 'screen'
+  if (['monitor', 'monitors', 'screen', 'screens', 'display', 'displays'].includes(k))
+    return 'screen'
   if (['laptop', 'laptops', 'all laptops'].includes(k)) return 'laptop'
   if (['keyboard', 'keyboards'].includes(k)) return 'keyboard'
   if (['headset', 'headsets', 'casque', 'casques'].includes(k)) return 'casque'
@@ -231,10 +339,8 @@ const Home = async ({
 
   // --- price range (merge, don’t overwrite) ---
   const price: any = {}
-  if (maxDt.toString().length > 0)
-    price.lte = parseInt(maxDt.toString(), 10)
-  if (minDt.toString().length > 0)
-    price.gte = parseInt(minDt.toString(), 10)
+  if (maxDt.toString().length > 0) price.lte = parseInt(maxDt.toString(), 10)
+  if (minDt.toString().length > 0) price.gte = parseInt(minDt.toString(), 10)
   if (Object.keys(price).length)
     whereClause.price = { ...(whereClause.price || {}), ...price }
 
@@ -246,13 +352,31 @@ const Home = async ({
 
     // Which labels should be handled via relations instead of categoryId?
     const RELATION_ONLY_KEYS = [
-      'mouse', 'mice',
-      'keyboard', 'keyboards',
-      'headset', 'headsets', 'casque', 'casques',
-      'mousepad', 'mousepads', 'mouse pad', 'mouse pads',
-      'mic', 'microphone', 'microphones',
-      'camera', 'cameras', 'webcam', 'webcams',
-      'controller', 'controllers', 'gamepad', 'joystick', 'manette', 'manettes',
+      'mouse',
+      'mice',
+      'keyboard',
+      'keyboards',
+      'headset',
+      'headsets',
+      'casque',
+      'casques',
+      'mousepad',
+      'mousepads',
+      'mouse pad',
+      'mouse pads',
+      'mic',
+      'microphone',
+      'microphones',
+      'camera',
+      'cameras',
+      'webcam',
+      'webcams',
+      'controller',
+      'controllers',
+      'gamepad',
+      'joystick',
+      'manette',
+      'manettes',
     ]
 
     const isRelationOnly = RELATION_ONLY_KEYS.includes(k)
@@ -271,10 +395,13 @@ const Home = async ({
     // 2) Always apply the relation mapping for our "virtual" categories
     if (['mouse', 'mice'].includes(k)) whereClause.Mouse = { some: {} }
     else if (['keyboard', 'keyboards'].includes(k)) whereClause.keyboard = { some: {} }
-    else if (['headset', 'headsets', 'casque', 'casques'].includes(k)) whereClause.Headset = { some: {} }
+    else if (['headset', 'headsets', 'casque', 'casques'].includes(k))
+      whereClause.Headset = { some: {} }
     else if (['gpu', 'gpus'].includes(k)) whereClause.gpus = { some: {} }
-    else if (['motherboard', 'motherboards'].includes(k)) whereClause.motherboard = { some: {} }
-    else if (['storage', 'storages', 'harddisk', 'hard disk', 'hard-disks'].includes(k)) whereClause.storages = { some: {} }
+    else if (['motherboard', 'motherboards'].includes(k))
+      whereClause.motherboard = { some: {} }
+    else if (['storage', 'storages', 'harddisk', 'hard disk', 'hard-disks'].includes(k))
+      whereClause.storages = { some: {} }
     else if (
       [
         'power supplies',
@@ -287,12 +414,16 @@ const Home = async ({
       ].includes(k)
     )
       whereClause.powersupplies = { some: {} }
-    else if (['case', 'cases', 'pc case', 'pc cases', 'pccase'].includes(k)) whereClause.cases = { some: {} }
+    else if (['case', 'cases', 'pc case', 'pc cases', 'pccase'].includes(k))
+      whereClause.cases = { some: {} }
     else if (['cooling', 'cooler', 'coolers'].includes(k)) whereClause.cooling = { some: {} }
-    else if (['monitor', 'monitors', 'screen', 'screens', 'display', 'displays'].includes(k)) whereClause.screens = { some: {} }
-    else if (['mousepad', 'mousepads', 'mouse pad', 'mouse pads'].includes(k)) whereClause.Mousepad = { some: {} }
+    else if (['monitor', 'monitors', 'screen', 'screens', 'display', 'displays'].includes(k))
+      whereClause.screens = { some: {} }
+    else if (['mousepad', 'mousepads', 'mouse pad', 'mouse pads'].includes(k))
+      whereClause.Mousepad = { some: {} }
     else if (['mic', 'microphone', 'microphones'].includes(k)) whereClause.Mic = { some: {} }
-    else if (['camera', 'cameras', 'webcam', 'webcams'].includes(k)) whereClause.Camera = { some: {} }
+    else if (['camera', 'cameras', 'webcam', 'webcams'].includes(k))
+      whereClause.Camera = { some: {} }
     else if (
       ['controller', 'controllers', 'gamepad', 'joystick', 'manette', 'manettes'].includes(k)
     )
@@ -462,9 +593,7 @@ const Home = async ({
   if (prods.findIndex((e) => (e.memories?.length ?? 0) > 0) > -1)
     filterPromises.push(memoriesFilters() as unknown as Promise<HomeFilter>)
   if (prods.findIndex((e) => (e.powersupplies?.length ?? 0) > 0) > -1)
-    filterPromises.push(
-      powersuppliesFilters() as unknown as Promise<HomeFilter>
-    )
+    filterPromises.push(powersuppliesFilters() as unknown as Promise<HomeFilter>)
   if (prods.findIndex((e) => (e.screens?.length ?? 0) > 0) > -1)
     filterPromises.push(screensFilters() as unknown as Promise<HomeFilter>)
   if (prods.findIndex((e) => (e.storages?.length ?? 0) > 0) > -1)

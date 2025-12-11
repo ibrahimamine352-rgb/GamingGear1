@@ -11,13 +11,13 @@ export const contentType = "image/png";
 
 interface Props {
   params: {
-    productId: string;
+    slug: string;
   };
 }
 
 export default async function og({ params }: Props) {
   const prod = await prismadb.product.findFirst({
-    where:{id:params.productId},
+    where:{id:params.slug},
     include:{
         images:true
     }
