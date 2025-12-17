@@ -1,14 +1,13 @@
-import { NextResponse } from 'next/server';
-import prismadb from '@/lib/prismadb';
+import { NextResponse } from "next/server";
+import prismadb from "@/lib/prismadb";
 import { slugify } from "@/lib/slugify";
 
-export async function POST(
-  req: Request,
-) {
+export async function POST(req: Request) {
   try {
     const body = await req.json();
 
     const {
+      // Product fields
       name,
       price,
       categoryId,
@@ -17,26 +16,23 @@ export async function POST(
       isArchived,
       comingSoon,
       outOfStock,
-      manufacturerId,
-      ProcesseurId,
-      SystemId,
-      GraphiccardId,
-      HardiskId,
-      ScreenSizeId,
-      RefreshRateId,
-      memoryId,
-      TouchScreen,
       description,
       stock,
       dicountPrice,
       additionalDetails,
+
+      // RAM fields (Memory)
+      marqueId,
+      numberId,
+      typeId,
+      frequencyId,
+      rgb,
     } = body;
 
-    if (!name) {
-      return new NextResponse("Name is required", { status: 400 });
-    }
+    // ---------- Validations ----------
+    if (!name) return new NextResponse("Name is required", { status: 400 });
 
-    if (!images || !images.length) {
+    if (!images || !Array.isArray(images) || images.length === 0) {
       return new NextResponse("Images are required", { status: 400 });
     }
 
@@ -52,59 +48,73 @@ export async function POST(
       return new NextResponse("Stock is required", { status: 400 });
     }
 
-    // ✅ SEO slug for Product
+    // RAM required fields
+    if (!marqueId) return new NextResponse("Marque id is required", { status: 400 });
+    if (!numberId) return new NextResponse("Number id is required", { status: 400 });
+    if (!typeId) return new NextResponse("Type id is required", { status: 400 });
+    if (!frequencyId) return new NextResponse("Frequency id is required", { status: 400 });
+
+    // ---------- Slug ----------
     const baseSlug = slugify(name);
     const slug = `${baseSlug}-${Date.now()}`;
 
-    const laptop = await prismadb.laptop.create({
+    // ✅ Create Product + nested Memory (RAM)
+    const product = await prismadb.product.create({
       data: {
-        manufacturerId,
-        ProcesseurId,
-        SystemId,
-        GraphiccardId,
-        HardiskId,
-        ScreenSizeId,
-        RefreshRateId,
-        memoryId,
-        TouchScreen,
-        product: {
+        slug,
+        name,
+        price,
+        isFeatured: !!isFeatured,
+        isArchived: !!isArchived,
+        comingSoon: !!comingSoon,
+        outOfStock: !!outOfStock,
+        description,
+        stock,
+        dicountPrice: dicountPrice ?? 0,
+
+        category: {
+          connect: { id: categoryId },
+        },
+
+        // ✅ This matches your app (Product has `memories`)
+        memories: {
           create: {
-            slug, // ✅ required slug in Product
-            name,
-            price,
-            isFeatured,
-            isArchived,
-            comingSoon,
-            outOfStock,
-            description,
-            stock,
-            dicountPrice: dicountPrice ?? 0,
-            // ✅ connect to category relation (because Product now has `category` relation)
-            category: {
-              connect: { id: categoryId },
-            },
-            additionalDetails: additionalDetails
-              ? {
-                  createMany: {
-                    data: [...additionalDetails],
-                  },
-                }
-              : undefined,
-            images: {
-              createMany: {
-                data: images.map((image: { url: string }) => ({
-                  url: image.url,
-                })),
-              },
-            },
+            marqueId,
+            numberId,
+            typeId,
+            frequencyId,
+            rgb: !!rgb,
+          },
+        },
+
+        additionalDetails:
+          Array.isArray(additionalDetails) && additionalDetails.length
+            ? {
+                createMany: {
+                  data: additionalDetails,
+                },
+              }
+            : undefined,
+
+        images: {
+          createMany: {
+            data: images.map((image: { url: string }) => ({
+              url: image.url,
+            })),
           },
         },
       },
+      include: {
+        images: true,
+        category: true,
+        memories: true,
+        additionalDetails: true,
+      },
     });
 
-    return NextResponse.json(laptop);
+    return NextResponse.json(product);
   } catch (error) {
-    console.log('[LAPTOP_POST]', error);
+    console.log("[MEMORY_PRODUCT_POST]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
@@ -112,8 +122,8 @@ export async function POST(
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const categoryId = searchParams.get('categoryId') || undefined;
-    const isFeatured = searchParams.get('isFeatured');
+    const categoryId = searchParams.get("categoryId") || undefined;
+    const isFeatured = searchParams.get("isFeatured");
 
     const products = await prismadb.product.findMany({
       where: {
@@ -126,13 +136,13 @@ export async function GET(req: Request) {
         category: true,
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
     return NextResponse.json(products);
   } catch (error) {
-    console.log('[PRODUCTS_GET]', error);
+    console.log("[PRODUCTS_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
