@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import * as z from "zod"
-const axios = require("axios");
-import { useEffect, useState } from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { toast } from "react-hot-toast"
-import { Trash } from "lucide-react"
-import { CPUSupport, Category, ComponentOnPc, ComponentOnPcGroupeEntityProfile, EntityProfile, Image, PreBuiltPcmodel, Product, pcTemplate } from "@prisma/client"
-import { useParams, useRouter } from "next/navigation"
+import * as z from "zod";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { toast } from "react-hot-toast";
+import { Trash } from "lucide-react";
+import { Category, Image, Product } from "@prisma/client";
+import { useParams, useRouter } from "next/navigation";
 
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -20,23 +20,20 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Separator } from "@/components/ui/separator"
-import { Heading } from "@/components/ui/heading"
-import { AlertModal } from "@/components/modals/alert-modal"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import ImageUpload from "@/components/ui/image-upload"
-import { Checkbox } from "@/components/ui/checkbox"
+} from "@/components/ui/form";
+import { Separator } from "@/components/ui/separator";
+import { Heading } from "@/components/ui/heading";
+import { AlertModal } from "@/components/modals/alert-modal";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import ImageUpload from "@/components/ui/image-upload";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import Addtioanlinfos from "./addtioanlinfos";
 import InputArray from "./addtioanlinfos";
 import { ProdCol } from "@/types";
 import Pctemplate from "./pc-template";
 
-type Field = {
-  name: string;
-  value: string;
-};
+/** ✅ MUST match Prisma enum PackType */
+type PackType = "CUSTOM" | "UNITY_SCREEN";
 
 const formSchema = z.object({
   name: z.string().min(1),
@@ -45,72 +42,61 @@ const formSchema = z.object({
   categoryId: z.string().min(1),
   dicountPrice: z.coerce.number().optional(),
   description: z.string().min(1),
-  discountOnPc:z.coerce.number().optional(),
+  discountOnPc: z.coerce.number().optional(),
   stock: z.coerce.number().min(0).optional(),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
   comingSoon: z.boolean().default(false).optional(),
-outOfStock: z.boolean().default(false).optional(),
-
+  outOfStock: z.boolean().default(false).optional(),
   additionalDetails: z.object({ name: z.string(), value: z.string() }).array(),
-
 });
-export type motherboardata = {
-  products: Product[]
-  cpusupport: CPUSupport
-}
-type ramSlot = {
-  rams: ProdCol[];
-}
-type DiskSlot = {
-  disk: ProdCol[];
-}
-type ProductFormValues = z.infer<typeof formSchema>
+
+type ProductFormValues = z.infer<typeof formSchema>;
 
 export interface ProductFormProps {
-  initialData: Product & {
-    images: Image[]
-    PackProduct:{
-        id:number,
-        Clavier: ProdCol[],
-        Headset:ProdCol[],
-        Mic:ProdCol[],
-        Mouse:ProdCol[],
-        MousePad:ProdCol[],
-        Screen:ProdCol[],   
-        Speaker:ProdCol[], 
-        Manette:ProdCol[], 
-        Chair:ProdCol[],  
-        Camera:ProdCol[],
-        DefaultClavier:String
-        DefaultMouse:String
-        DefaultMousePad:String
-        DefaultMic:String
-        DefaultHeadset:String
-        DefaultCamera:String
-        DefaultScreen:String
-        DefaultSpeaker :String
-        DefaultManette:String
-        DefaultChair   :String
-        discountOnPack: number
-    }[]
+  initialData:
+    | (Product & {
+        images: Image[];
+        PackProduct: {
+          id: string; // ✅ in Prisma AccessoryPack id is String(uuid)
+          Clavier: ProdCol[];
+          Headset: ProdCol[];
+          Mic: ProdCol[];
+          Mouse: ProdCol[];
+          MousePad: ProdCol[];
+          Screen: ProdCol[];
+          Speaker: ProdCol[];
+          Manette: ProdCol[];
+          Chair: ProdCol[];
+          Camera: ProdCol[];
+          DefaultClavier: string;
+          DefaultMouse: string;
+          DefaultMousePad: string;
+          DefaultMic: string;
+          DefaultHeadset: string;
+          DefaultCamera: string;
+          DefaultScreen: string;
+          DefaultSpeaker: string;
+          DefaultManette: string;
+          DefaultChair: string;
+          discountOnPack: number;
+        }[];
+      })
+    | null;
 
-   
-  } | null;
   categories: Category[];
 
- 
   keyboards: ProdCol[];
   Mouses: ProdCol[];
   Mousepads: ProdCol[];
   Mics: ProdCol[];
-  Headsets: ProdCol[]
+  Headsets: ProdCol[];
   Cameras: ProdCol[];
-  screens: ProdCol[]
-  Hautparleurs: ProdCol[]
-  Manettes:ProdCol[],
-  Chaisegamings:ProdCol[]
-};
+  screens: ProdCol[];
+  Hautparleurs: ProdCol[];
+  Manettes: ProdCol[];
+  Chaisegamings: ProdCol[];
+}
 
 export const ProductForm: React.FC<ProductFormProps> = ({
   initialData,
@@ -121,10 +107,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   Mics,
   Headsets,
   Cameras,
-  screens,  
-  Hautparleurs,  
+  screens,
+  Hautparleurs,
   Manettes,
-  Chaisegamings, 
+  Chaisegamings,
 }) => {
   const params = useParams();
   const router = useRouter();
@@ -132,332 +118,250 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const title = initialData ? 'Edit product' : 'Create product';
-  const description = initialData ? 'Edit a product.' : 'Add a new product';
-  const toastMessage = initialData ? 'Product updated.' : 'Product created.';
-  const action = initialData ? 'Save changes' : 'Create';
+  const title = initialData ? "Edit Custom Pack" : "Create Custom Pack";
+  const description = initialData ? "Edit a pack." : "Add a new pack";
+  const toastMessage = initialData ? "Pack updated." : "Pack created.";
+  const action = initialData ? "Save changes" : "Create";
 
-  const defaultValues = initialData ? {
-    ...initialData,
-    images:initialData.images,
-    price: parseFloat(String(initialData?.price)),
-    dicountPrice: parseFloat(String(initialData?.dicountPrice)),
-    stock: parseInt(String(initialData?.price)),
-    discountOnPc: parseFloat(String(initialData?.PackProduct[0].discountOnPack )),
-    PackProduct:{
-      Clavier:initialData.PackProduct[0].Clavier ,
-      Headset:initialData.PackProduct[0].Headset,
-      Mic:initialData.PackProduct[0].Mic,
-      Mouse:initialData.PackProduct[0].Mouse,
-      MousePad:initialData.PackProduct[0].MousePad,
-      Screen:initialData.PackProduct[0].Screen, 
-      Speaker:initialData.PackProduct[0].Speaker, 
-      Manette:initialData.PackProduct[0].Manette, 
-      Chair:initialData.PackProduct[0].Chair, 
-      Camera:initialData.PackProduct[0].Camera, 
-      DefaultClavier:initialData.PackProduct[0].DefaultClavier,
-      DefaultMouse:initialData.PackProduct[0].DefaultMouse,
-      DefaultMousePad:initialData.PackProduct[0].DefaultMousePad,
-      DefaultMic:initialData.PackProduct[0].DefaultMic,
-      DefaultHeadset:initialData.PackProduct[0].DefaultHeadset,
-      DefaultCamera:initialData.PackProduct[0].DefaultCamera,
-      DefaultScreen:initialData.PackProduct[0].DefaultScreen,
-      DefaultSpeaker:initialData.PackProduct[0].DefaultSpeaker,
-      DefaultManette:initialData.PackProduct[0].DefaultManette,
-      DefaultChair:initialData.PackProduct[0].DefaultChair,
-      
+  const pack0 = initialData?.PackProduct?.[0];
 
-
-    }
-   } : {
-    name: '',
-    images: [],
-    price: 0,
-    categoryId: '',
-    dicountPrice: 0,
-    description: '',
-    stock: 0,
-    isFeatured: false,
-    isArchived: false,
-    comingSoon: false,
-    outOfStock: false,
-    additionalDetails: [],
-    PackProduct:{
-      Clavier:[],
-      Headset:[],
-      Mic:[],
-      Mouse:[],
-      MousePad:[],
-      Screen:[],
-      Speaker:[],
-      Manette:[],
-      Chair:[],
-      Camera:[],
-      discountOnPack:0,
-      DefaultClavier:"",
-        DefaultMouse:"",
-        DefaultMousePad:"",
-        DefaultMic:"",
-        DefaultHeadset:"",
-        DefaultCamera:"",
-        DefaultScreen:"",
-        DefaultSpeaker:"",
-        DefaultManette:"",
-        DefaultChair:"",
-    }
-  }
+  const defaultValues: ProductFormValues = initialData
+    ? {
+        name: initialData.name ?? "",
+        images: initialData.images ?? [],
+        price: Number(initialData.price ?? 0),
+        categoryId: initialData.categoryId ?? "",
+        dicountPrice: Number(initialData.dicountPrice ?? 0),
+        description: initialData.description ?? "",
+        stock: Number(initialData.stock ?? 0),
+        isFeatured: Boolean(initialData.isFeatured),
+        isArchived: Boolean(initialData.isArchived),
+        comingSoon: Boolean(initialData.comingSoon),
+        outOfStock: Boolean(initialData.outOfStock),
+        additionalDetails: (initialData.additionalDetails ?? []).map((d: any) => ({
+          name: d.name,
+          value: d.value,
+        })),
+        discountOnPc: Number(pack0?.discountOnPack ?? 0),
+      }
+    : {
+        name: "",
+        images: [],
+        price: 0,
+        categoryId: "",
+        dicountPrice: 0,
+        description: "",
+        stock: 0,
+        isFeatured: false,
+        isArchived: false,
+        comingSoon: false,
+        outOfStock: false,
+        additionalDetails: [],
+        discountOnPc: 0,
+      };
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues
+    defaultValues,
   });
 
-  const onSubmit = async (data: ProductFormValues) => {
-    console.log("data")
-    const dis=form.getValues('discountOnPc')
-  
-      try {
-        setLoading(true);
-        if(total)
-        data.price=parseInt(total.toString())
-        const pct = {
-          prodid:initialData?.id,
-      packid:initialData?.PackProduct[0].id,
-Clavier:keyboardList,
-Mouse:MouseList,
-MousePad:MousepadsList,
-Mic:MicsList,
-Headset:HeadsetsList,
-Camera:CamerasList,
-Screen:screensList,
-Speaker:HautparleursList,
-Manette:ManettesList,
-Chair:ChaisegamingsList,
-discountOnPack:dis,
+  /** picker lists (selected products) */
+  const [keyboardList, setkeyboardList] = useState<ProdCol[]>(
+    pack0?.Clavier ? keyboards.filter((e) => pack0.Clavier.some((ee) => e.id === ee.id)) : []
+  );
+  const [MouseList, setMouseList] = useState<ProdCol[]>(
+    pack0?.Mouse ? Mouses.filter((e) => pack0.Mouse.some((ee) => e.id === ee.id)) : []
+  );
+  const [MousepadsList, setMousepadsList] = useState<ProdCol[]>(
+    pack0?.MousePad ? Mousepads.filter((e) => pack0.MousePad.some((ee) => e.id === ee.id)) : []
+  );
+  const [MicsList, setMicsList] = useState<ProdCol[]>(
+    pack0?.Mic ? Mics.filter((e) => pack0.Mic.some((ee) => e.id === ee.id)) : []
+  );
+  const [HeadsetsList, setHeadsetsList] = useState<ProdCol[]>(
+    pack0?.Headset ? Headsets.filter((e) => pack0.Headset.some((ee) => e.id === ee.id)) : []
+  );
+  const [CamerasList, setCamerasList] = useState<ProdCol[]>(
+    pack0?.Camera ? Cameras.filter((e) => pack0.Camera.some((ee) => e.id === ee.id)) : []
+  );
+  const [screensList, setscreensList] = useState<ProdCol[]>(
+    pack0?.Screen ? screens.filter((e) => pack0.Screen.some((ee) => e.id === ee.id)) : []
+  );
+  const [HautparleursList, setHautparleursList] = useState<ProdCol[]>(
+    pack0?.Speaker ? Hautparleurs.filter((e) => pack0.Speaker.some((ee) => e.id === ee.id)) : []
+  );
+  const [ManettesList, setManettesList] = useState<ProdCol[]>(
+    pack0?.Manette ? Manettes.filter((e) => pack0.Manette.some((ee) => e.id === ee.id)) : []
+  );
+  const [ChaisegamingsList, setChaisegamingsList] = useState<ProdCol[]>(
+    pack0?.Chair ? Chaisegamings.filter((e) => pack0.Chair.some((ee) => e.id === ee.id)) : []
+  );
 
-DefaultClavier:defaultKeyboard,
-DefaultMouse:defaultMouse,
-DefaultMousePad:defaultMousePad,
-DefaultMic:defaultMics,
-DefaultHeadset:defaultHeadset,
-DefaultCamera:defaultCamera,
-DefaultScreen:defaultScreen,
-DefaultSpeaker:DefaultSpeaker,
-DefaultManette:DefaultManette,
-DefaultChair:DefaultChair
-        }
-      
-        
-        if (initialData) {
-          await axios.patch(`/api/Pack/${params.productId}`, { ...data, ...pct });
-        } else {
-          await axios.post(`/api/Pack`, { ...data, ...pct });
-        }
-        router.refresh();
-        router.push(`/admin/CustomPack`);
-        toast.success(toastMessage);
-      } catch (error: any) {
+  /** defaults (picked as "DefaultX") */
+  const [defaultKeyboard, setDefaultKeyboard] = useState<string>(pack0?.DefaultClavier ?? "");
+  const [defaultMouse, setDefaultMouse] = useState<string>(pack0?.DefaultMouse ?? "");
+  const [defaultMousePad, setDefaultMousePad] = useState<string>(pack0?.DefaultMousePad ?? "");
+  const [defaultMics, setDefaultMics] = useState<string>(pack0?.DefaultMic ?? "");
+  const [defaultHeadset, setDefaultHeadset] = useState<string>(pack0?.DefaultHeadset ?? "");
+  const [defaultCamera, setDefaultCamera] = useState<string>(pack0?.DefaultCamera ?? "");
+  const [defaultScreen, setDefaultScreen] = useState<string>(pack0?.DefaultScreen ?? "");
+  const [DefaultSpeaker, setDefaultSpeaker] = useState<string>(pack0?.DefaultSpeaker ?? "");
+  const [DefaultManette, setDefaultManette] = useState<string>(pack0?.DefaultManette ?? "");
+  const [DefaultChair, setDefaultChair] = useState<string>(pack0?.DefaultChair ?? "");
 
-        toast.error('Something went wrong.');
-     console.log(error)
-      } finally {
-        setLoading(false);
-      }
-    
-  
- 
+  /** Total */
+  const [total, setTotal] = useState<number>(Number(initialData?.price ?? 0));
+
+  const calcTotal = () => {
+    let pr = 0;
+
+    const add = (list: ProdCol[], id: string) => {
+      if (!id) return;
+      const prod = list.find((e) => e.id === id);
+      if (prod) pr += Number(prod.price ?? 0);
+    };
+
+    add(keyboardList, defaultKeyboard);
+    add(MouseList, defaultMouse);
+    add(MousepadsList, defaultMousePad);
+    add(MicsList, defaultMics);
+    add(HeadsetsList, defaultHeadset);
+    add(CamerasList, defaultCamera);
+    add(screensList, defaultScreen);
+    add(HautparleursList, DefaultSpeaker);
+    add(ManettesList, DefaultManette);
+    add(ChaisegamingsList, DefaultChair); // ✅ FIXED (you had ManettesList here)
+
+    const dis = Number(form.getValues("discountOnPc") ?? 0);
+    if (dis > 0) pr -= dis;
+
+    setTotal(pr);
   };
 
-  const onDelete = async () => {
+  useEffect(() => {
+    calcTotal();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    form.watch("discountOnPc"),
+    DefaultChair,
+    DefaultManette,
+    DefaultSpeaker,
+    defaultCamera,
+    defaultHeadset,
+    defaultKeyboard,
+    defaultMics,
+    defaultMouse,
+    defaultMousePad,
+    defaultScreen,
+    keyboardList,
+    MouseList,
+    MousepadsList,
+    MicsList,
+    HeadsetsList,
+    CamerasList,
+    screensList,
+    HautparleursList,
+    ManettesList,
+    ChaisegamingsList,
+  ]);
+
+  /** Submit */
+  const onSubmit = async (data: ProductFormValues) => {
+    const discountOnPack = Number(form.getValues("discountOnPc") ?? 0);
+
     try {
       setLoading(true);
-      await axios.delete(`/api/Pack/${params.productId}`);
+
+      // ✅ force correct pack type for this form
+      const packType: PackType = "CUSTOM";
+
+      const payload = {
+        ...data,
+        packType, // ✅ REQUIRED by your API now
+        price: Number(total),
+
+        prodid: initialData?.id,
+        packid: pack0?.id,
+
+        Clavier: keyboardList,
+        Mouse: MouseList,
+        MousePad: MousepadsList,
+        Mic: MicsList,
+        Headset: HeadsetsList,
+        Camera: CamerasList,
+        Screen: screensList,
+        Speaker: HautparleursList,
+        Manette: ManettesList,
+        Chair: ChaisegamingsList,
+
+        discountOnPack,
+
+        DefaultClavier: defaultKeyboard,
+        DefaultMouse: defaultMouse,
+        DefaultMousePad: defaultMousePad,
+        DefaultMic: defaultMics,
+        DefaultHeadset: defaultHeadset,
+        DefaultCamera: defaultCamera,
+        DefaultScreen: defaultScreen,
+        DefaultSpeaker: DefaultSpeaker,
+        DefaultManette: DefaultManette,
+        DefaultChair: DefaultChair,
+      };
+
+      const id = typeof initialData?.id === "string" ? initialData.id : undefined;
+
+      if (id) {
+        await axios.patch(`/api/Pack/${id}`, payload);
+      } else {
+        await axios.post(`/api/Pack`, payload);
+      }
+
       router.refresh();
-      router.push(`/products`);
-      toast.success('Product deleted.');
-    } catch (error: any) {
-      toast.error('Something went wrong.');
+      router.push(`/admin/CustomPack`);
+      toast.success(toastMessage);
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /** Delete */
+  const onDelete = async () => {
+    try {
+      if (!initialData?.id) return;
+      setLoading(true);
+
+      await axios.delete(`/api/Pack/${initialData.id}`);
+
+      router.refresh();
+      router.push(`/admin/CustomPack`);
+      toast.success("Product deleted.");
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong.");
     } finally {
       setLoading(false);
       setOpen(false);
     }
-  }
+  };
 
-
-  // const handleInputArrayChange = (inputArray: Array<{ name: string; value: string }>) => {
-  //   setParentInputArray(inputArray);
-
-  //   console.log(parentInputArray)
-  // };
-  const [pcTemplate, setPcTemplate] = useState({})
-
-
-
-
-
-
-  const [keyboardList, setkeyboardList] = useState<ProdCol[]>(initialData && initialData.PackProduct && initialData.PackProduct[0].Clavier
-    ? keyboards.filter(e => initialData?.PackProduct[0].Clavier.find(ee => e.id === ee.id))
-    : []);
-    const [MouseList, setMouseList] = useState<ProdCol[]>(initialData && initialData.PackProduct && initialData.PackProduct[0].Mouse
-      ? Mouses.filter(e => initialData?.PackProduct[0].Mouse.find(ee => e.id === ee.id))
-      : []);
-  
-  const [MousepadsList, setMousepadsList] = useState<ProdCol[]>(initialData && initialData.PackProduct && initialData.PackProduct[0].MousePad
-      ? Mousepads.filter(e => initialData?.PackProduct[0].MousePad.find(ee => e.id === ee.id))
-      : []);
-  
-  const [MicsList, setMicsList] = useState<ProdCol[]>(initialData && initialData.PackProduct && initialData.PackProduct[0].Mic
-      ? Mics.filter(e => initialData?.PackProduct[0].Mic.find(ee => e.id === ee.id))
-      : []);
-  
-  const [HeadsetsList, setHeadsetsList] = useState<ProdCol[]>(initialData && initialData.PackProduct && initialData.PackProduct[0].Headset
-      ? Headsets.filter(e => initialData?.PackProduct[0].Headset.find(ee => e.id === ee.id))
-      : []);
-  
-  const [CamerasList, setCamerasList] = useState<ProdCol[]>(initialData && initialData.PackProduct && initialData.PackProduct[0].Camera
-      ? Cameras.filter(e => initialData?.PackProduct[0].Camera.find(ee => e.id === ee.id))
-      : []);
-  
-  const [screensList, setscreensList] = useState<ProdCol[]>(initialData && initialData.PackProduct && initialData.PackProduct[0].Screen
-      ? screens.filter(e => initialData?.PackProduct[0].Screen.find(ee => e.id === ee.id))
-      : []);
-  
-  const [HautparleursList, setHautparleursList] = useState<ProdCol[]>(initialData && initialData.PackProduct && initialData.PackProduct[0].Speaker
-      ? Hautparleurs.filter(e => initialData?.PackProduct[0].Speaker.find(ee => e.id === ee.id))
-      : []);
-  
-  const [ManettesList, setManettesList] = useState<ProdCol[]>(initialData && initialData.PackProduct && initialData.PackProduct[0].Manette
-      ? Manettes.filter(e => initialData?.PackProduct[0].Manette.find(ee => e.id === ee.id))
-      : []);
-  
-  const [ChaisegamingsList, setChaisegamingsList] = useState<ProdCol[]>(initialData && initialData.PackProduct && initialData.PackProduct[0].Chair
-      ? Chaisegamings.filter(e => initialData?.PackProduct[0].Chair.find(ee => e.id === ee.id))
-      : []);
-  
-  console.log(initialData?.PackProduct[0].discountOnPack)
-
-  const [defaultKeyboard,setDefaultKeyboard]= useState<String>(initialData?.PackProduct[0].DefaultClavier??"")
-  const [defaultMouse,setDefaultMouse]= useState<String>(initialData?.PackProduct[0].DefaultMouse??"")
-  const [defaultMousePad,setDefaultMousePad]= useState<String>(initialData?.PackProduct[0].DefaultMousePad??"")
-  const [defaultMics,setDefaultMics]= useState<String>(initialData?.PackProduct[0].DefaultMic??"")
-  const [defaultHeadset,setDefaultHeadset]= useState<String>(initialData?.PackProduct[0].DefaultHeadset??"")
-  const [defaultCamera,setDefaultCamera]= useState<String>(initialData?.PackProduct[0].DefaultCamera??"")
-  const [defaultScreen,setDefaultScreen]= useState<String>(initialData?.PackProduct[0].DefaultScreen??"")
-  const [DefaultSpeaker,setDefaultSpeDefaultSpeaker]= useState<String>(initialData?.PackProduct[0].DefaultSpeaker??"")
-  const [DefaultManette,setDefaultSpeDefaultManette]= useState<String>(initialData?.PackProduct[0].DefaultManette??"")
-  const [DefaultChair,setDefaultSpeDefaultChair]= useState<String>(initialData?.PackProduct[0].DefaultChair??"")
- 
-
-
-  const [total,setTotal]=useState(initialData?.price??0)
-const CalculeTotal=()=>{
-  let pr=0
-  if(defaultKeyboard.length>0){
-    const prod=keyboardList.find((e)=>e.id==defaultKeyboard)
-    if(prod)
-    pr+=prod?.price
-  }
-  if(defaultMouse.length>0){
-    const prod=MouseList.find((e)=>e.id==defaultMouse)
-    if(prod)
-    pr+=prod?.price
-  }
-  if(defaultMousePad.length>0){
-    const prod=MousepadsList.find((e)=>e.id==defaultMousePad)
-    if(prod)
-    pr+=prod?.price
-  }
-  if(defaultMics.length>0){
-    const prod=MicsList.find((e)=>e.id==defaultMics)
-    if(prod)
-    pr+=prod?.price
-  }
-  if(defaultHeadset.length>0){
-    const prod=HeadsetsList.find((e)=>e.id==defaultHeadset)
-    if(prod)
-    pr+=prod?.price
-  }
-  if(defaultCamera.length>0){
-    const prod=CamerasList.find((e)=>e.id==defaultCamera)
-    if(prod)
-    pr+=prod?.price
-  }
-  if(defaultScreen.length>0){
-    const prod=screensList.find((e)=>e.id==defaultScreen)
-    if(prod)
-    pr+=prod?.price
-  
-  }
-  if(DefaultSpeaker.length>0){
-   
-    const prod=HautparleursList.find((e)=>e.id==DefaultSpeaker)
-    if(prod)
-    pr+=prod?.price
-  
-  }
-  
-  if(DefaultManette.length>0){
-   
-    const prod=ManettesList.find((e)=>e.id==DefaultManette)
-    if(prod)
-    pr+=prod?.price
-  
-  
-  }
-  if(DefaultChair.length>0){
-   
-    const prod=ManettesList.find((e)=>e.id==DefaultChair)
-    if(prod)
-    pr+=prod?.price
-  
-  }
-  
-  const dis=form.getValues('discountOnPc')
-  if(dis&&dis>0)
-  pr=pr-dis
-setTotal(pr)
-}
-useEffect(()=>{
-  
-  CalculeTotal()
-  console.log(defaultMousePad)
-  console.log(initialData?.PackProduct[0].DefaultMousePad)
-},[
-  form.watch('discountOnPc'),
-  DefaultChair,
-  DefaultManette,
-  DefaultSpeaker,
-  defaultCamera,
-  defaultHeadset,
-  defaultKeyboard,
-  defaultMics,
-  defaultMouse,
-  defaultMousePad,
-  defaultScreen
-])
   return (
     <>
-      <AlertModal
-        isOpen={open}
-        onClose={() => setOpen(false)}
-        onConfirm={onDelete}
-        loading={loading}
-      />
+      <AlertModal isOpen={open} onClose={() => setOpen(false)} onConfirm={onDelete} loading={loading} />
+
       <div className="flex items-center justify-between">
         <Heading title={title} description={description} />
         {initialData && (
-          <Button
-            disabled={loading}
-            variant="destructive"
-            size="sm"
-            onClick={() => setOpen(true)}
-          >
+          <Button disabled={loading} variant="destructive" size="sm" onClick={() => setOpen(true)}>
             <Trash className="h-4 w-4" />
           </Button>
         )}
       </div>
+
       <Separator />
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
           <FormField
@@ -468,16 +372,17 @@ useEffect(()=>{
                 <FormLabel>Images</FormLabel>
                 <FormControl>
                   <ImageUpload
-                    value={field.value.map((image) => image.url)}
+                    value={(field.value ?? []).map((image) => image.url)}
                     disabled={loading}
-                    onChange={(url) => field.onChange([...field.value, { url }])}
-                    onRemove={(url) => field.onChange([...field.value.filter((current) => current.url !== url)])}
+                    onChange={(url) => field.onChange([...(field.value ?? []), { url }])}
+                    onRemove={(url) => field.onChange((field.value ?? []).filter((cur) => cur.url !== url))}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+
           <div className="md:grid md:grid-cols-3 gap-8">
             <FormField
               control={form.control}
@@ -486,7 +391,7 @@ useEffect(()=>{
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input disabled={loading} placeholder="Product name" {...field} />
+                    <Input disabled={loading} placeholder="Pack name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -502,12 +407,14 @@ useEffect(()=>{
                   <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue defaultValue={field.value} placeholder="Select a category" />
+                        <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -515,6 +422,7 @@ useEffect(()=>{
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="description"
@@ -528,15 +436,16 @@ useEffect(()=>{
                 </FormItem>
               )}
             />
+
+            {/* hidden fields */}
             <FormField
-            
               control={form.control}
               name="price"
               render={({ field }) => (
                 <FormItem className="hidden">
                   <FormLabel>Price</FormLabel>
                   <FormControl>
-                    <Input type="number" disabled={loading} placeholder="9.99" {...field} />
+                    <Input type="number" disabled={loading} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -549,13 +458,12 @@ useEffect(()=>{
                 <FormItem className="hidden">
                   <FormLabel>DicountPrice</FormLabel>
                   <FormControl>
-                    <Input type="number" disabled={loading} placeholder="" {...field} />
+                    <Input type="number" disabled={loading} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
             <FormField
               control={form.control}
               name="stock"
@@ -563,13 +471,12 @@ useEffect(()=>{
                 <FormItem className="hidden">
                   <FormLabel>Stock</FormLabel>
                   <FormControl>
-                    <Input type="number" disabled={loading} placeholder="" {...field} />
+                    <Input type="number" disabled={loading} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
 
             <FormField
               control={form.control}
@@ -577,30 +484,23 @@ useEffect(()=>{
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      // @ts-ignore
-                      onCheckedChange={field.onChange}
-                    />
+                    <Checkbox checked={!!field.value} /* @ts-ignore */ onCheckedChange={field.onChange} />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel>
-                      Featured
-                    </FormLabel>
-                    <FormDescription>
-                      This product will appear on the home page
-                    </FormDescription>
+                    <FormLabel>Featured</FormLabel>
+                    <FormDescription>This product will appear on the home page</FormDescription>
                   </div>
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="comingSoon"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
-                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    <Checkbox checked={!!field.value} /* @ts-ignore */ onCheckedChange={field.onChange} />
                   </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>Coming Soon</FormLabel>
@@ -609,36 +509,30 @@ useEffect(()=>{
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="isArchived"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      // @ts-ignore
-                      onCheckedChange={field.onChange}
-                    />
+                    <Checkbox checked={!!field.value} /* @ts-ignore */ onCheckedChange={field.onChange} />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel>
-                      Archived
-                    </FormLabel>
-                    <FormDescription>
-                      This product will not appear anywhere in the store.
-                    </FormDescription>
+                    <FormLabel>Archived</FormLabel>
+                    <FormDescription>This product will not appear anywhere in the store.</FormDescription>
                   </div>
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="outOfStock"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
-                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    <Checkbox checked={!!field.value} /* @ts-ignore */ onCheckedChange={field.onChange} />
                   </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>Out of Stock</FormLabel>
@@ -649,112 +543,103 @@ useEffect(()=>{
             />
           </div>
 
-
           <FormField
             control={form.control}
             name="additionalDetails"
-            
             render={({ field }) => (
               <FormItem className="hidden">
                 <FormLabel>Infos</FormLabel>
-
                 <FormControl>
-
                   <InputArray
-
-                    onChange={(url: any[]) => field.onChange([...url])}
-                    inputArrayp={field.value.map((i) => ({ name: i.name, value: i.value }))} />
+                    onChange={(arr: any[]) => field.onChange([...arr])}
+                    inputArrayp={(field.value ?? []).map((i) => ({ name: i.name, value: i.value }))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <div className="w-full fixed bottom-0 left-0 z-40 bg-white dark:bg-black border-t-small py-3 px-3">
-          <div>Total : {total.toString()} TND</div>
-           <FormField
+
+          {/* footer */}
+          <div className="w-full fixed bottom-0 left-0 z-40 bg-white dark:bg-black border-t py-3 px-3">
+            <div>Total : {Number(total).toString()} TND</div>
+
+            <FormField
               control={form.control}
               name="discountOnPc"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>discount On Pc</FormLabel>
                   <FormControl>
-                    <Input type="number" onKeyDown={(ke)=>{if(ke.key=="Enter"){form.trigger()};console.log(ke.key)}} disabled={loading} placeholder="" {...field} />
+                    <Input type="number" disabled={loading} placeholder="0" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-                 <Button onClick={() => {
-      
-          }} disabled={loading} className="ml-auto my-3 w-full" type="submit">
-          Product  {action}
-          </Button>
+
+            <Button disabled={loading} className="ml-auto my-3 w-full" type="submit">
+              Product {action}
+            </Button>
           </div>
-           
-        
+
           <Pctemplate
-          Cameras={Cameras}
-          CamerasList={CamerasList}
-          Chaisegamings={Chaisegamings}
-          ChaisegamingsList={ChaisegamingsList}
-          DefaultCamera={defaultCamera}
-          DefaultChair={DefaultChair}
-          DefaultClavier={defaultKeyboard}
-          DefaultHeadset={defaultHeadset}
-          DefaultManette={DefaultManette}
-          DefaultMic={defaultMics}
-          DefaultMouse={defaultMouse}
-          DefaultMousePad={defaultMousePad}
-          DefaultScreen={defaultScreen}
-          DefaultSpeaker={DefaultSpeaker}
-          Hautparleurs={Hautparleurs}
-          HautparleursList={HautparleursList}
-          Headsets={Headsets}
-          HeadsetsList={HeadsetsList}
-          Manettes={Manettes}
-          ManettesList={ManettesList}
-          Mics={Mics}
-          MicsList={MicsList}
-          MouseList={MouseList}
-          Mousepads={Mousepads}
-          MousepadsList={MousepadsList}
-          Mouses={Mouses}
-          initialData={initialData}
-          keyboardList={keyboardList}
-          keyboards={keyboards}
-          screens={screens}
-          screensList={screensList}
-          setCamerasList={setCamerasList}
-          setChaisegamingsList={setChaisegamingsList}
-          setDefaultCamera={setDefaultCamera}
-          setDefaultHeadset={setDefaultHeadset}
-          setDefaultKeyboard={setDefaultKeyboard}
-          setDefaultMics={setDefaultMics}
-          setDefaultMouse={setDefaultMouse}
-          setDefaultMousePad={setDefaultMousePad}
-          setDefaultScreen={setDefaultScreen}
-          setDefaultSpeDefaultChair={setDefaultSpeDefaultChair}
-          setDefaultSpeDefaultManette={setDefaultSpeDefaultManette}
-          setDefaultSpeDefaultSpeaker={setDefaultSpeDefaultSpeaker}
-          setHautparleursList={setHautparleursList}
-          setHeadsetsList={setHeadsetsList}
-          setManettesList={setManettesList}
-          setMicsList={setMicsList}
-          setMouseList={setMouseList}
-          setMousepadsList={setMousepadsList}
-          setkeyboardList={setkeyboardList}
-          setscreensList={setscreensList}
+            Cameras={Cameras}
+            CamerasList={CamerasList}
+            Chaisegamings={Chaisegamings}
+            ChaisegamingsList={ChaisegamingsList}
+            DefaultCamera={defaultCamera}
+            DefaultChair={DefaultChair}
+            DefaultClavier={defaultKeyboard}
+            DefaultHeadset={defaultHeadset}
+            DefaultManette={DefaultManette}
+            DefaultMic={defaultMics}
+            DefaultMouse={defaultMouse}
+            DefaultMousePad={defaultMousePad}
+            DefaultScreen={defaultScreen}
+            DefaultSpeaker={DefaultSpeaker}
+            Hautparleurs={Hautparleurs}
+            HautparleursList={HautparleursList}
+            Headsets={Headsets}
+            HeadsetsList={HeadsetsList}
+            Manettes={Manettes}
+            ManettesList={ManettesList}
+            Mics={Mics}
+            MicsList={MicsList}
+            MouseList={MouseList}
+            Mousepads={Mousepads}
+            MousepadsList={MousepadsList}
+            Mouses={Mouses}
+            initialData={initialData}
+            keyboardList={keyboardList}
+            keyboards={keyboards}
+            screens={screens}
+            screensList={screensList}
+            setCamerasList={setCamerasList}
+            setChaisegamingsList={setChaisegamingsList}
+            setDefaultCamera={setDefaultCamera}
+            setDefaultHeadset={setDefaultHeadset}
+            setDefaultKeyboard={setDefaultKeyboard}
+            setDefaultMics={setDefaultMics}
+            setDefaultMouse={setDefaultMouse}
+            setDefaultMousePad={setDefaultMousePad}
+            setDefaultScreen={setDefaultScreen}
+            setDefaultSpeDefaultChair={setDefaultChair}
+            setDefaultSpeDefaultManette={setDefaultManette}
+            setDefaultSpeDefaultSpeaker={setDefaultSpeaker}
+            setHautparleursList={setHautparleursList}
+            setHeadsetsList={setHeadsetsList}
+            setManettesList={setManettesList}
+            setMicsList={setMicsList}
+            setMouseList={setMouseList}
+            setMousepadsList={setMousepadsList}
+            setkeyboardList={setkeyboardList}
+            setscreensList={setscreensList}
           />
-     
         </form>
       </Form>
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
+
+      <div className="h-40" />
     </>
   );
 };

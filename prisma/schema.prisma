@@ -91,7 +91,7 @@ model Product {
   storages            Harddisk[]       @relation("ProductToStorage")
   keyboard            keyboard[]       @relation("ProductTokeyboard")
   Pack                Pack[]           @relation("ProductsToPack")
-  packType            PackType?
+ packType              PackType?        @default(CUSTOM)
 }
 
 model Field {
@@ -1104,3 +1104,4 @@ enum PackType {
   CUSTOM
   UNITY_SCREEN
 }
+

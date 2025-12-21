@@ -1,16 +1,23 @@
-import { NextResponse } from 'next/server';
-import prismadb from '@/lib/prismadb';
-import { slugify } from '@/lib/slugify';
+import { NextResponse } from "next/server";
+import prismadb from "@/lib/prismadb";
+import { slugify } from "@/lib/slugify";
 
-export async function POST(
-  req: Request,
-  {}: {}
-) {
+type PackType = "CUSTOM" | "UNITY_SCREEN";
+
+function toConnectIds(arr: any[] | undefined) {
+  return (Array.isArray(arr) ? arr : []).map((i) => ({ id: i.id }));
+}
+
+function firstImageUrl(images: { url: string }[] | undefined) {
+  return Array.isArray(images) && images.length > 0 ? images[0].url : "";
+}
+
+export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    // Safe destructuring (arrays default to [])
     const {
+      packType,
       name,
       price,
       categoryId,
@@ -21,155 +28,193 @@ export async function POST(
       outOfStock,
       description,
       stock,
-
-      Clavier = [],
-      Mouse = [],
-      MousePad = [],
-      Mic = [],
-      Headset = [],
-      Camera = [],
-      Screen = [],
-      Speaker = [],
-      Manette = [],
-      Chair = [],
-
-      discountOnPack = 0,
       dicountPrice = 0,
-      DefaultClavier,
-      DefaultMouse,
-      DefaultMousePad,
-      DefaultMic,
-      DefaultHeadset,
-      DefaultCamera,
-      DefaultScreen,
-      DefaultSpeaker,
-      DefaultManette,
-      DefaultChair,
-      DefaultPack,              // still allowed in body, just unused
       additionalDetails = [],
-    } = body;
+    } = body as {
+      packType: PackType;
+      name: string;
+      price: number;
+      categoryId: string;
+      images: { url: string }[];
+      isFeatured?: boolean;
+      isArchived?: boolean;
+      comingSoon?: boolean;
+      outOfStock?: boolean;
+      description: string;
+      stock: number;
+      dicountPrice?: number;
+      additionalDetails?: { name: string; value: string }[];
+    };
 
-    console.log(body);
-
-    if (!description) {
-      return new NextResponse('description is required', { status: 400 });
-    }
-    if (!name) {
-      return new NextResponse('Name is required', { status: 400 });
-    }
-    if (!images || !images.length) {
-      return new NextResponse('Images are required', { status: 400 });
-    }
-    if (!categoryId) {
-      return new NextResponse('Category id is required', { status: 400 });
+    if (!packType) return new NextResponse("packType is required", { status: 400 });
+    if (!name) return new NextResponse("Name is required", { status: 400 });
+    if (!description) return new NextResponse("description is required", { status: 400 });
+    if (!categoryId) return new NextResponse("Category id is required", { status: 400 });
+    if (!images || !Array.isArray(images) || images.length === 0) {
+      return new NextResponse("Images are required", { status: 400 });
     }
 
-    // ✅ SEO slug for Product
     const baseSlug = slugify(name);
     const slug = `${baseSlug}-${Date.now()}`;
 
-    const product = await prismadb.accessoryPack.create({
+    // ✅ Create Product first
+    const createdProduct = await prismadb.product.create({
       data: {
-        Product: {
-          create: {
-            slug,                     // ✅ required by Product model
-            name,
-            price,
-            isFeatured,
-            isArchived,
-            comingSoon,
-            outOfStock,
-            description,
-            stock,
-            dicountPrice: dicountPrice ?? 0,
-            // ✅ connect to category relation instead of categoryId field
-            category: {
-              connect: { id: categoryId },
-            },
-            additionalDetails: additionalDetails.length
-              ? {
-                  createMany: {
-                    data: [...additionalDetails],
-                  },
-                }
-              : undefined,
-            images: {
-              createMany: {
-                data: images.map((image: { url: string }) => ({
-                  url: image.url,
-                })),
-              },
-            },
+        slug,
+        name,
+        price,
+        dicountPrice: dicountPrice ?? 0,
+        description,
+        stock,
+        isFeatured: !!isFeatured,
+        isArchived: !!isArchived,
+        comingSoon: !!comingSoon,
+        outOfStock: !!outOfStock,
+        packType, // ✅ enum matches your schema
+        category: { connect: { id: categoryId } },
+
+        additionalDetails:
+          Array.isArray(additionalDetails) && additionalDetails.length
+            ? { createMany: { data: additionalDetails } }
+            : undefined,
+
+        images: {
+          createMany: {
+            data: images.map((img) => ({ url: img.url })),
           },
         },
+      },
+    });
 
-        // fields on accessoryPack
-        discountOnPack,
-        DefaultCamera,
-        DefaultChair,
+    // ✅ CUSTOM => AccessoryPack
+    if (packType === "CUSTOM") {
+      const {
+        discountOnPack = 0,
         DefaultClavier,
-        DefaultHeadset,
-        DefaultManette,
-        DefaultMic,
         DefaultMouse,
         DefaultMousePad,
+        DefaultMic,
+        DefaultHeadset,
+        DefaultCamera,
         DefaultScreen,
         DefaultSpeaker,
-        // ❌ DefaultPack intentionally NOT sent here (not in DB model)
+        DefaultManette,
+        DefaultChair,
 
-        // relation connects (now always arrays)
-        Clavier: { connect: Clavier.map((i: any) => ({ id: i.id })) },
-        Camera: { connect: Camera.map((i: any) => ({ id: i.id })) },
-        Chair: { connect: Chair.map((i: any) => ({ id: i.id })) },
-        Headset: { connect: Headset.map((i: any) => ({ id: i.id })) },
-        Manette: { connect: Manette.map((i: any) => ({ id: i.id })) },
-        Mouse: { connect: Mouse.map((i: any) => ({ id: i.id })) },
-        MousePad: { connect: MousePad.map((i: any) => ({ id: i.id })) },
-        Screen: { connect: Screen.map((i: any) => ({ id: i.id })) },
-        Mic: { connect: Mic.map((i: any) => ({ id: i.id })) },
-        Speaker: { connect: Speaker.map((i: any) => ({ id: i.id })) },
-      },
-    });
+        Clavier = [],
+        Mouse = [],
+        MousePad = [],
+        Mic = [],
+        Headset = [],
+        Camera = [],
+        Screen = [],
+        Speaker = [],
+        Manette = [],
+        Chair = [],
+      } = body;
 
-    console.log('[PRODUCTS_POST]', product);
-    return NextResponse.json(product);
+      const accessoryPack = await prismadb.accessoryPack.create({
+        data: {
+          discountOnPack,
+          DefaultCamera,
+          DefaultChair,
+          DefaultClavier,
+          DefaultHeadset,
+          DefaultManette,
+          DefaultMic,
+          DefaultMouse,
+          DefaultMousePad,
+          DefaultScreen,
+          DefaultSpeaker,
+
+          // ✅ Product is Product[] in schema => connect ARRAY
+          Product: { connect: [{ id: createdProduct.id }] },
+
+          Clavier: { connect: toConnectIds(Clavier) },
+          Mouse: { connect: toConnectIds(Mouse) },
+          MousePad: { connect: toConnectIds(MousePad) },
+          Mic: { connect: toConnectIds(Mic) },
+          Headset: { connect: toConnectIds(Headset) },
+          Camera: { connect: toConnectIds(Camera) },
+          Screen: { connect: toConnectIds(Screen) },
+          Speaker: { connect: toConnectIds(Speaker) },
+          Manette: { connect: toConnectIds(Manette) },
+          Chair: { connect: toConnectIds(Chair) },
+        },
+      });
+
+      return NextResponse.json({ product: createdProduct, accessoryPack });
+    }
+
+    // ✅ UNITY_SCREEN => FullPack
+    if (packType === "UNITY_SCREEN") {
+      const {
+        discountOnPack = 0,
+        DefaultUnity,
+        DefaultScreen,
+        DefaultPack,
+        Unity = [],
+        Screen = [],
+        Pack = [],
+      } = body;
+
+      // Pack[] comes as PRODUCTs -> convert to AccessoryPack ids
+      const packProductIds = (Array.isArray(Pack) ? Pack : []).map((p: any) => p.id);
+
+      const accessoryPacks = packProductIds.length
+        ? await prismadb.accessoryPack.findMany({
+            where: { Product: { some: { id: { in: packProductIds } } } },
+            select: { id: true },
+          })
+        : [];
+
+      const fullPack = await prismadb.fullPack.create({
+        data: {
+          // ✅ REQUIRED by your schema (no defaults)
+          packId: createdProduct.id,
+          packTitle: name,
+          packImage: firstImageUrl(images),
+
+          Title: name,
+          price,
+          discountOnPack,
+          DefaultUnity: DefaultUnity ?? "",
+          DefaultScreen: DefaultScreen ?? "",
+          DefaultPack: DefaultPack ?? "",
+
+          // ✅ Product is Product[] in schema => connect ARRAY
+          Product: { connect: [{ id: createdProduct.id }] },
+
+          Unity: { connect: toConnectIds(Unity) },
+          Screen: { connect: toConnectIds(Screen) },
+          Pack: { connect: accessoryPacks.map((p) => ({ id: p.id })) },
+        },
+      });
+
+      return NextResponse.json({ product: createdProduct, fullPack });
+    }
+
+    return new NextResponse("Invalid packType", { status: 400 });
   } catch (error) {
-    console.log('[PRODUCTS_POST]', error);
-    return new NextResponse('Internal error ' + error, { status: 500 });
+    console.log("[PACK_POST]", error);
+    return new NextResponse("Internal error", { status: 500 });
   }
 }
 
-export async function DELETE(req: Request) {
+export async function GET() {
   try {
-    const products = await prismadb.accessoryPack.deleteMany();
-    return NextResponse.json(products);
-  } catch (error) {
-    console.log('[PRODUCTS_GET]', error);
-    return new NextResponse('Internal error', { status: 500 });
-  }
-}
-
-export async function GET(req: Request) {
-  try {
-    const products = await prismadb.accessoryPack.findMany({
-      include: {
-        Camera: true,
-        Chair: true,
-        Clavier: true,
-        Headset: true,
-        Manette: true,
-        Mic: true,
-        Mouse: true,
-        MousePad: true,
-        Product: true,
-        Screen: true,
-        Speaker: true,
+    const products = await prismadb.product.findMany({
+      where: {
+        packType: { in: ["CUSTOM", "UNITY_SCREEN"] },
+        isArchived: false,
       },
+      include: { images: true, category: true },
+      orderBy: { createdAt: "desc" },
     });
 
     return NextResponse.json(products);
   } catch (error) {
-    console.log('[PRODUCTS_GET]', error);
-    return new NextResponse('Internal error', { status: 500 });
+    console.log("[PACK_GET]", error);
+    return new NextResponse("Internal error", { status: 500 });
   }
 }
