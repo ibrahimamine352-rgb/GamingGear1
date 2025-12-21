@@ -2,12 +2,12 @@
 
 import * as z from "zod";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import { Trash } from "lucide-react";
-import { Category, Image, Product, Field } from "@prisma/client";
+import { Category } from "@prisma/client";
 import { useParams, useRouter } from "next/navigation";
 
 import { Input } from "@/components/ui/input";
@@ -24,23 +24,65 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Heading } from "@/components/ui/heading";
 import { AlertModal } from "@/components/modals/alert-modal";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import ImageUpload from "@/components/ui/image-upload";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
 import InputArray from "./addtioanlinfos";
 import { ProdCol } from "@/types";
-import Pctemplate from "./pc-template";
 
 /** MUST match Prisma enum */
 type PackType = "CUSTOM";
 
+/* ---------------- DTO TYPES (plain JS types only) ---------------- */
+export type PackForForm = {
+  id: string;
+
+  Clavier: ProdCol[];
+  Mouse: ProdCol[];
+  MousePad: ProdCol[];
+  Mic: ProdCol[];
+  Headset: ProdCol[];
+  Camera: ProdCol[];
+  Screen: ProdCol[];
+  Speaker: ProdCol[];
+  Manette: ProdCol[];
+  Chair: ProdCol[];
+
+  DefaultClavier: string;
+  DefaultMouse: string;
+  DefaultMousePad: string;
+  DefaultMic: string;
+  DefaultHeadset: string;
+  DefaultCamera: string;
+  DefaultScreen: string;
+  DefaultSpeaker: string;
+  DefaultManette: string;
+  DefaultChair: string;
+
+  discountOnPack: number;
+};
+
+export type ProductForForm = {
+  id: string;
+  name: string;
+  categoryId: string;
+  description: string;
+
+  images: { url: string }[];
+
+  price: number;
+  dicountPrice: number;
+  stock: number;
+
+  isFeatured: boolean;
+  isArchived: boolean;
+  comingSoon: boolean;
+  outOfStock: boolean;
+
+  additionalDetails: { name: string; value: string }[];
+
+  PackProduct: PackForForm[];
+};
+
+/* ---------------- ZOD ---------------- */
 const formSchema = z.object({
   name: z.string().min(1),
   images: z.object({ url: z.string() }).array().min(1),
@@ -54,45 +96,18 @@ const formSchema = z.object({
   isArchived: z.boolean().optional(),
   comingSoon: z.boolean().optional(),
   outOfStock: z.boolean().optional(),
-  additionalDetails: z.object({
-    name: z.string(),
-    value: z.string(),
-  }).array(),
+  additionalDetails: z
+    .object({
+      name: z.string(),
+      value: z.string(),
+    })
+    .array(),
 });
 
 type ProductFormValues = z.infer<typeof formSchema>;
 
 export interface ProductFormProps {
-  initialData:
-    | (Product & {
-        images: Image[];
-        additionalDetails: Field[];
-        PackProduct: {
-          id: string;
-          Clavier: ProdCol[];
-          Mouse: ProdCol[];
-          MousePad: ProdCol[];
-          Mic: ProdCol[];
-          Headset: ProdCol[];
-          Camera: ProdCol[];
-          Screen: ProdCol[];
-          Speaker: ProdCol[];
-          Manette: ProdCol[];
-          Chair: ProdCol[];
-          DefaultClavier: string;
-          DefaultMouse: string;
-          DefaultMousePad: string;
-          DefaultMic: string;
-          DefaultHeadset: string;
-          DefaultCamera: string;
-          DefaultScreen: string;
-          DefaultSpeaker: string;
-          DefaultManette: string;
-          DefaultChair: string;
-          discountOnPack: number;
-        }[];
-      })
-    | null;
+  initialData: ProductForForm | null;
 
   categories: Category[];
   keyboards: ProdCol[];
@@ -110,62 +125,69 @@ export interface ProductFormProps {
 export const ProductForm: React.FC<ProductFormProps> = ({
   initialData,
   categories,
-  keyboards,
-  Mouses,
-  Mousepads,
-  Mics,
-  Headsets,
-  Cameras,
-  screens,
-  Hautparleurs,
-  Manettes,
-  Chaisegamings,
 }) => {
   const router = useRouter();
   const params = useParams();
-  const pack0 = initialData?.PackProduct?.[0];
-
-  const form = useForm<ProductFormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: initialData
-      ? {
-          name: initialData.name,
-          images: initialData.images,
-          price: Number(initialData.price),
-          categoryId: initialData.categoryId,
-          dicountPrice: Number(initialData.dicountPrice),
-          description: initialData.description,
-          stock: Number(initialData.stock),
-          isFeatured: initialData.isFeatured,
-          isArchived: initialData.isArchived,
-          comingSoon: initialData.comingSoon,
-          outOfStock: initialData.outOfStock,
-          discountOnPc: pack0?.discountOnPack ?? 0,
-          additionalDetails: initialData.additionalDetails.map((d) => ({
-            name: d.name,
-            value: d.value,
-          })),
-        }
-      : {
-          name: "",
-          images: [],
-          price: 0,
-          categoryId: "",
-          dicountPrice: 0,
-          description: "",
-          stock: 0,
-          isFeatured: false,
-          isArchived: false,
-          comingSoon: false,
-          outOfStock: false,
-          discountOnPc: 0,
-          additionalDetails: [],
-        },
-  });
 
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const [total, setTotal] = useState(Number(initialData?.price ?? 0));
+
+  const pack0 = initialData?.PackProduct?.[0];
+
+  const defaultValues: ProductFormValues = useMemo(() => {
+    if (!initialData) {
+      return {
+        name: "",
+        images: [],
+        price: 0,
+        categoryId: "",
+        dicountPrice: 0,
+        description: "",
+        stock: 0,
+        isFeatured: false,
+        isArchived: false,
+        comingSoon: false,
+        outOfStock: false,
+        discountOnPc: 0,
+        additionalDetails: [],
+      };
+    }
+
+    return {
+      name: initialData.name ?? "",
+      images: initialData.images ?? [],
+      price: Number(initialData.price ?? 0),
+      categoryId: initialData.categoryId ?? "",
+      dicountPrice: Number(initialData.dicountPrice ?? 0),
+      description: initialData.description ?? "",
+      stock: Number(initialData.stock ?? 0),
+      isFeatured: Boolean(initialData.isFeatured),
+      isArchived: Boolean(initialData.isArchived),
+      comingSoon: Boolean(initialData.comingSoon),
+      outOfStock: Boolean(initialData.outOfStock),
+      discountOnPc: Number(pack0?.discountOnPack ?? 0),
+      additionalDetails: (initialData.additionalDetails ?? []).map((d) => ({
+        name: d.name,
+        value: d.value,
+      })),
+    };
+  }, [initialData, pack0?.discountOnPack]);
+
+  const form = useForm<ProductFormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues,
+  });
+
+  const [total, setTotal] = useState<number>(Number(initialData?.price ?? 0));
+
+  // If you compute total somewhere else, keep it.
+  // Here we just sync it with discountOnPc for demo.
+  useEffect(() => {
+    const dis = Number(form.getValues("discountOnPc") ?? 0);
+    const base = Number(initialData?.price ?? 0);
+    setTotal(Math.max(0, base - dis));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.watch("discountOnPc")]);
 
   const onSubmit = async (data: ProductFormValues) => {
     try {
@@ -174,7 +196,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       const payload = {
         ...data,
         packType: "CUSTOM" as PackType,
-        price: total,
+        price: Number(total),
       };
 
       if (initialData?.id) {
@@ -187,6 +209,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       router.push("/admin/CustomPack");
       toast.success("Saved successfully");
     } catch (e) {
+      console.error(e);
       toast.error("Something went wrong");
     } finally {
       setLoading(false);
@@ -198,14 +221,27 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       <AlertModal
         isOpen={open}
         onClose={() => setOpen(false)}
-        onConfirm={() => {}}
+        onConfirm={() => setOpen(false)}
         loading={loading}
       />
 
-      <Heading
-        title={initialData ? "Edit Custom Pack" : "Create Custom Pack"}
-        description="Manage custom accessory packs"
-      />
+      <div className="flex items-center justify-between">
+        <Heading
+          title={initialData ? "Edit Custom Pack" : "Create Custom Pack"}
+          description="Manage custom accessory packs"
+        />
+
+        {initialData?.id && (
+          <Button
+            variant="destructive"
+            size="sm"
+            disabled={loading}
+            onClick={() => setOpen(true)}
+          >
+            <Trash className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
 
       <Separator />
 
@@ -215,28 +251,40 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             control={form.control}
             name="images"
             render={({ field }) => (
-              <ImageUpload
-                value={field.value.map((i) => i.url)}
-                onChange={(url) =>
-                  field.onChange([...field.value, { url }])
-                }
-                onRemove={(url) =>
-                  field.onChange(
-                    field.value.filter((i) => i.url !== url)
-                  )
-                }
-              />
+              <FormItem>
+                <FormLabel>Images</FormLabel>
+                <FormControl>
+                  <ImageUpload
+                    value={(field.value ?? []).map((i) => i.url)}
+                    disabled={loading}
+                    onChange={(url) => field.onChange([...(field.value ?? []), { url }])}
+                    onRemove={(url) =>
+                      field.onChange((field.value ?? []).filter((i) => i.url !== url))
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
+
+          {/* optional display */}
+          <div className="text-sm">Total: {total} TND</div>
 
           <FormField
             control={form.control}
             name="additionalDetails"
             render={({ field }) => (
-              <InputArray
-                inputArrayp={field.value}
-                onChange={(v) => field.onChange(v)}
-              />
+              <FormItem>
+                <FormLabel>Additional Details</FormLabel>
+                <FormControl>
+                  <InputArray
+                    inputArrayp={field.value ?? []}
+                    onChange={(v: any) => field.onChange(v)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
 
