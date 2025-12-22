@@ -4,9 +4,8 @@ import { slugify } from "@/lib/slugify";
 
 type PackType = "CUSTOM" | "UNITY_SCREEN";
 
-function toConnectIds(arr: any[] | undefined) {
-  return (Array.isArray(arr) ? arr : []).map((i) => ({ id: i.id }));
-}
+const toConnectIds = (arr: any[] | undefined) =>
+  (Array.isArray(arr) ? arr : []).map((i) => ({ id: i.id }));
 
 export async function GET(
   _req: Request,
@@ -62,8 +61,8 @@ export async function PATCH(
       outOfStock,
       description,
       stock,
-      dicountPrice = 0,
-      additionalDetails = [],
+      dicountPrice,
+      additionalDetails,
     } = body as {
       packType?: PackType;
       name?: string;
@@ -80,33 +79,45 @@ export async function PATCH(
       additionalDetails?: { name: string; value: string }[];
     };
 
-    // read existing packType if not passed
+    /**
+     * ✅ IMPORTANT FIX:
+     * Don't use `select: { packType: true }` (it breaks types for some Prisma builds).
+     * Fetch the product normally and read `existing?.packType`.
+     */
     const existing = await prismadb.product.findUnique({
       where: { id: params.productId },
-      select: { packType: true },
     });
 
-    const finalPackType = (packType ?? existing?.packType ?? null) as PackType | null;
+    const finalPackType: PackType | null =
+      (packType ?? (existing?.packType as PackType | undefined) ?? null);
 
-    if (!finalPackType) return new NextResponse("packType is required", { status: 400 });
+    if (!finalPackType) {
+      return new NextResponse("packType is required", { status: 400 });
+    }
 
-    // update product basics
     const updated = await prismadb.product.update({
       where: { id: params.productId },
       data: {
-        ...(name ? { name, slug: `${slugify(name)}-${Date.now()}` } : {}),
+        ...(typeof name === "string" && name.length
+          ? { name, slug: `${slugify(name)}-${Date.now()}` }
+          : {}),
+
         ...(typeof price === "number" ? { price } : {}),
         ...(typeof dicountPrice === "number" ? { dicountPrice } : {}),
         ...(typeof stock === "number" ? { stock } : {}),
         ...(typeof description === "string" ? { description } : {}),
-        ...(typeof categoryId === "string" ? { category: { connect: { id: categoryId } } } : {}),
+
+        ...(typeof categoryId === "string" && categoryId.length
+          ? { category: { connect: { id: categoryId } } }
+          : {}),
+
         ...(typeof isFeatured === "boolean" ? { isFeatured } : {}),
         ...(typeof isArchived === "boolean" ? { isArchived } : {}),
         ...(typeof comingSoon === "boolean" ? { comingSoon } : {}),
         ...(typeof outOfStock === "boolean" ? { outOfStock } : {}),
+
         packType: finalPackType,
 
-        // replace additionalDetails
         ...(Array.isArray(additionalDetails)
           ? {
               additionalDetails: {
@@ -116,7 +127,6 @@ export async function PATCH(
             }
           : {}),
 
-        // replace images
         ...(Array.isArray(images)
           ? {
               images: {
@@ -128,7 +138,7 @@ export async function PATCH(
       },
     });
 
-    // Update AccessoryPack / FullPack relations depending on type
+    // ✅ CUSTOM: update AccessoryPack relations
     if (finalPackType === "CUSTOM") {
       const {
         discountOnPack = 0,
@@ -142,7 +152,6 @@ export async function PATCH(
         DefaultSpeaker = "",
         DefaultManette = "",
         DefaultChair = "",
-
         Clavier = [],
         Mouse = [],
         MousePad = [],
@@ -153,9 +162,8 @@ export async function PATCH(
         Speaker = [],
         Manette = [],
         Chair = [],
-      } = body;
+      } = body as any;
 
-      // Find or create accessory pack that contains this product
       const pack = await prismadb.accessoryPack.findFirst({
         where: { Product: { some: { id: params.productId } } },
         select: { id: true },
