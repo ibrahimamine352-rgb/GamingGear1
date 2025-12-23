@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import prismadb from "@/lib/prismadb";
 import { slugify } from "@/lib/slugify";
 
-// If you use these strings in the UI, keep them consistent here
 const SORT = {
   MOST_POPULAR: "Les plus populaires",
   MOST_RECENT: "Les plus récents",
@@ -15,7 +14,6 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const {
-      // Product fields
       name,
       price,
       categoryId,
@@ -29,7 +27,6 @@ export async function POST(req: Request) {
       dicountPrice,
       additionalDetails,
 
-      // RAM fields (Memory)
       marqueId,
       numberId,
       typeId,
@@ -78,7 +75,6 @@ export async function POST(req: Request) {
 
         category: { connect: { id: categoryId } },
 
-        // Product.memories is Product[] <-> Memory[] in your schema
         memories: {
           create: {
             marqueId,
@@ -126,22 +122,18 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
 
-    // Build-PC / Shop typically sends these
     const search = searchParams.get("search")?.trim() || "";
     const minDt = Number(searchParams.get("minDt") ?? 0);
     const maxDt = Number(searchParams.get("maxDt") ?? 999999999);
 
-    // pagination (make page 1-based)
     const page = Math.max(1, Number(searchParams.get("page") ?? 1));
     const perpage = Math.max(1, Number(searchParams.get("perpage") ?? 24));
     const skip = (page - 1) * perpage;
     const take = perpage;
 
-    // optional flags
     const isFeatured = searchParams.get("isFeatured");
     const categoryId = searchParams.get("categoryId") || undefined;
 
-    // If your UI sends category name as `categorie=Monitors`, support it too:
     const categorieName = searchParams.get("categorie") || undefined;
     let resolvedCategoryId = categoryId;
 
@@ -163,7 +155,8 @@ export async function GET(req: Request) {
         ? { price: "desc" as const }
         : { createdAt: "desc" as const };
 
-    // ✅ IMPORTANT: only RAM products
+    // ✅ FIX: remove `memories: { some: {} }` because it filters out all old RAM products
+    // that don't yet have a `memories` row in DB, making RAM "disappear".
     const whereClause: any = {
       isArchived: false,
       ...(resolvedCategoryId ? { categoryId: resolvedCategoryId } : {}),
@@ -176,13 +169,10 @@ export async function GET(req: Request) {
             ],
           }
         : {}),
-      // price range
       price: {
         gte: isFinite(minDt) ? minDt : 0,
         lte: isFinite(maxDt) ? maxDt : 999999999,
       },
-      // 🔥 RAM-only condition
-      memories: { some: {} },
     };
 
     const [total, products] = await Promise.all([
@@ -192,7 +182,6 @@ export async function GET(req: Request) {
         include: {
           images: true,
           category: true,
-          // include RAM details for Build-PC filters
           memories: {
             include: {
               marque: true,
@@ -208,7 +197,6 @@ export async function GET(req: Request) {
       }),
     ]);
 
-    // Keep returning array (compatible with your old callers)
     return NextResponse.json(products, {
       headers: {
         "X-Total-Count": String(total),
