@@ -1,21 +1,19 @@
-"use client"
+"use client";
 
-import { ColumnDef } from "@tanstack/react-table"
-
-import { CellAction } from "./cell-action"
+import { ColumnDef } from "@tanstack/react-table";
+import { CellAction } from "./cell-action";
 
 export type ProductColumn = {
-  id: string
+  id: string;
   name: string;
   price: string;
   category: string;
-
   createdAt: string;
   isFeatured: boolean;
   isArchived: boolean;
   comingSoon: boolean;
   outOfStock: boolean;
-}
+};
 
 export const columns: ColumnDef<ProductColumn>[] = [
   {
@@ -39,10 +37,6 @@ export const columns: ColumnDef<ProductColumn>[] = [
     header: "Category",
   },
   {
-    accessorKey: "category",
-    header: "Category",
-  },
-  {
     accessorKey: "createdAt",
     header: "Date",
   },
@@ -56,6 +50,6 @@ export const columns: ColumnDef<ProductColumn>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => <CellAction data={row.original} />
+    cell: ({ row }) => <CellAction data={row.original} />,
   },
 ];
