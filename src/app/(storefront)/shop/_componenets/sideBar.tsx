@@ -50,9 +50,17 @@ interface ProductListProps {
 }
 
 const AMD_SOCKETS = ["AM5", "AM4", "sTR5"];
-const INTEL_SOCKETS = ["Intel LGA 1200", "Intel LGA 1700", "Intel LGA 1851", "Intel LGA 1151"];
+const INTEL_SOCKETS = [
+  "Intel LGA 1200",
+  "Intel LGA 1700",
+  "Intel LGA 1851",
+  "Intel LGA 1151",
+];
 
-const filterCpuSupportByBrand = (items: filterItem[], filterList: FilterList): filterItem[] => {
+const filterCpuSupportByBrand = (
+  items: filterItem[],
+  filterList: FilterList
+): filterItem[] => {
   const selectedBrands =
     filterList["processorModel"]?.map((i) => i.searchKey.toLowerCase()) ?? [];
 
@@ -90,7 +98,9 @@ const Sidebar: React.FC<ProductListProps> = ({
   const { lang } = useLanguage();
   const ui = UI_TEXT[lang];
 
-  const [filterList, setFilterList] = useState<FilterList>(selectfilterList || {});
+  const [filterList, setFilterList] = useState<FilterList>(
+    selectfilterList || {}
+  );
   const [title, setTitle] = useState<string>(titlee);
   const [priceFilter, setPriceFilter] = useState<[number, number]>([0, 20000]);
   const [totalproducts, setTotalproducts] = useState<number>(totalprod);
@@ -100,7 +110,9 @@ const Sidebar: React.FC<ProductListProps> = ({
   const [timeTaken, setTimeTaken] = useState(0);
 
   // ✅ useRef fixes the eslint "startTime missing dependency" warning
-  const startTimeRef = useRef<number>(typeof performance !== "undefined" ? performance.now() : Date.now());
+  const startTimeRef = useRef<number>(
+    typeof performance !== "undefined" ? performance.now() : Date.now()
+  );
 
   // keep original keys for server filtering
   const techFilters = filter;
@@ -115,7 +127,9 @@ const Sidebar: React.FC<ProductListProps> = ({
     []
   );
 
-  const [selectedSort, setSelectedSort] = useState(sort ?? SORT_VALUES.MOST_POPULAR);
+  const [selectedSort, setSelectedSort] = useState(
+    sort ?? SORT_VALUES.MOST_POPULAR
+  );
 
   const sortOptions = useMemo(
     () => [
@@ -156,15 +170,31 @@ const Sidebar: React.FC<ProductListProps> = ({
   const getSectionTitle = (f: Filter) => {
     if (!f?.title || !Array.isArray(f.list)) return String(f?.title ?? "");
     const titleLc = f.title.toString().toLowerCase();
-    const names = f.list.map((x) => (x.name ?? "").toString().toLowerCase().trim());
-    const onlyBrands = names.length > 0 && names.every((n) => n === "amd" || n === "intel");
-    if (titleLc.includes("processor support") && onlyBrands) return "Processor Brand";
+    const names = f.list.map((x) =>
+      (x.name ?? "").toString().toLowerCase().trim()
+    );
+    const onlyBrands =
+      names.length > 0 && names.every((n) => n === "amd" || n === "intel");
+    if (titleLc.includes("processor support") && onlyBrands)
+      return "Processor Brand";
     return String(f.title);
   };
 
+  // ✅ CHANGE #1: detect monitors page
+  const isMonitorsPage =
+    (category || "").toLowerCase() === "monitors" ||
+    (header || "").toLowerCase().includes("monitor");
+
   // Hidden groups (by base title)
   const HIDDEN = new Set<string>();
-  const isHiddenGroup = (baseTitle: string) => HIDDEN.has(baseTitle.toLowerCase().trim());
+
+  // ✅ CHANGE #2: hide "Type" on monitors page
+  const isHiddenGroup = (baseTitle: string) => {
+    const t = baseTitle.toLowerCase().trim();
+    if (HIDDEN.has(t)) return true;
+    if (isMonitorsPage && t === "type") return true;
+    return false;
+  };
 
   useEffect(() => {
     setFilterList(selectfilterList || {});
@@ -172,13 +202,15 @@ const Sidebar: React.FC<ProductListProps> = ({
 
   useEffect(() => {
     // update loading + stats whenever server items change
-    const endTime = typeof performance !== "undefined" ? performance.now() : Date.now();
+    const endTime =
+      typeof performance !== "undefined" ? performance.now() : Date.now();
     setIsloading(false);
 
     const elapsed = (endTime - startTimeRef.current) / 1000;
     setTimeTaken(elapsed);
 
-    startTimeRef.current = typeof performance !== "undefined" ? performance.now() : Date.now();
+    startTimeRef.current =
+      typeof performance !== "undefined" ? performance.now() : Date.now();
 
     setTotalproducts(totalprod);
     setTitle(titlee);
@@ -202,10 +234,13 @@ const Sidebar: React.FC<ProductListProps> = ({
     setTimeTaken(0);
     setMobileFiltersOpen(false);
     setTotalproducts(0);
-    startTimeRef.current = typeof performance !== "undefined" ? performance.now() : Date.now();
+    startTimeRef.current =
+      typeof performance !== "undefined" ? performance.now() : Date.now();
 
     router.push(
-      `/shop?minDt=${priceFilter[0]}&maxDt=${priceFilter[1]}&search=${encodeURIComponent(searchTerm)}` +
+      `/shop?minDt=${priceFilter[0]}&maxDt=${priceFilter[1]}&search=${encodeURIComponent(
+        searchTerm
+      )}` +
         `${finalCategory ? "&categorie=" + encodeURIComponent(finalCategory) : ""}` +
         `&sort=${encodeURIComponent(finalSort)}` +
         `${encodedFilterList.data ? "&filterList=" + encodedFilterList.data : ""}`
@@ -215,7 +250,11 @@ const Sidebar: React.FC<ProductListProps> = ({
   // ✅ IMPORTANT FIX:
   // If the backend sent an empty "Type" list, we generate it from categories (so "Gaming / Pro" shows).
   // This fixes the exact symptom you showed: "Type" exists but displays nothing.
-  const getItemsToShow = (hfTitle: string, filterKey: string, f: Filter): filterItem[] => {
+  const getItemsToShow = (
+    hfTitle: string,
+    filterKey: string,
+    f: Filter
+  ): filterItem[] => {
     const baseTitle = getSectionTitle(f).toLowerCase().trim();
 
     // your special CPU rule
@@ -224,7 +263,11 @@ const Sidebar: React.FC<ProductListProps> = ({
     }
 
     // fallback for "Type" if list empty
-    if (baseTitle === "type" && (!f.list || f.list.length === 0) && categories.length > 0) {
+    if (
+      baseTitle === "type" &&
+      (!f.list || f.list.length === 0) &&
+      categories.length > 0
+    ) {
       return categories.map((c, idx) => ({
         id: idx,
         name: c.name,
@@ -238,7 +281,11 @@ const Sidebar: React.FC<ProductListProps> = ({
     <div className="w-full">
       {/* Mobile filter dialog */}
       <Transition.Root show={mobileFiltersOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50 lg:hidden" onClose={setMobileFiltersOpen}>
+        <Dialog
+          as="div"
+          className="relative z-50 lg:hidden"
+          onClose={setMobileFiltersOpen}
+        >
           <Transition.Child
             as={Fragment}
             enter="transition-opacity ease-linear duration-300"
@@ -263,7 +310,9 @@ const Sidebar: React.FC<ProductListProps> = ({
             >
               <Dialog.Panel className="relative ml-0 flex h-full w-full max-w-lg flex-col overflow-y-auto bg-card border-l border-border py-4 pb-12 shadow-xl">
                 <div className="w-full flex items-center justify-between px-4">
-                  <h2 className="text-lg font-medium text-foreground">{ui.filtersTitle}</h2>
+                  <h2 className="text-lg font-medium text-foreground">
+                    {ui.filtersTitle}
+                  </h2>
                   <button
                     type="button"
                     className="-mr-2 flex h-10 w-10 items-center justify-center rounded-md bg-[hsl(var(--card)/0.60)] border border-border hover:bg-[hsl(var(--card)/0.80)]"
@@ -274,7 +323,10 @@ const Sidebar: React.FC<ProductListProps> = ({
                   </button>
                 </div>
 
-                <form className="mt-4 border-t border-border" onSubmit={(e) => e.preventDefault()}>
+                <form
+                  className="mt-4 border-t border-border"
+                  onSubmit={(e) => e.preventDefault()}
+                >
                   <div className="px-4 pt-4">
                     <input
                       type="search"
@@ -294,7 +346,11 @@ const Sidebar: React.FC<ProductListProps> = ({
                     />
 
                     <div className="w-full mt-3">
-                      <PriceFilter setLoading={setIsloading} value={priceFilter} handlePriceFilter={onPriceChange} />
+                      <PriceFilter
+                        setLoading={setIsloading}
+                        value={priceFilter}
+                        handlePriceFilter={onPriceChange}
+                      />
                     </div>
 
                     <Button
@@ -311,21 +367,33 @@ const Sidebar: React.FC<ProductListProps> = ({
 
                   {/* ✅ Mobile: show Category AND Technical filters (not one-or-the-other) */}
                   {!isLoading && categories.length > 1 && (
-                    <Disclosure as="div" className="border-b border-border py-6 px-4">
+                    <Disclosure
+                      as="div"
+                      className="border-b border-border py-6 px-4"
+                    >
                       {({ open }) => (
                         <>
                           <h3 className="-my-3 flow-root">
                             <Disclosure.Button className="flex w-full items-center justify-between bg-transparent py-3 text-sm text-foreground hover:text-[#00e0ff]">
-                              <span className="font-medium">{categorieSection.name}</span>
+                              <span className="font-medium">
+                                {categorieSection.name}
+                              </span>
                               <span className="ml-6 flex items-center">
-                                {open ? <MinusIcon className="h-5 w-5" /> : <PlusIcon className="h-5 w-5" />}
+                                {open ? (
+                                  <MinusIcon className="h-5 w-5" />
+                                ) : (
+                                  <PlusIcon className="h-5 w-5" />
+                                )}
                               </span>
                             </Disclosure.Button>
                           </h3>
                           <Disclosure.Panel className="pt-6">
                             <div className="space-y-4">
-                              {categorieSection.options.map((option, idx) => (
-                                <div key={option.value} className="flex items-center">
+                              {categorieSection.options.map((option) => (
+                                <div
+                                  key={option.value}
+                                  className="flex items-center"
+                                >
                                   <button
                                     type="button"
                                     className="text-left text-sm text-foreground/80 hover:text-[#00e0ff]"
@@ -350,26 +418,41 @@ const Sidebar: React.FC<ProductListProps> = ({
                       <div key={String(hf.title)} className="px-4">
                         {Object.entries(hf.data).map(([filterKey, raw]) => {
                           const f = raw as Filter;
-                          if (!f || !f.title || !Array.isArray(f.list)) return null;
+                          if (!f || !f.title || !Array.isArray(f.list))
+                            return null;
 
                           const baseTitle = getSectionTitle(f);
                           const displayTitle = translateFilterTitle(lang, baseTitle);
                           if (isHiddenGroup(baseTitle)) return null;
 
-                          const itemsToShow = getItemsToShow(String(hf.title), filterKey, f);
+                          const itemsToShow = getItemsToShow(
+                            String(hf.title),
+                            filterKey,
+                            f
+                          );
 
-                          // ✅ if still empty, hide the group (prevents empty "Type" box)
-                          if (!itemsToShow || itemsToShow.length === 0) return null;
+                          if (!itemsToShow || itemsToShow.length === 0)
+                            return null;
 
                           return (
-                            <Disclosure as="div" key={`${filterKey}-${String(f.title)}`} className="border-b border-border py-4">
+                            <Disclosure
+                              as="div"
+                              key={`${filterKey}-${String(f.title)}`}
+                              className="border-b border-border py-4"
+                            >
                               {({ open }) => (
                                 <>
                                   <h3 className="-my-1 flow-root">
                                     <Disclosure.Button className="flex w-full items-center justify-between bg-transparent py-2 text-sm text-foreground hover:text-[#00e0ff]">
-                                      <span className="font-medium">{displayTitle}</span>
+                                      <span className="font-medium">
+                                        {displayTitle}
+                                      </span>
                                       <span className="ml-6 flex items-center">
-                                        {open ? <MinusIcon className="h-5 w-5" /> : <PlusIcon className="h-5 w-5" />}
+                                        {open ? (
+                                          <MinusIcon className="h-5 w-5" />
+                                        ) : (
+                                          <PlusIcon className="h-5 w-5" />
+                                        )}
                                       </span>
                                     </Disclosure.Button>
                                   </h3>
@@ -377,7 +460,9 @@ const Sidebar: React.FC<ProductListProps> = ({
                                     <CheckboxGroup
                                       label={displayTitle}
                                       items={itemsToShow}
-                                      onChange={(value) => handleCheckboxChange(filterKey, value)}
+                                      onChange={(value) =>
+                                        handleCheckboxChange(filterKey, value)
+                                      }
                                       keyto={filterKey}
                                       selectedItems={filterList}
                                     />
@@ -404,7 +489,10 @@ const Sidebar: React.FC<ProductListProps> = ({
             {header !== "Store" ? (
               <>
                 <a href="/shop">
-                  <span className="font-light text-sm underline cursor-pointer"> {ui.allProducts} {"> "} </span>
+                  <span className="font-light text-sm underline cursor-pointer">
+                    {" "}
+                    {ui.allProducts} {"> "}{" "}
+                  </span>
                 </a>
                 <span className="font-light text-sm ">{header}</span>
               </>
@@ -443,7 +531,9 @@ const Sidebar: React.FC<ProductListProps> = ({
                               fetchData(undefined, option.value);
                             }}
                             className={classNames(
-                              selectedSort === option.value ? "text-[#00e0ff]" : "text-foreground/80",
+                              selectedSort === option.value
+                                ? "text-[#00e0ff]"
+                                : "text-foreground/80",
                               active ? "bg:white/10" : "",
                               "block w-full text-left px-4 py-2 text-sm"
                             )}
@@ -495,7 +585,11 @@ const Sidebar: React.FC<ProductListProps> = ({
               />
 
               <div className="w-full mt-3">
-                <PriceFilter setLoading={setIsloading} value={priceFilter} handlePriceFilter={onPriceChange} />
+                <PriceFilter
+                  setLoading={setIsloading}
+                  value={priceFilter}
+                  handlePriceFilter={onPriceChange}
+                />
               </div>
 
               <Button
