@@ -122,14 +122,23 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
 
-    const search = searchParams.get("search")?.trim() || "";
+    // compat: old q / new search
+    const search = (searchParams.get("search") ?? searchParams.get("q") ?? "").trim();
+
+    // compat: old units & page(0-based) / new perpage & page(1-based)
+    const unitsParam = searchParams.get("units");
+    const perpageParam = searchParams.get("perpage");
+    const take = Math.max(1, Number(perpageParam ?? unitsParam ?? 24));
+
+    const pageRaw = searchParams.get("page");
+    const pageNum = Number(pageRaw ?? 1);
+    const isOldPaging = !!unitsParam && !perpageParam;
+    const page1Based = isOldPaging ? Math.max(1, pageNum + 1) : Math.max(1, pageNum);
+
+    const skip = (page1Based - 1) * take;
+
     const minDt = Number(searchParams.get("minDt") ?? 0);
     const maxDt = Number(searchParams.get("maxDt") ?? 999999999);
-
-    const page = Math.max(1, Number(searchParams.get("page") ?? 1));
-    const perpage = Math.max(1, Number(searchParams.get("perpage") ?? 24));
-    const skip = (page - 1) * perpage;
-    const take = perpage;
 
     const isFeatured = searchParams.get("isFeatured");
     const categoryId = searchParams.get("categoryId") || undefined;
@@ -155,8 +164,6 @@ export async function GET(req: Request) {
         ? { price: "desc" as const }
         : { createdAt: "desc" as const };
 
-    // ✅ FIX: remove `memories: { some: {} }` because it filters out all old RAM products
-    // that don't yet have a `memories` row in DB, making RAM "disappear".
     const whereClause: any = {
       isArchived: false,
       ...(resolvedCategoryId ? { categoryId: resolvedCategoryId } : {}),
@@ -170,8 +177,8 @@ export async function GET(req: Request) {
           }
         : {}),
       price: {
-        gte: isFinite(minDt) ? minDt : 0,
-        lte: isFinite(maxDt) ? maxDt : 999999999,
+        gte: Number.isFinite(minDt) ? minDt : 0,
+        lte: Number.isFinite(maxDt) ? maxDt : 999999999,
       },
     };
 
@@ -197,11 +204,12 @@ export async function GET(req: Request) {
       }),
     ]);
 
+    // ✅ MUST RETURN ARRAY because Ram.tsx expects Memory[]
     return NextResponse.json(products, {
       headers: {
         "X-Total-Count": String(total),
-        "X-Page": String(page),
-        "X-Per-Page": String(perpage),
+        "X-Page": String(page1Based),
+        "X-Per-Page": String(take),
       },
     });
   } catch (error) {

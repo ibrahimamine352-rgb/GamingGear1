@@ -1,235 +1,644 @@
-import { NextResponse } from "next/server";
-import prismadb from "@/lib/prismadb";
-import { slugify } from "@/lib/slugify";
+"use client";
 
-const SORT = {
-  MOST_POPULAR: "Les plus populaires",
-  MOST_RECENT: "Les plus récents",
-  PRICE_ASC: "Prix : Croissant",
-  PRICE_DESC: "Prix : Décroissant",
-} as const;
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { Menu, Transition } from "@headlessui/react";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import { Pagination } from "@nextui-org/pagination";
+import { toast } from "react-hot-toast";
 
-export async function POST(req: Request) {
-  try {
-    const body = await req.json();
+import { Button } from "@/components/ui/button";
+import { InlineDetails } from "@/components/InlineDetails";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import Container from "@/components/ui/container";
+import Skeleton from "@/components/ui/skeleton";
+import Currency from "@/components/ui/currency";
 
-    const {
-      // Product fields
-      name,
-      price,
-      categoryId,
-      images,
-      isFeatured,
-      isArchived,
-      comingSoon,
-      outOfStock,
-      description,
-      stock,
-      dicountPrice,
-      additionalDetails,
+import SearchComponent from "@/components/search-filters/motherboard/motherboard-search";
+import { useLanguage } from "@/context/language-context";
+import { UI_TEXT } from "@/i18n/ui-text";
 
-      // RAM fields (Memory)
-      marqueId,
-      numberId,
-      typeId,
-      frequencyId,
-      rgb,
-    } = body;
+import { MemoryFrequency, MemoryNumber, MemoryType } from "@prisma/client";
+import type { SelectedFeatures } from "./BuildForm";
+import type { Product } from "@/types";
+import type { Filter, ProfileType, filterItem } from "../page";
 
-    if (!name) return new NextResponse("Name is required", { status: 400 });
+import { AllProductsCompatibility } from "./comps";
 
-    if (!images || !Array.isArray(images) || images.length === 0) {
-      return new NextResponse("Images are required", { status: 400 });
+// ---- helpers ----
+const extractNumber = (text: string | undefined | null): number | null => {
+  if (!text) return null;
+  const m = text.match(/^(\d+)/);
+  return m ? parseInt(m[1], 10) : null;
+};
+
+type checkItem = { id: number; searchKey: string };
+function classNames(...classes: (string | boolean)[]): string {
+  return classes.filter(Boolean).join(" ");
+}
+
+type SetRams = (callback: (prevRams: Array<Memory | null>) => Array<Memory | null>) => void;
+
+type m = { frequency: MemoryFrequency; number: MemoryNumber; type: MemoryType };
+export type Memory = Product & { memories: m[] };
+
+export type checkItemGroupsRam = {
+  memoryFrequency: checkItem[];
+  memoryMarque: checkItem[];
+  memoryNumber: checkItem[];
+  memoryType: checkItem[];
+};
+
+type YourComponentProps = {
+  rams: (Memory | null)[];
+  setRams: SetRams;
+  removeFeature: (featureName: string) => void;
+  addFeature: (featureName: string, value: any) => void;
+  selectedFeatures: SelectedFeatures;
+  selectedCompatibility: AllProductsCompatibility | null;
+  setMotherboardId: (values: Product) => void;
+  motherboardId: Product | undefined;
+  profiles: ProfileType[];
+  setCompatibility: (value: Record<string, { message: string; error: boolean }>) => void;
+  memoryMarque: Filter;
+  memoryFrequency: Filter;
+  memoryNumber: Filter;
+  memoryType: Filter;
+  ramSlotNumber: number;
+  ramSlotType: string;
+};
+
+// safely get memory speed label
+const getMemorySpeedName = (mem: Memory | null | undefined): string | undefined =>
+  mem?.memories?.[0]?.frequency?.name;
+
+const PER_PAGE = 10;
+
+export const Ram: React.FC<YourComponentProps> = (props) => {
+  const { lang } = useLanguage();
+  const ui = UI_TEXT[lang];
+
+  const [data, setData] = useState<Memory[]>([]);
+  const [currentPage, setCurrentPage] = useState(0); // 0-based in UI
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  const [filterList, setFilterList] = useState<checkItemGroupsRam>({
+    memoryFrequency: [],
+    memoryMarque: [],
+    memoryNumber: [],
+    memoryType: [],
+  });
+
+  const [priceFilter, setPriceFilter] = useState<number[]>([0, 5000]);
+  const [compatible, setcompatible] = useState(false);
+  const [selectedSort, setSelectedSort] = useState("Prix : Croissant");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTime, setSearchTime] = useState(0);
+
+  const totalPages = useMemo(
+    () => Math.max(1, Math.ceil(totalCount / PER_PAGE)),
+    [totalCount]
+  );
+
+  const sortOptions = [
+    { name: "Les plus populaires", href: "#", current: selectedSort === "Les plus populaires" },
+    { name: "Les plus récents", href: "#", current: selectedSort === "Les plus récents" },
+    { name: "Prix : Croissant", href: "#", current: selectedSort === "Prix : Croissant" },
+    { name: "Prix : Décroissant", href: "#", current: selectedSort === "Prix : Décroissant" },
+  ];
+
+  const handleSortClick = (name: string) => setSelectedSort(name);
+
+  const handleCheckboxChange = (filterKey: keyof checkItemGroupsRam, value: string) => {
+    setFilterList((prev) => {
+      const arr = prev[filterKey] ? [...prev[filterKey]] : [];
+      const idx = arr.findIndex((i) => i.searchKey === value);
+      const nextArr =
+        idx >= 0 ? arr.filter((_, k) => k !== idx) : [...arr, { id: Date.now(), searchKey: value }];
+      return { ...prev, [filterKey]: nextArr };
+    });
+  };
+
+  // ✅ FIX: supports BOTH API response shapes:
+  // 1) array: [ ...products ]
+  // 2) object: { data: [...products], total: number }
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+
+      const encodedFilterList = encodeURIComponent(JSON.stringify(filterList));
+      const startTime = performance.now();
+
+      const url =
+        `/api/memory/component?search=${encodeURIComponent(searchTerm)}` +
+        `&minDt=${encodeURIComponent(String(priceFilter[0] ?? 0))}` +
+        `&maxDt=${encodeURIComponent(String(priceFilter[1] ?? 999999999))}` +
+        `&sort=${encodeURIComponent(selectedSort)}` +
+        `&page=${encodeURIComponent(String(currentPage + 1))}` +
+        `&perpage=${encodeURIComponent(String(PER_PAGE))}` +
+        `&filterList=${encodedFilterList}` +
+        `${compatible && props.motherboardId ? `&motherboardId=${props.motherboardId.id}` : ""}`;
+
+      const response = await fetch(url, { cache: "no-store" });
+      const json = await response.json();
+
+      const endTime = performance.now();
+      setSearchTime((endTime - startTime) / 1000);
+
+      // ✅ parse list
+      const list: Memory[] = Array.isArray(json) ? json : Array.isArray(json?.data) ? json.data : [];
+      setData(list);
+
+      // ✅ total
+      const totalHeader = response.headers.get("X-Total-Count");
+      const totalFromHeader = totalHeader ? Number(totalHeader) : NaN;
+      const totalFromBody = typeof json?.total === "number" ? json.total : NaN;
+      const total = Number.isFinite(totalFromHeader)
+        ? totalFromHeader
+        : Number.isFinite(totalFromBody)
+        ? totalFromBody
+        : list.length;
+
+      setTotalCount(total);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setData([]);
+      setTotalCount(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, selectedSort]);
+
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [searchTerm, priceFilter, compatible, filterList]);
+
+  function haveCommonElement<T>(set1: T[], array2: T[]): boolean {
+    const array1 = Array.from(set1);
+    for (const item of array1) if (array2.includes(item)) return true;
+    return false;
+  }
+
+  const checkcompatibility = (product: Product) => {
+    const mb = props.motherboardId;
+    if (mb) {
+      const MProfiles = props.profiles.filter((e) =>
+        e.motherboards.find((ee) => ee.productId == mb.id)
+      );
+      const PProfiles = props.profiles.filter((e) =>
+        e.RAMs.find((ee) => ee.Components.find((zz) => zz.productId == product.id))
+      );
+      return haveCommonElement(MProfiles, PProfiles);
+    }
+    return true;
+  };
+
+  const [openDialog, steOpenDialog] = useState(false);
+  const [openedramSlot, setopenedramSlot] = useState(0);
+
+  // compatibility summary
+  useEffect(() => {
+    const updates: Record<string, { message: string; error: boolean }> = {};
+    const messages: string[] = [];
+
+    if (props.motherboardId) {
+      props.rams.forEach((e, k) => {
+        if (e != null) {
+          const typeName = e.memories?.[0]?.type?.name;
+          if (typeName && typeName === props.ramSlotType) messages.push("Compatible");
+          else messages.push(props.ramSlotType + " à " + k + " est requis");
+        }
+      });
     }
 
-    if (price === undefined || price === null) {
-      return new NextResponse("Price is required", { status: 400 });
+    if (messages.length > 0) {
+      const notCompat = messages.filter((e) => e !== "Compatible");
+      updates["ramCompatibility"] =
+        notCompat.length === 0
+          ? { message: "Compatible", error: false }
+          : { message: messages.join(""), error: true };
+    } else {
+      updates["ramCompatibility"] = { message: "Please select at least one RAM module", error: true };
     }
 
-    if (!categoryId) {
-      return new NextResponse("Category id is required", { status: 400 });
-    }
+    props.setCompatibility(updates);
+  }, [props.rams, props.motherboardId, props.ramSlotType, props.setCompatibility]);
 
-    if (stock === undefined || stock === null) {
-      return new NextResponse("Stock is required", { status: 400 });
-    }
+  const addEmptyCase = () => props.setRams((prev) => [...prev, null]);
 
-    if (!marqueId) return new NextResponse("Marque id is required", { status: 400 });
-    if (!numberId) return new NextResponse("Number id is required", { status: 400 });
-    if (!typeId) return new NextResponse("Type id is required", { status: 400 });
-    if (!frequencyId) return new NextResponse("Frequency id is required", { status: 400 });
-
-    const baseSlug = slugify(name);
-    const slug = `${baseSlug}-${Date.now()}`;
-
-    const product = await prismadb.product.create({
-      data: {
-        slug,
-        name,
-        price,
-        isFeatured: !!isFeatured,
-        isArchived: !!isArchived,
-        comingSoon: !!comingSoon,
-        outOfStock: !!outOfStock,
-        description,
-        stock,
-        dicountPrice: dicountPrice ?? 0,
-
-        category: { connect: { id: categoryId } },
-
-        memories: {
-          create: {
-            marqueId,
-            numberId,
-            typeId,
-            frequencyId,
-            rgb: !!rgb,
-          },
-        },
-
-        additionalDetails:
-          Array.isArray(additionalDetails) && additionalDetails.length
-            ? { createMany: { data: additionalDetails } }
-            : undefined,
-
-        images: {
-          createMany: {
-            data: images.map((image: { url: string }) => ({ url: image.url })),
-          },
-        },
-      },
-      include: {
-        images: true,
-        category: true,
-        memories: {
-          include: {
-            marque: true,
-            number: true,
-            type: true,
-            frequency: true,
-          },
-        },
-        additionalDetails: true,
-      },
+  const updateCase = (index: number, item: Memory | null) => {
+    props.setRams((prev) => {
+      const updated = [...prev];
+      updated[index] = item;
+      return updated;
     });
 
-    return NextResponse.json(product);
-  } catch (error) {
-    console.log("[MEMORY_PRODUCT_POST]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    const speedName = getMemorySpeedName(item);
+    if (item && speedName) props.addFeature("Memory_Speed", extractNumber(speedName));
+  };
+
+  function extractLesserNumber(memoryString: string | undefined | null): number | null {
+    if (!memoryString) return null;
+    const s = memoryString.replace(/\s/g, "");
+    const match = s.match(/\b(\d+)X(\d+)/i);
+    if (!match) return null;
+    return Math.min(parseInt(match[1], 10), parseInt(match[2], 10));
   }
-}
 
-export async function GET(req: Request) {
-  try {
-    const { searchParams } = new URL(req.url);
+  const is2caseProduct = (item: Memory) => extractLesserNumber(item?.name) === 2;
 
-    // ✅ Backward compatible search:
-    // old UI sends q=..., new UI sends search=...
-    const search = (searchParams.get("search") ?? searchParams.get("q") ?? "").trim();
+  const updatewithremove2case = (index: number, item: Memory | null) => {
+    props.setRams((prev) => {
+      const updated = [...prev];
+      updated[index] = item;
+      const idx = updated.indexOf(null);
+      if (idx !== -1) updated.splice(idx, 1);
+      return updated;
+    });
 
-    // ✅ Backward compatible pagination:
-    // old UI sends units=10 & page=0 (0-based)
-    // new UI sends perpage=24 & page=1 (1-based)
-    const unitsParam = searchParams.get("units");
-    const perpageParam = searchParams.get("perpage");
+    const speedName = getMemorySpeedName(item);
+    if (item && speedName) props.addFeature("Memory_Speed", extractNumber(speedName));
+  };
 
-    const take = Math.max(1, Number(perpageParam ?? unitsParam ?? 24));
+  const updateonecasefortwocase = (index: number, item: Memory | null) => {
+    props.setRams((prev) => {
+      const updated = [...prev, null];
+      updated[index] = item;
+      return updated;
+    });
 
-    const pageParamRaw = searchParams.get("page");
-    const pageNum = Number(pageParamRaw ?? 1);
+    const speedName = getMemorySpeedName(item);
+    if (item && speedName) props.addFeature("Memory_Speed", extractNumber(speedName));
+  };
 
-    // If "units" exists, assume old behavior => page is 0-based
-    const isOldPaging = !!unitsParam && !perpageParam;
+  const updateElementAtIndex = (index: number, newValue: Memory | null) => {
+    const prvprod = props.rams[index];
 
-    const page1Based = isOldPaging ? Math.max(1, pageNum + 1) : Math.max(1, pageNum);
-    const skip = (page1Based - 1) * take;
-
-    // ✅ Optional flags
-    const isFeatured = searchParams.get("isFeatured");
-    const categoryId = searchParams.get("categoryId") || undefined;
-
-    // Support category name too: categorie=Monitors
-    const categorieName = searchParams.get("categorie") || undefined;
-    let resolvedCategoryId = categoryId;
-
-    if (!resolvedCategoryId && categorieName) {
-      const cat = await prismadb.category.findFirst({
-        where: { name: categorieName },
-        select: { id: true },
-      });
-      resolvedCategoryId = cat?.id;
+    if (newValue === null) {
+      if (prvprod && is2caseProduct(prvprod)) {
+        updateCase(index, null);
+        addEmptyCase();
+      } else {
+        updateCase(index, null);
+      }
+      return;
     }
 
-    // ✅ Sorting
-    const sort = searchParams.get("sort") || "";
-    const orderBy =
-      sort === SORT.MOST_RECENT
-        ? { createdAt: "desc" as const }
-        : sort === SORT.PRICE_ASC
-        ? { price: "asc" as const }
-        : sort === SORT.PRICE_DESC
-        ? { price: "desc" as const }
-        : { createdAt: "desc" as const };
-
-    // ✅ Price range (support new params; old UI may not send them)
-    const minDt = Number(searchParams.get("minDt") ?? 0);
-    const maxDt = Number(searchParams.get("maxDt") ?? 999999999);
-
-    const whereClause: any = {
-      isArchived: false,
-      ...(resolvedCategoryId ? { categoryId: resolvedCategoryId } : {}),
-      ...(isFeatured ? { isFeatured: true } : {}),
-      ...(search
-        ? {
-            OR: [
-              { name: { contains: search, mode: "insensitive" } },
-              { description: { contains: search, mode: "insensitive" } },
-            ],
-          }
-        : {}),
-      price: {
-        gte: Number.isFinite(minDt) ? minDt : 0,
-        lte: Number.isFinite(maxDt) ? maxDt : 999999999,
-      },
-    };
-
-    const [total, products] = await Promise.all([
-      prismadb.product.count({ where: whereClause }),
-      prismadb.product.findMany({
-        where: whereClause,
-        include: {
-          images: true,
-          category: true,
-          memories: {
-            include: {
-              marque: true,
-              number: true,
-              type: true,
-              frequency: true,
-            },
-          },
-        },
-        orderBy,
-        skip,
-        take,
-      }),
-    ]);
-
-    // ✅ IMPORTANT: Return the OLD SHAPE so your old RAM UI works:
-    // { data, total }
-    return NextResponse.json(
-      { data: products, total },
-      {
-        headers: {
-          "X-Total-Count": String(total),
-          "X-Page": String(page1Based),
-          "X-Per-Page": String(take),
-        },
+    if (prvprod === null) {
+      if (is2caseProduct(newValue)) {
+        if (props.rams.filter((e) => e === null).length >= 2) {
+          updatewithremove2case(index, newValue);
+          toast.success("Ce produit a 2 barrettes RAM");
+        } else {
+          toast.error("This product has 2 RAM slots, please free up another RAM slot.");
+        }
+      } else {
+        updateCase(index, newValue);
       }
-    );
-  } catch (error) {
-    console.log("[MEMORY_COMPONENT_GET]", error);
-    return new NextResponse("Internal error", { status: 500 });
-  }
-}
+      return;
+    }
+
+    // replacing existing
+    if (prvprod && is2caseProduct(prvprod) && !is2caseProduct(newValue)) {
+      updateonecasefortwocase(index, newValue);
+    } else {
+      if (props.rams.filter((e) => e === null).length >= 1) {
+        updateCase(index, newValue);
+        if (is2caseProduct(newValue)) toast.success("Ce produit a 2 barrettes RAM");
+      } else if (prvprod && is2caseProduct(prvprod)) {
+        updateCase(index, newValue);
+      } else {
+        if (!is2caseProduct(prvprod) && !is2caseProduct(newValue)) updateCase(index, newValue);
+        else toast.error("This product has 2 RAM slots, please free up another RAM slot.");
+      }
+    }
+  };
+
+  // normalize RAM array based on slot count
+  useEffect(() => {
+    const filtered = props.rams.filter((e) => e != null) as Memory[];
+
+    if (props.ramSlotNumber === 2) {
+      let n = 0,
+        i = 0;
+      const arr: (Memory | null)[] = [];
+      filtered.forEach((it) => {
+        if (it && is2caseProduct(it) && n < 2) {
+          n += 2;
+          arr[i] = it;
+          i++;
+        }
+      });
+      filtered.forEach((it) => {
+        if (it && !is2caseProduct(it) && n < 2) {
+          n += 1;
+          arr[i] = it;
+          i++;
+        }
+      });
+      if (i === 0) n = 1;
+      for (let Xy = i; Xy < 3 - n; Xy++) arr[Xy] = null;
+      props.setRams(() => [...arr]);
+    } else if (props.ramSlotNumber === 4) {
+      let n = 0,
+        i = 0;
+      const arr: (Memory | null)[] = [];
+      filtered.forEach((it) => {
+        if (it && is2caseProduct(it) && n < 4) {
+          n += 2;
+          arr[i] = it;
+          i++;
+        }
+      });
+      filtered.forEach((it) => {
+        if (it && !is2caseProduct(it) && n < 4) {
+          n += 1;
+          arr[i] = it;
+          i++;
+        }
+      });
+      for (let Xy = i; Xy < 5 - n; Xy++) arr[Xy] = null;
+      props.setRams(() => [...arr]);
+    }
+  }, [props.ramSlotNumber, props.motherboardId]); // keep as you had
+
+  return (
+    <div className="text-foreground">
+      <Dialog open={openDialog} onOpenChange={(o) => steOpenDialog(o)}>
+        <DialogTrigger asChild />
+        <DialogContent
+          className="
+            w-[95vw] max-w-[1200px]
+            h-[85vh] md:h-[80vh]
+            p-0 overflow-hidden
+            flex flex-col
+            bg-[#101218] text-[#e6e8ee]
+            border border-border rounded-2xl
+          "
+        >
+          <DialogHeader className="sticky top-0 z-10 bg-[#101218] border-b border-border px-4 py-3">
+            <DialogTitle>
+              <div className="flex justify-between items-center">
+                <h1>RAM module store</h1>
+
+                <Menu as="div" className="relative inline-block text-left">
+                  <div className="flex">
+                    <Menu.Button className="group inline-flex items-center text-sm font-medium">
+                      Sort&nbsp;<span className="text-[#e6e8ee]">{selectedSort}</span>
+                      <ChevronDownIcon className="ml-1 h-5 w-5 text-[#a6adc8]" aria-hidden="true" />
+                    </Menu.Button>
+                  </div>
+
+                  <Transition
+                    as={Fragment}
+                    enter="transition ease-out duration-100"
+                    enterFrom="transform opacity-0 scale-95"
+                    enterTo="transform opacity-100 scale-100"
+                    leave="transition ease-in duration-75"
+                    leaveFrom="transform opacity-100 scale-100"
+                    leaveTo="transform opacity-0 scale-95"
+                  >
+                    <Menu.Items className="absolute right-0 z-10 mt-2 w-44 origin-top-right rounded-md bg-[#12141b] text-[#e6e8ee] border border-border shadow-2xl focus:outline-none">
+                      <div className="py-1">
+                        {sortOptions.map((option) => (
+                          <Menu.Item key={option.name}>
+                            {({ active }) => (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  handleSortClick(option.name);
+                                  setCurrentPage(0);
+                                }}
+                                className={classNames(
+                                  option.current
+                                    ? "cursor-pointer text-[#00e0ff] font-medium"
+                                    : "cursor-pointer text-[#a6adc8]",
+                                  active ? "bg-[#101218]" : "",
+                                  "block w-full text-left px-4 py-2 text-sm"
+                                )}
+                              >
+                                {option.name}
+                              </button>
+                            )}
+                          </Menu.Item>
+                        ))}
+                      </div>
+                    </Menu.Items>
+                  </Transition>
+                </Menu>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="flex-1 grid grid-cols-12 gap-4 px-4 py-4 overflow-hidden text-[13px]">
+            {/* FILTERS */}
+            <div className="col-span-12 md:col-span-4 lg:col-span-3 overflow-y-auto pr-1">
+              <SearchComponent
+                priceFilter={priceFilter}
+                setPriceFilter={setPriceFilter}
+                fetchData={fetchData}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                setLoading={setLoading}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                setTotalPages={() => {}}
+                totalPages={totalCount}
+              />
+
+              {(props.memoryMarque?.list?.length ?? 0) > 0 && (
+                <>
+                  {props.motherboardId ? (
+                    <div className="mt-2">
+                      <label className="text-sm inline-flex items-center gap-2">
+                        <Input
+                          type="checkbox"
+                          className="w-3 h-3 m-0"
+                          checked={compatible}
+                          onChange={(e) => setcompatible(e.target.checked)}
+                        />
+                        Compatible with Motherboard
+                      </label>
+                    </div>
+                  ) : null}
+
+                  {(
+                    ["memoryMarque", "memoryFrequency", "memoryType", "memoryNumber"] as const
+                  ).map((key) => {
+                    const filterData = props[key] as Filter | undefined;
+                    if (!filterData?.list) return null;
+                    return (
+                      <CheckboxGroup
+                        key={key}
+                        label={filterData.title.toString()}
+                        items={filterData.list}
+                        onChange={(value) => handleCheckboxChange(key as any, value)}
+                        selectedItems={filterList[key as keyof checkItemGroupsRam].map((item) => item.searchKey)}
+                      />
+                    );
+                  })}
+                </>
+              )}
+            </div>
+
+            {/* RESULTS */}
+            <div className="col-span-12 md:col-span-8 lg:col-span-9 overflow-y-auto">
+              {loading ? (
+                <Container>
+                  <div className="w-full h-full p-6">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                      {Array.from({ length: PER_PAGE }).map((_, i) => (
+                        <Skeleton key={i} className="w-full h-48 rounded-xl" />
+                      ))}
+                    </div>
+                  </div>
+                </Container>
+              ) : (
+                <>
+                  {data.length === 0 && <p className="text-[#a6adc8]">{ui.builderNoResults}.</p>}
+
+                  {data.length > 0 && (
+                    <>
+                      <div className="text-xs text-[#a6adc8] mb-2">
+                        ({totalCount}) {ui.builderResultsSummary(totalCount, searchTime)}
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                        {data.map((item, key) => (
+                          <div
+                            key={key}
+                            className={`bg-[#12141b] hover:bg-[#101218] transition flex flex-col justify-between group cursor-pointer rounded-xl border border-white/5 p-3 space-y-1 ${
+                              checkcompatibility(item) ? "ring-1 ring-[#00e0ff]/50" : "ring-1 ring-red-500/40"
+                            }`}
+                          >
+                            <div>
+                              <div className="aspect-square rounded-xl relative">
+                                <Image
+                                  src={item.images?.[0]?.url || ""}
+                                  alt={item.name || ""}
+                                  fill
+                                  className="aspect-square object-cover rounded-md"
+                                />
+                              </div>
+
+                              <div className="mt-2">
+                                <p className="font-semibold text-sm leading-tight">{item.name}</p>
+                                <p className="text-xs text-[#a6adc8]">{item.category?.name}</p>
+                              </div>
+
+                              <div className="flex items-center justify-between text-xs mt-1">
+                                <Currency value={item?.price} />
+                              </div>
+                            </div>
+
+                            <div className="w-full">
+                              <InlineDetails text={item.description} />
+
+                              <Button
+                                type="button"
+                                disabled={item.stock == 0}
+                                onClick={() => {
+                                  updateElementAtIndex(openedramSlot, item);
+                                  steOpenDialog(false);
+                                }}
+                                className="w-full btn-primary-blue"
+                              >
+                                {item.stock == 0 ? "Hors Stock" : ui.builderBtnAdd}
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter className="sticky bottom-0 bg-[#101218] border-t border-border px-4 py-3">
+            <div className="grid grid-cols-12 gap-4 w-full items-center">
+              <div className="col-span-12 md:col-span-4 lg:col-span-3">
+                <Button
+                  className="w-full px-6 py-2 bg-[#00a2ff] hover:bg-[#0092e6] text-foreground"
+                  onClick={() => {
+                    setCurrentPage(0);
+                    fetchData();
+                  }}
+                >
+                  {ui.filterButton}
+                </Button>
+              </div>
+
+              <div className="col-span-12 md:col-span-8 lg:col-span-9 flex justify-end">
+                {totalCount > 0 && !loading && data.length > 0 && (
+                  <Pagination
+                    isCompact
+                    showControls
+                    total={totalPages}
+                    page={currentPage + 1}
+                    onChange={(p) => setCurrentPage(p - 1)}
+                    classNames={{
+                      wrapper: "gap-2",
+                      item: "w-8 h-8 text-foreground bg-white/10 border border-white/20 hover:bg-white/20",
+                      cursor:
+                        "bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] font-semibold shadow-[0_0_20px_hsl(var(--accent)/0.15)]",
+                      prev: "bg-white/10 border border-white/20 text-foreground hover:bg-white/20",
+                      next: "bg-white/10 border border-white/20 text-foreground hover:bg-white/20",
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+// Checkbox group
+const CheckboxGroup = (props: {
+  label: string;
+  items: filterItem[];
+  onChange: (value: string) => void;
+  selectedItems: string[];
+}) => {
+  const items = props.items || [];
+  return (
+    <div className="text-foreground">
+      <br />
+      <p className="text-sm font-semibold">{props.label}</p>
+      {items.map((item) => (
+        <div key={item.name}>
+          <div className="flex items-center">
+            <Input
+              type="checkbox"
+              className="appearance-none w-3 h-3 m-2"
+              value={item.name}
+              checked={props.selectedItems.includes(item.name)}
+              onChange={() => props.onChange(item.name)}
+            />
+            <label className="text-sm text-foreground/70">
+              {item.name} ({item.number})
+            </label>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
