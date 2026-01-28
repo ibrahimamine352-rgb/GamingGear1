@@ -16,19 +16,24 @@ export const metadata: Metadata = {
   title: "PC Gamer & PC Portable Tunisie | Gaming Gear TN",
   description:
     "Boutique spécialisée en PC Gamer, PC portables, composants et périphériques en Tunisie. Configurations sur-mesure, livraison rapide et garantie 1 an.",
+
   verification: {
     google: "WN6mHKSUzEyafoGqd8VqSidxCAnomSUBXp_8mUguVh4",
   },
+
   icons: {
-    icon: [
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/favicon.ico", sizes: "any" },
-    ],
+    // 🔴 PRIORITÉ GOOGLE & DESKTOP
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+
+    // 🍎 iOS
     apple: "/apple-touch-icon.png",
   },
+
+  // 🤖 Android / PWA
   manifest: "/site.webmanifest",
 };
+
 
 export default async function RootLayout({
   children,
