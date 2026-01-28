@@ -6,7 +6,7 @@ import { Motherboard } from './Motherboard'
 import { Processor } from './Processor'
 import { Product } from '@/types'
 import { AllProductsCompatibility, defaultAllProductsCompatibility } from './comps'
-import { Memory, Ram } from './Ram'
+import { Memory, Ram } from "./Ram";
 import { HardDisk } from './HardDisk'
 import { Power } from './Power'
 import { Case } from './Case'

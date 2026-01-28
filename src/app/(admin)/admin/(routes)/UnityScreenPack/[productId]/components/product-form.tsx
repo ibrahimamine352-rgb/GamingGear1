@@ -24,23 +24,30 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Heading } from "@/components/ui/heading";
 import { AlertModal } from "@/components/modals/alert-modal";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import ImageUpload from "@/components/ui/image-upload";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 
-import InputArray from "./addtioanlinfos";
 import Pctemplate from "./pc-template";
 import { ProdCol } from "@/types";
 
-/** ----- Types kept simple to avoid TS noise ----- */
-type Field = { name: string; value: string };
+/** ✅ MUST match your Prisma enum exactly */
+type PackType = "CUSTOM" | "UNITY_SCREEN";
+
+type FieldKV = { name: string; value: string };
 
 type FullPackRow = {
-  id: number;
+  id: string; // Prisma uuid
   Unity: ProdCol[];
   Screen: ProdCol[];
-  Pack: ProdCol[];
+  Pack: ProdCol[]; // (your UI list type)
   DefaultPack: string;
   DefaultUnity: string;
   DefaultScreen: string;
@@ -48,7 +55,6 @@ type FullPackRow = {
 };
 
 export type ProductFormProps = {
-  /** Keep loose to avoid red squiggles from shape drift */
   initialData: any | null;
   categories: Category[];
   screens: ProdCol[];
@@ -56,7 +62,6 @@ export type ProductFormProps = {
   packs: ProdCol[];
 };
 
-/** ----- Zod form schema (unchanged) ----- */
 const formSchema = z.object({
   name: z.string().min(1),
   images: z.object({ url: z.string() }).array().min(1),
@@ -87,22 +92,19 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const title = initialData ? "Edit product" : "Create product";
-  const description = initialData ? "Edit a product." : "Add a new product";
-  const toastMessage = initialData ? "Product updated." : "Product created.";
-  const action = initialData ? "Save changes" : "Create";
+  const title = initialData ? "Edit Unity+Screen Pack" : "Create Unity+Screen Pack";
+  const descriptionText = initialData ? "Edit this pack." : "Create a new Unity+Screen pack.";
+  const toastMessage = initialData ? "Pack updated." : "Pack created.";
+  const actionLabel = initialData ? "Save changes" : "Create";
 
-  // FullPack row 0 from initialData (if present)
   const fp0: FullPackRow | undefined = useMemo(
     () => initialData?.FullPack?.[0],
     [initialData]
   );
 
-  /** ----- Default form values from initialData ----- */
   const defaultValues: ProductFormValues = {
     name: initialData?.name ?? "",
     images: initialData?.images ?? [],
-    // Prisma Decimal-safe -> Number(...)
     price: Number(initialData?.price ?? 0),
     categoryId: initialData?.categoryId ?? "",
     dicountPrice: Number(initialData?.dicountPrice ?? 0),
@@ -112,7 +114,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
     isArchived: Boolean(initialData?.isArchived),
     comingSoon: Boolean(initialData?.comingSoon),
     outOfStock: Boolean(initialData?.outOfStock),
-    additionalDetails: (initialData?.additionalDetails ?? []).map((d: Field) => ({
+    additionalDetails: (initialData?.additionalDetails ?? []).map((d: FieldKV) => ({
       name: d.name,
       value: d.value,
     })),
@@ -124,41 +126,43 @@ const ProductForm: React.FC<ProductFormProps> = ({
     defaultValues,
   });
 
-  /** ----- Pickers state (Unity / Screen / Pack) ----- */
-  const [screensList, setscreensList] = useState<ProdCol[]>(
+  const discountOnPc = Number(form.watch("discountOnPc") ?? 0);
+
+  /** Pickers state */
+  const [screensList, setScreensList] = useState<ProdCol[]>(
     fp0?.Screen ? screens.filter((s) => fp0.Screen.some((x) => x.id === s.id)) : []
   );
-  const [PackList, setPackList] = useState<ProdCol[]>(
+  const [packList, setPackList] = useState<ProdCol[]>(
     fp0?.Pack ? packs.filter((p) => fp0.Pack.some((x) => x.id === p.id)) : []
   );
-  const [UnityList, setUnityList] = useState<ProdCol[]>(
+  const [unityList, setUnityList] = useState<ProdCol[]>(
     fp0?.Unity ? unities.filter((u) => fp0.Unity.some((x) => x.id === u.id)) : []
   );
 
-  const [DefaultPack, setDefaultPack] = useState<string>(fp0?.DefaultPack ?? "");
-  const [DefaultScreen, setDefaultScreen] = useState<string>(fp0?.DefaultScreen ?? "");
-  const [DefaultUnity, setDefaultUnity] = useState<string>(fp0?.DefaultUnity ?? "");
+  const [defaultPack, setDefaultPack] = useState<string>(fp0?.DefaultPack ?? "");
+  const [defaultScreen, setDefaultScreen] = useState<string>(fp0?.DefaultScreen ?? "");
+  const [defaultUnity, setDefaultUnity] = useState<string>(fp0?.DefaultUnity ?? "");
 
-  /** ----- Total calculator ----- */
+  /** Total */
   const [total, setTotal] = useState<number>(Number(initialData?.price ?? 0));
+
   const calcTotal = () => {
     let pr = 0;
 
-    if (DefaultUnity) {
-      const prod = UnityList.find((e) => e.id === DefaultUnity);
-      if (prod) pr += prod.price;
+    if (defaultUnity) {
+      const prod = unityList.find((e) => e.id === defaultUnity);
+      if (prod) pr += Number(prod.price ?? 0);
     }
-    if (DefaultScreen) {
-      const prod = screensList.find((e) => e.id === DefaultScreen);
-      if (prod) pr += prod.price;
+    if (defaultScreen) {
+      const prod = screensList.find((e) => e.id === defaultScreen);
+      if (prod) pr += Number(prod.price ?? 0);
     }
-    if (DefaultPack) {
-      const prod = PackList.find((e) => e.id === DefaultPack);
-      if (prod) pr += prod.price;
+    if (defaultPack) {
+      const prod = packList.find((e) => e.id === defaultPack);
+      if (prod) pr += Number(prod.price ?? 0);
     }
 
-    const dis = form.getValues("discountOnPc") ?? 0;
-    if (dis && dis > 0) pr -= dis;
+    if (discountOnPc > 0) pr -= discountOnPc;
 
     setTotal(pr);
   };
@@ -166,37 +170,32 @@ const ProductForm: React.FC<ProductFormProps> = ({
   useEffect(() => {
     calcTotal();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    form.watch("discountOnPc"),
-    DefaultPack,
-    DefaultScreen,
-    DefaultUnity,
-    UnityList,
-    PackList,
-    screensList,
-  ]);
+  }, [discountOnPc, defaultPack, defaultScreen, defaultUnity, unityList, packList, screensList]);
 
-  /** ----- Submit / Delete ----- */
+  /** Submit */
   const onSubmit = async (data: ProductFormValues) => {
     try {
       setLoading(true);
 
-      if (total) data.price = Number(total);
-      const dis = Number(form.getValues("discountOnPc") ?? 0);
-
+      const packType: PackType = "UNITY_SCREEN"; // ✅ matches Prisma enum
       const payload = {
         ...data,
-        prodid: initialData?.id, // undefined on create -> OK
-        packid: fp0?.id, // undefined on create -> OK
-        Unity: UnityList,
-        Pack: PackList,
-        discountOnPack: dis,
-        DefaultScreen,
-        DefaultPack,
-        DefaultUnity,
+        packType,
+        price: Number(total),
+
+        prodid: initialData?.id,
+        packid: fp0?.id,
+
+        Unity: unityList,
+        Screen: screensList,
+        Pack: packList,
+
+        discountOnPack: Number(discountOnPc ?? 0),
+        DefaultUnity: defaultUnity,
+        DefaultScreen: defaultScreen,
+        DefaultPack: defaultPack,
       };
 
-      // ✅ no useParams in client component; rely on initialData.id for edit
       const id = typeof initialData?.id === "string" ? initialData.id : undefined;
 
       if (id) {
@@ -206,7 +205,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
       }
 
       router.refresh();
-      router.push(`/admin/CustomPack`);
+      router.push(`/admin/UnityScreenPack`);
       toast.success(toastMessage);
     } catch (error) {
       console.error(error);
@@ -216,15 +215,19 @@ const ProductForm: React.FC<ProductFormProps> = ({
     }
   };
 
+  /** Delete */
   const onDelete = async () => {
     try {
       if (!initialData?.id) return;
       setLoading(true);
+
       await axios.delete(`/api/Pack/${initialData.id}`);
+
       router.refresh();
-      router.push(`/products`);
-      toast.success("Product deleted.");
-    } catch {
+      router.push(`/admin/UnityScreenPack`);
+      toast.success("Pack deleted.");
+    } catch (error) {
+      console.error(error);
       toast.error("Something went wrong.");
     } finally {
       setLoading(false);
@@ -232,29 +235,19 @@ const ProductForm: React.FC<ProductFormProps> = ({
     }
   };
 
-  /** ----- Render ----- */
   return (
     <>
-      <AlertModal
-        isOpen={open}
-        onClose={() => setOpen(false)}
-        onConfirm={onDelete}
-        loading={loading}
-      />
+      <AlertModal isOpen={open} onClose={() => setOpen(false)} onConfirm={onDelete} loading={loading} />
 
       <div className="flex items-center justify-between">
-        <Heading title={title} description={description} />
+        <Heading title={title} description={descriptionText} />
         {initialData && (
-          <Button
-            disabled={loading}
-            variant="destructive"
-            size="sm"
-            onClick={() => setOpen(true)}
-          >
+          <Button disabled={loading} variant="destructive" size="sm" onClick={() => setOpen(true)}>
             <Trash className="h-4 w-4" />
           </Button>
         )}
       </div>
+
       <Separator />
 
       <Form {...form}>
@@ -267,12 +260,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 <FormLabel>Images</FormLabel>
                 <FormControl>
                   <ImageUpload
-                    value={field.value.map((image) => image.url)}
+                    value={(field.value ?? []).map((image) => image.url)}
                     disabled={loading}
-                    onChange={(url) => field.onChange([...field.value, { url }])}
-                    onRemove={(url) =>
-                      field.onChange(field.value.filter((current) => current.url !== url))
-                    }
+                    onChange={(url) => field.onChange([...(field.value ?? []), { url }])}
+                    onRemove={(url) => field.onChange((field.value ?? []).filter((cur) => cur.url !== url))}
                   />
                 </FormControl>
                 <FormMessage />
@@ -288,7 +279,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input disabled={loading} placeholder="Product name" {...field} />
+                    <Input disabled={loading} placeholder="Pack name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -301,15 +292,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select
-                    disabled={loading}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    defaultValue={field.value}
-                  >
+                  <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue defaultValue={field.value} placeholder="Select a category" />
+                        <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -332,14 +318,14 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea disabled={loading} placeholder="" {...field} />
+                    <Textarea disabled={loading} placeholder="Describe this pack..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* hidden numeric fields (kept for compatibility) */}
+            {/* Keep hidden fields (schema requires them) */}
             <FormField
               control={form.control}
               name="price"
@@ -347,7 +333,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 <FormItem className="hidden">
                   <FormLabel>Price</FormLabel>
                   <FormControl>
-                    <Input type="number" disabled={loading} placeholder="9.99" {...field} />
+                    <Input type="number" disabled={loading} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -358,9 +344,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
               name="dicountPrice"
               render={({ field }) => (
                 <FormItem className="hidden">
-                  <FormLabel>DicountPrice</FormLabel>
+                  <FormLabel>DiscountPrice</FormLabel>
                   <FormControl>
-                    <Input type="number" disabled={loading} placeholder="" {...field} />
+                    <Input type="number" disabled={loading} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -373,7 +359,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 <FormItem className="hidden">
                   <FormLabel>Stock</FormLabel>
                   <FormControl>
-                    <Input type="number" disabled={loading} placeholder="" {...field} />
+                    <Input type="number" disabled={loading} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -386,15 +372,11 @@ const ProductForm: React.FC<ProductFormProps> = ({
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      // @ts-ignore
-                      onCheckedChange={field.onChange}
-                    />
+                    <Checkbox checked={!!field.value} /* @ts-ignore */ onCheckedChange={field.onChange} />
                   </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>Featured</FormLabel>
-                    <FormDescription>This product will appear on the home page</FormDescription>
+                    <FormDescription>Show on home page</FormDescription>
                   </div>
                 </FormItem>
               )}
@@ -406,103 +388,88 @@ const ProductForm: React.FC<ProductFormProps> = ({
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      // @ts-ignore
-                      onCheckedChange={field.onChange}
-                    />
+                    <Checkbox checked={!!field.value} /* @ts-ignore */ onCheckedChange={field.onChange} />
                   </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>Archived</FormLabel>
-                    <FormDescription>This product will not appear anywhere in the store.</FormDescription>
+                    <FormDescription>Hide from store</FormDescription>
                   </div>
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="comingSoon"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      // @ts-ignore
-                      onCheckedChange={field.onChange}
-                    />
+                    <Checkbox checked={!!field.value} /* @ts-ignore */ onCheckedChange={field.onChange} />
                   </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>Coming Soon</FormLabel>
-                    <FormDescription>Mark this product as coming soon</FormDescription>
+                    <FormDescription>Mark as coming soon</FormDescription>
                   </div>
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="outOfStock"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      // @ts-ignore
-                      onCheckedChange={field.onChange}
-                    />
-                    </FormControl>
+                    <Checkbox checked={!!field.value} /* @ts-ignore */ onCheckedChange={field.onChange} />
+                  </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>Out of Stock</FormLabel>
-                    <FormDescription>Mark this product as out of stock</FormDescription>
+                    <FormDescription>Mark as out of stock</FormDescription>
                   </div>
                 </FormItem>
               )}
             />
           </div>
+
           <Separator />
 
-          {/* Sticky footer with total + discount */}
-          <div className="w-full fixed bottom-0 left-0 z-40 bg-white dark:bg-black border-t-small py-3 px-3">
-            <div>Total : {total.toString()} TND</div>
+          {/* Footer */}
+          <div className="w-full fixed bottom-0 left-0 z-40 bg-white dark:bg-black border-t py-3 px-3">
+            <div className="mb-2 font-medium">Total: {Number(total).toString()} TND</div>
+
             <FormField
               control={form.control}
               name="discountOnPc"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>discount On Pc</FormLabel>
+                  <FormLabel>Discount</FormLabel>
                   <FormControl>
-                    <Input
-                      type="number"
-                      onKeyDown={(ke) => {
-                        if (ke.key === "Enter") form.trigger();
-                      }}
-                      disabled={loading}
-                      placeholder=""
-                      {...field}
-                    />
+                    <Input type="number" disabled={loading} placeholder="0" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <Button disabled={loading} className="ml-auto my-3 w-full" type="submit">
-              Product {action}
+              {actionLabel}
             </Button>
           </div>
 
-          {/* Unity / Screen / Pack pickers */}
+          {/* Pickers */}
           <Pctemplate
             screens={screens}
             screensList={screensList}
             setDefaultScreen={setDefaultScreen}
-            setscreensList={setscreensList}
+            setscreensList={setScreensList}
             initialData={initialData}
-            DefaultUnity={DefaultUnity}
-            DefaultPack={DefaultPack}
-            DefaultScreen={DefaultScreen}
+            DefaultUnity={defaultUnity}
+            DefaultPack={defaultPack}
+            DefaultScreen={defaultScreen}
             setDefaultUnity={setDefaultUnity}
             setDefaultPack={setDefaultPack}
-            UnityList={UnityList}
-            PackList={PackList}
+            UnityList={unityList}
+            PackList={packList}
             setUnityList={setUnityList}
             setPackList={setPackList}
             unities={unities}
@@ -511,7 +478,6 @@ const ProductForm: React.FC<ProductFormProps> = ({
         </form>
       </Form>
 
-      {/* Spacer for the fixed footer */}
       <div className="h-40" />
     </>
   );

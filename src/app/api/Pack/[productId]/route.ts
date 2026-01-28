@@ -1,220 +1,225 @@
 import { NextResponse } from "next/server";
-
-
 import prismadb from "@/lib/prismadb";
-import { id } from "date-fns/locale";
+import { slugify } from "@/lib/slugify";
+
+type PackType = "CUSTOM" | "UNITY_SCREEN";
+
+const toConnectIds = (arr: any[] | undefined) =>
+  (Array.isArray(arr) ? arr : []).map((i) => ({ id: i.id }));
 
 export async function GET(
-  req: Request,
+  _req: Request,
   { params }: { params: { productId: string } }
 ) {
   try {
-    if (!params.productId) {
-      return new NextResponse("Product id is required", { status: 400 });
-    }
-
     const product = await prismadb.product.findUnique({
-      where: {
-        id: params.productId
-      },
+      where: { id: params.productId },
       include: {
         images: true,
         category: true,
         additionalDetails: true,
-      }
+        PackProduct: {
+          include: {
+            Camera: { include: { images: true } },
+            Clavier: { include: { images: true } },
+            Headset: { include: { images: true } },
+            Mic: { include: { images: true } },
+            Mouse: { include: { images: true } },
+            MousePad: { include: { images: true } },
+            Screen: { include: { images: true } },
+            Chair: { include: { images: true } },
+            Manette: { include: { images: true } },
+            Speaker: { include: { images: true } },
+          },
+        },
+      },
     });
-  
+
     return NextResponse.json(product);
   } catch (error) {
-    console.log('[PRODUCT_GET]', error);
+    console.log("[PACK_ID_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
-};
-
-export async function DELETE(
-  req: Request,
-  { params }: { params: { productId: string, storeId: string } }
-) {
-  try {
-
-    if (!params.productId) {
-      return new NextResponse("Product id is required", { status: 400 });
-    }
-
-
-    const Product = await prismadb.product.delete({
-      where: {
-        id:params.productId},
-        include:{
-          PackProduct:true
-        }
-    });
-    const deletedProduct = await prismadb.accessoryPack.delete({
-      where: {
-      id:Product.PackProduct[0].id
-      }
-    });
-
-  
-    return NextResponse.json(deletedProduct);
-  } catch (error) {
-    console.log('[PRODUCT_DELETE]', error);
-    return new NextResponse("Internal error", { status: 500 });
-  }
-};
-
+}
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { productId: string} }
+  { params }: { params: { productId: string } }
 ) {
   try {
     const body = await req.json();
 
-    // Extract necessary information from the request body
-    const {prodid,
-      packid,
-      
-      name, price, categoryId, images, isFeatured, isArchived, comingSoon,
+    const {
+      packType,
+      name,
+      price,
+      categoryId,
+      images,
+      isFeatured,
+      isArchived,
+      comingSoon,
       outOfStock,
-      description, stock,
-      Clavier,
-      Mouse,
-      MousePad,
-      Mic,
-      Headset,
-      Camera,
-      Screen,
-      Speaker,
-      Manette,
-      Chair,
-      discountOnPack,
-      DefaultClavier,
-      DefaultMouse,
-      DefaultMousePad,
+      description,
+      stock,
       dicountPrice,
-      DefaultMic,
-      DefaultHeadset,
-      DefaultCamera,
-      DefaultScreen,
-      DefaultSpeaker,
-      DefaultManette,
-      DefaultChair,
-      additionalDetails
-    } = body;
+      additionalDetails,
+    } = body as {
+      packType?: PackType;
+      name?: string;
+      price?: number;
+      categoryId?: string;
+      images?: { url: string }[];
+      isFeatured?: boolean;
+      isArchived?: boolean;
+      comingSoon?: boolean;
+      outOfStock?: boolean;
+      description?: string;
+      stock?: number;
+      dicountPrice?: number;
+      additionalDetails?: { name: string; value: string }[];
+    };
 
-    await prismadb.image.deleteMany({
-      where:{
-        productId:prodid
-      }
-    })
-     await prismadb.product.update({
-      where:{
-        id:prodid
-      },
-      data:{
-        name,
-        price: price,
-        isFeatured: isFeatured,
-        isArchived: isArchived,
-        comingSoon,
-          outOfStock,
-        description: description,
-        categoryId: categoryId,
-        stock: stock,
-        dicountPrice: dicountPrice,
-        additionalDetails: {
-          createMany: {
-            data: [...additionalDetails]
-          }
+    /**
+     * ✅ IMPORTANT FIX:
+     * Don't use `select: { packType: true }` (it breaks types for some Prisma builds).
+     * Fetch the product normally and read `existing?.packType`.
+     */
+    const existing = await prismadb.product.findUnique({
+      where: { id: params.productId },
+    });
 
-        },
-        images: {
-          createMany: {
-            data: images.map((image: { url: string }) => ({
-              url: image.url,
-            })),
-          }
+    const finalPackType: PackType | null =
+      (packType ?? (existing?.packType as PackType | undefined) ?? null);
 
-        },
+    if (!finalPackType) {
+      return new NextResponse("packType is required", { status: 400 });
+    }
 
-      }
-     })
-    const product = await prismadb.accessoryPack.update({
-      where:{
-        id:packid
-      },
+    const updated = await prismadb.product.update({
+      where: { id: params.productId },
       data: {
-       
-        DefaultCamera,
-        DefaultChair,
-        DefaultClavier,
-        DefaultHeadset,
-        DefaultManette,
-        DefaultMic,
-        DefaultMouse,
-        DefaultMousePad,
-        DefaultScreen,
-        DefaultSpeaker,
-        discountOnPack,
-        Clavier: {
-          connect: Clavier.map((pcCase: any) => ({
-            id: pcCase.id
-          })),
-        },
-        Camera: {
-          connect: Camera.map((pcCase: any) => ({
-            id: pcCase.id
-          })),
-        },
-        Chair: {
-          connect: Chair.map((pcCase: any) => ({
-            id: pcCase.id
-          })),
-        },
-        Headset: {
-          connect: Headset.map((pcCase: any) => ({
-            id: pcCase.id
-          })),
-        },
-        Manette: {
-          connect: Manette.map((pcCase: any) => ({
-            id: pcCase.id
-          })),
-        },
-        Mouse: {
-          connect: Mouse.map((pcCase: any) => ({
-            id: pcCase.id
-          })),
-        },
-        MousePad: {
-          connect: MousePad.map((pcCase: any) => ({
-            id: pcCase.id
-          })),
-        },
-        Screen: {
-          connect: Screen.map((pcCase: any) => ({
-            id: pcCase.id
-          })),
-        },
-        Mic: {
-          connect: Mic.map((pcCase: any) => ({
-            id: pcCase.id
-          })),
-        },
-        Speaker: {
-          connect: Speaker.map((pcCase: any) => ({
-            id:pcCase.id
-          })),},
+        ...(typeof name === "string" && name.length
+          ? { name, slug: `${slugify(name)}-${Date.now()}` }
+          : {}),
 
+        ...(typeof price === "number" ? { price } : {}),
+        ...(typeof dicountPrice === "number" ? { dicountPrice } : {}),
+        ...(typeof stock === "number" ? { stock } : {}),
+        ...(typeof description === "string" ? { description } : {}),
 
+        ...(typeof categoryId === "string" && categoryId.length
+          ? { category: { connect: { id: categoryId } } }
+          : {}),
+
+        ...(typeof isFeatured === "boolean" ? { isFeatured } : {}),
+        ...(typeof isArchived === "boolean" ? { isArchived } : {}),
+        ...(typeof comingSoon === "boolean" ? { comingSoon } : {}),
+        ...(typeof outOfStock === "boolean" ? { outOfStock } : {}),
+
+        packType: finalPackType,
+
+        ...(Array.isArray(additionalDetails)
+          ? {
+              additionalDetails: {
+                deleteMany: {},
+                createMany: { data: additionalDetails },
+              },
+            }
+          : {}),
+
+        ...(Array.isArray(images)
+          ? {
+              images: {
+                deleteMany: {},
+                createMany: { data: images.map((i) => ({ url: i.url })) },
+              },
+            }
+          : {}),
+      },
+    });
+
+    // ✅ CUSTOM: update AccessoryPack relations
+    if (finalPackType === "CUSTOM") {
+      const {
+        discountOnPack = 0,
+        DefaultClavier = "",
+        DefaultMouse = "",
+        DefaultMousePad = "",
+        DefaultMic = "",
+        DefaultHeadset = "",
+        DefaultCamera = "",
+        DefaultScreen = "",
+        DefaultSpeaker = "",
+        DefaultManette = "",
+        DefaultChair = "",
+        Clavier = [],
+        Mouse = [],
+        MousePad = [],
+        Mic = [],
+        Headset = [],
+        Camera = [],
+        Screen = [],
+        Speaker = [],
+        Manette = [],
+        Chair = [],
+      } = body as any;
+
+      const pack = await prismadb.accessoryPack.findFirst({
+        where: { Product: { some: { id: params.productId } } },
+        select: { id: true },
+      });
+
+      if (pack) {
+        await prismadb.accessoryPack.update({
+          where: { id: pack.id },
+          data: {
+            discountOnPack: Number(discountOnPack) || 0,
+
+            DefaultCamera,
+            DefaultChair,
+            DefaultClavier,
+            DefaultHeadset,
+            DefaultManette,
+            DefaultMic,
+            DefaultMouse,
+            DefaultMousePad,
+            DefaultScreen,
+            DefaultSpeaker,
+
+            Clavier: { set: [], connect: toConnectIds(Clavier) },
+            Mouse: { set: [], connect: toConnectIds(Mouse) },
+            MousePad: { set: [], connect: toConnectIds(MousePad) },
+            Mic: { set: [], connect: toConnectIds(Mic) },
+            Headset: { set: [], connect: toConnectIds(Headset) },
+            Camera: { set: [], connect: toConnectIds(Camera) },
+            Screen: { set: [], connect: toConnectIds(Screen) },
+            Speaker: { set: [], connect: toConnectIds(Speaker) },
+            Manette: { set: [], connect: toConnectIds(Manette) },
+            Chair: { set: [], connect: toConnectIds(Chair) },
+          },
+        });
       }
+    }
 
-    })
-    console.log(product)
-    return NextResponse.json(product);
+    return NextResponse.json(updated);
   } catch (error) {
-    console.log('[PRODUCTS_PUT]', error);
-    return new NextResponse("Internal error " + error, { status: 500 });
+    console.log("[PACK_ID_PATCH]", error);
+    return new NextResponse("Internal error", { status: 500 });
   }
-};
+}
+
+export async function DELETE(
+  _req: Request,
+  { params }: { params: { productId: string } }
+) {
+  try {
+    const deleted = await prismadb.product.delete({
+      where: { id: params.productId },
+    });
+
+    return NextResponse.json(deleted);
+  } catch (error) {
+    console.log("[PACK_ID_DELETE]", error);
+    return new NextResponse("Internal error", { status: 500 });
+  }
+}
