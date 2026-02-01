@@ -152,29 +152,24 @@ export default function ProductForm({
 
         <Separator />
 
-       {/* Pickers */}
-<Pctemplate
-  unity={unityList}
-  screen={screensList}
-  pack={packList}
-
-  setUnity={setUnityList}
-  setScreen={setScreensList}
-  setPack={setPackList}
-
-  defaultUnity={defaultUnity}
-  defaultScreen={defaultScreen}
-  defaultPack={defaultPack}
-
-  setDefaultUnity={setDefaultUnity}
-  setDefaultScreen={setDefaultScreen}
-  setDefaultPack={setDefaultPack}
-
-  unities={unities}
-  screens={screens}
-  packs={packs}
-/>
-
+        <Pctemplate
+          screens={screens}
+          unities={unities}
+          packs={packs}
+          screensList={screensList}
+          UnityList={unityList}
+          PackList={packList}
+          setscreensList={setScreensList}
+          setUnityList={setUnityList}
+          setPackList={setPackList}
+          DefaultUnity={defaultUnity}
+          DefaultScreen={defaultScreen}
+          DefaultPack={defaultPack}
+          setDefaultUnity={setDefaultUnity}
+          setDefaultScreen={setDefaultScreen}
+          setDefaultPack={setDefaultPack}
+          initialData={initialData}
+        />
 
         <Button type="submit">Save</Button>
       </form>
