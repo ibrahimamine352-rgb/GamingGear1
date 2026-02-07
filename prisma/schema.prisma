@@ -91,6 +91,7 @@ model Product {
   storages            Harddisk[]       @relation("ProductToStorage")
   keyboard            keyboard[]       @relation("ProductTokeyboard")
   Pack                Pack[]           @relation("ProductsToPack")
+ packType              PackType?        @default(CUSTOM)
 }
 
 model Field {
@@ -1099,3 +1100,8 @@ enum Componenets {
   CASE
   POWERSUPPLY
 }
+enum PackType {
+  CUSTOM
+  UNITY_SCREEN
+}
+

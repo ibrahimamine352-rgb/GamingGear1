@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
@@ -13,26 +13,33 @@ import { ProductColumn, columns } from "./columns";
 
 interface ProductsClientProps {
   data: ProductColumn[];
-};
+}
 
-export const ProductsClient: React.FC<ProductsClientProps> = ({
-  data
-}) => {
-  const params = useParams();
+export const ProductsClient: React.FC<ProductsClientProps> = ({ data }) => {
   const router = useRouter();
 
   return (
-    <> 
+    <>
       <div className="flex items-center justify-between">
-        <Heading title={`Cases (${data.length})`} description="Manage products for your store" />
+        {/* ✅ FIXED TITLE */}
+        <Heading
+          title={`CPU Coolers (${data.length})`}
+          description="Manage CPU cooling products"
+        />
+
         <Button onClick={() => router.push(`/admin/Cooling/new`)}>
-          <Plus className="mr-2 h-4 w-4" /> Add New
+          <Plus className="mr-2 h-4 w-4" />
+          Add New
         </Button>
       </div>
+
       <Separator />
+
       <DataTable searchKey="name" columns={columns} data={data} />
-      <Heading title="API" description="API Calls for motherboars" />
+
+      <Heading title="API" description="API calls for CPU coolers" />
       <Separator />
+
       <ApiList entityName="products" entityIdName="productId" />
     </>
   );
