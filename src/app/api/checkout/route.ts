@@ -106,8 +106,8 @@ export async function POST(req: Request) {
     // 🔐 EMAILS ARE SIDE EFFECTS
     try {
       const transporter = nodemailer.createTransport({
-        host: "smtp.email.eu-marseille-1.oci.oraclecloud.com",
-        port: 587,
+        host: "smtp.gmail.com",
+                port: 587,
         secure: false,
         auth: {
           user: process.env.SMTP_USER!,
@@ -116,15 +116,15 @@ export async function POST(req: Request) {
       });
 
       await transporter.sendMail({
-        from: "gaminggeartn@gmail.com",     
-        to: "gaminggear.tn@gmail.com",
+        from: '"GamingGear TN" <gaminggeartn.orders@gmail.com>',     
+        to: "gaminggeartn@gmail.com",
         subject: "Nouvelle commande",
         html: `<p>Nouvelle commande: ${order.id}</p>`,
       });
   
       if (isValidEmail(safeEmail)) {
         await transporter.sendMail({
-          from: "gaminggeartn@gmail.com",
+         from: '"GamingGear TN" <gaminggeartn.orders@gmail.com>',
           to: safeEmail,
           subject: "Votre commande est confirmée",
           html: `<p>Merci pour votre commande</p>`,
