@@ -117,7 +117,7 @@ export async function POST(req: Request) {
 
       await transporter.sendMail({
         from: "gaminggeartn@gmail.com",     
-        to: "gaminggeartn@gmail.com",
+        to: "gaminggear.tn@gmail.com",
         subject: "Nouvelle commande",
         html: `<p>Nouvelle commande: ${order.id}</p>`,
       });
