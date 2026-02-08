@@ -102,6 +102,17 @@ export async function POST(req: Request) {
         orderPc: { create: pcOrderItems },
       },
     });
+    const fullOrder = await prismadb.order.findUnique({
+      where: { id: order.id },
+      include: {
+        orderItems: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    });
+    
 
     // 🔐 EMAILS ARE SIDE EFFECTS
     try {
@@ -120,7 +131,30 @@ export async function POST(req: Request) {
         to: "gaminggear.tn@gmail.com",
         subject: "Nouvelle commande",
         html: `<p>Nouvelle commande: ${order.id}</p>`,
+      });await transporter.sendMail({
+        from: '"GamingGear TN" <gaminggeartn.orders@gmail.com>',
+        to: "gaminggear.tn@gmail.com",
+        subject: "Nouvelle commande",
+        html: `
+          <h2>Nouvelle commande</h2>
+          <p><strong>ID :</strong> ${fullOrder!.id}</p>
+      
+          <p>
+            <strong>Client :</strong>
+            ${fullOrder!.name} ${fullOrder!.lastName}<br/>
+            ${fullOrder!.email}<br/>
+            ${fullOrder!.phone}<br/>
+            ${fullOrder!.address}
+          </p>
+      
+          <ul>
+            ${fullOrder!.orderItems.map(item => `
+              <li>${item.product.name} — Quantité : ${item.number}</li>
+            `).join("")}
+          </ul>
+        `,
       });
+      
   
       if (isValidEmail(safeEmail)) {
         await transporter.sendMail({
