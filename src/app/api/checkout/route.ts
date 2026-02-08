@@ -1,3 +1,6 @@
+console.log("SMTP_USER =", process.env.SMTP_USER);
+console.log("SMTP_PASS exists =", !!process.env.SMTP_PASS);
+
 import { NextResponse } from "next/server";
 import prismadb from "@/lib/prismadb";
 import { PCCustom, PackCustom } from "@/hooks/use-cart";
