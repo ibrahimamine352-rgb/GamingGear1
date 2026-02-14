@@ -22,7 +22,10 @@ model User {
   Session       Session[]
 }
 
-
+enum PackType {
+  CUSTOM
+  UNITY_SCREEN
+}
 model Product {
   id                  String           @id @default(uuid())
   categoryId          String
@@ -1100,8 +1103,5 @@ enum Componenets {
   CASE
   POWERSUPPLY
 }
-enum PackType {
-  CUSTOM
-  UNITY_SCREEN
-}
+
 

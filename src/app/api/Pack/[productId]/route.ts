@@ -4,8 +4,10 @@ import { slugify } from "@/lib/slugify";
 
 type PackType = "CUSTOM" | "UNITY_SCREEN";
 
+const VALID_PACK_TYPES: PackType[] = ["CUSTOM", "UNITY_SCREEN"];
+
 const toConnectIds = (arr: any[] | undefined) =>
-  (Array.isArray(arr) ? arr : []).map((i) => ({ id: i.id }));
+  Array.isArray(arr) ? arr.map((i) => ({ id: i.id })) : [];
 
 export async function GET(
   _req: Request,
@@ -34,6 +36,10 @@ export async function GET(
         },
       },
     });
+
+    if (!product) {
+      return new NextResponse("Product not found", { status: 404 });
+    }
 
     return NextResponse.json(product);
   } catch (error) {
@@ -79,22 +85,29 @@ export async function PATCH(
       additionalDetails?: { name: string; value: string }[];
     };
 
-    /**
-     * ✅ IMPORTANT FIX:
-     * Don't use `select: { packType: true }` (it breaks types for some Prisma builds).
-     * Fetch the product normally and read `existing?.packType`.
-     */
+    // ✅ Fetch full product (safe typing)
     const existing = await prismadb.product.findUnique({
       where: { id: params.productId },
     });
 
-    const finalPackType: PackType | null =
-      (packType ?? (existing?.packType as PackType | undefined) ?? null);
+    if (!existing) {
+      return new NextResponse("Product not found", { status: 404 });
+    }
+
+    // ✅ Runtime enum validation
+    if (packType && !VALID_PACK_TYPES.includes(packType)) {
+      return new NextResponse("Invalid packType", { status: 400 });
+    }
+
+    // ✅ Resolve final packType
+    const finalPackType: PackType = packType ?? existing?.packType ?? "CUSTOM";
+
 
     if (!finalPackType) {
       return new NextResponse("packType is required", { status: 400 });
     }
 
+    // ✅ Update product safely
     const updated = await prismadb.product.update({
       where: { id: params.productId },
       data: {
@@ -131,14 +144,16 @@ export async function PATCH(
           ? {
               images: {
                 deleteMany: {},
-                createMany: { data: images.map((i) => ({ url: i.url })) },
+                createMany: {
+                  data: images.map((i) => ({ url: i.url })),
+                },
               },
             }
           : {}),
       },
     });
 
-    // ✅ CUSTOM: update AccessoryPack relations
+    // ✅ CUSTOM pack logic
     if (finalPackType === "CUSTOM") {
       const {
         discountOnPack = 0,
@@ -213,6 +228,14 @@ export async function DELETE(
   { params }: { params: { productId: string } }
 ) {
   try {
+    const existing = await prismadb.product.findUnique({
+      where: { id: params.productId },
+    });
+
+    if (!existing) {
+      return new NextResponse("Product not found", { status: 404 });
+    }
+
     const deleted = await prismadb.product.delete({
       where: { id: params.productId },
     });
