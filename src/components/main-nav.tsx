@@ -18,33 +18,33 @@ export function MainNav({
 
   const routes = [
 
-  
-    
+
+
     {
       href: `/admin/products`,
       label: 'Other Products',
       active: pathname === `/admin/products`,
     },
-  
+
     {
       href: `/admin/Laptop`,
       label: 'Laptops',
       active: pathname === `/admin/Laptop`,
     },
-    
+
     {
       href: `/admin/categories`,
       label: 'Categories',
       active: pathname === `/admin/categories`,
     },
-    
+
     {
       href: `/admin/orders`,
       label: 'Orders',
       active: pathname === `/admin/orders`,
     },
-    
-    
+
+
     {
       href: `/admin/mainpage`,
       label: 'Mainpage',
@@ -60,16 +60,16 @@ export function MainNav({
       label: 'Build pc',
       active: pathname === `/admin/Build-pc`,
     },
-    
+
     {
       href: `/admin/settings`,
       label: 'Settings',
       active: pathname === `/admin/settings`,
     },
   ]
-  const components: { label: string; href: string,active:boolean }[] = [
- 
-     {
+  const components: { label: string; href: string, active: boolean }[] = [
+
+    {
       href: `/admin/motherboards`,
       label: 'Motherboards',
       active: pathname === `/admin/motherboards`,
@@ -110,112 +110,112 @@ export function MainNav({
       label: 'Cooling',
       active: pathname === `/admin/Cooling`,
     },
-  
+
     {
       href: `/admin/Screen`,
       label: 'Screen',
       active: pathname === `/admin/Screen`,
     }
   ]
-  const accessoriescomponents: { label: string; href: string,active:boolean }[] = [
- 
+  const accessoriescomponents: { label: string; href: string, active: boolean }[] = [
+
     {
-     href: `/admin/keyboard`,
-     label: 'keyboards',
-     active: pathname === `/admin/keyboard`,
-   },
-   {
-     href: `/admin/Headset`,
-     label: 'Headset',
-     active: pathname === `/admin/Headset`,
-   },
-   {
-     href: `/admin/Microphone`,
-     label: 'Microphone',
-     active: pathname === `/admin/Microphone`,
-   },
-   {
-     href: `/admin/Mousepad`,
-     label: 'Mousepad',
-     active: pathname === `/admin/Mousepad`,
-   },
-   {
-    href: `/admin/Mouse`,
-    label: 'Mouse',
-    active: pathname === `/admin/Mouse`,
-  },
-  {
-    href: `/admin/Camera`,
-    label: 'Camera',
-    active: pathname === `/admin/Camera`,
-  },
-  {
-    href: `/admin/Hautparleur`,
-    label: 'Hautparleur',
-    active: pathname === `/admin/Hautparleur`,
-  },
-  {
-    href: `/admin/Chaisegaming`,
-    label: 'Chaisegaming',
-    active: pathname === `/admin/Chaisegaming`,
-  },
-  {
-    href: `/admin/Manette`,
-    label: 'Manette',
-    active: pathname === `/admin/Manette`,
-  },
-  {
-    href: `/admin/Pack`,
-    label: 'Pack',
-    active: pathname === `/admin/Pack`,
-  }
- ]
- const Packs: { label: string; href: string,active:boolean }[] = [
- 
-  {
-   href: `/admin/CustomPack`,
-   label: 'Custom Pack',
-   active: pathname === `/admin/CustomPack`,
- },
- {
-   href: `/admin/UnityScreenPack`,
-   label: 'Unity Screen Pack Combo',
-   active: pathname === `/admin/UnityScreenPack`,
- }
-]
-  const isActiveRoute = ( pattern:string) => {
+      href: `/admin/keyboard`,
+      label: 'keyboards',
+      active: pathname === `/admin/keyboard`,
+    },
+    {
+      href: `/admin/Headset`,
+      label: 'Headset',
+      active: pathname === `/admin/Headset`,
+    },
+    {
+      href: `/admin/Microphone`,
+      label: 'Microphone',
+      active: pathname === `/admin/Microphone`,
+    },
+    {
+      href: `/admin/Mousepad`,
+      label: 'Mousepad',
+      active: pathname === `/admin/Mousepad`,
+    },
+    {
+      href: `/admin/Mouse`,
+      label: 'Mouse',
+      active: pathname === `/admin/Mouse`,
+    },
+    {
+      href: `/admin/Camera`,
+      label: 'Camera',
+      active: pathname === `/admin/Camera`,
+    },
+    {
+      href: `/admin/Hautparleur`,
+      label: 'Hautparleur',
+      active: pathname === `/admin/Hautparleur`,
+    },
+    {
+      href: `/admin/Chaisegaming`,
+      label: 'Chaisegaming',
+      active: pathname === `/admin/Chaisegaming`,
+    },
+    {
+      href: `/admin/Manette`,
+      label: 'Manette',
+      active: pathname === `/admin/Manette`,
+    },
+    {
+      href: `/admin/Pack`,
+      label: 'Pack',
+      active: pathname === `/admin/Pack`,
+    }
+  ]
+  const Packs: { label: string; href: string, active: boolean }[] = [
+
+    {
+      href: `/admin/Pack`,
+      label: 'Custom Pack',
+      active: pathname === `/admin/Pack`,
+    },
+    {
+      href: `/admin/UnityScreenPack`,
+      label: 'Unity Screen Pack Combo',
+      active: pathname === `/admin/UnityScreenPack`,
+    }
+  ]
+  const isActiveRoute = (pattern: string) => {
     console.log(`pathname: ${pathname}, pattern: ${pattern}`);
-    
-    if (pathname.endsWith( "/admin") && pattern.endsWith( "/admin")) {
+
+    if (pathname.endsWith("/admin") && pattern.endsWith("/admin")) {
       return true;
     }
-    
+
     if (pathname.endsWith(pattern)) {
       return true;
     }
-  
+
     return false;
   };
-  
+
   return (
     <nav
       className={cn("flex items-center space-x-4 lg:space-x-6", className)}
       {...props}
-    > 
+    >
       <Link
-          key={`/admin`}
-          href={`/admin`}
-          className={cn(
-            'text-sm font-medium transition-colors hover:text-primary',
-            isActiveRoute("/admin") ? 'text-black dark:text-foreground' : 'text-muted-foreground'
-          )}
-        >
-          {'Overview'}
-        </Link>
-       <NavigationMenu className="list-none">
-            <NavigationMenuItem>
+        key={`/admin`}
+        href={`/admin`}
+        className={cn(
+          'text-sm font-medium transition-colors hover:text-primary',
+          isActiveRoute("/admin") ? 'text-black dark:text-foreground' : 'text-muted-foreground'
+        )}
+      >
+        {'Overview'}
+      </Link>
+      <NavigationMenu className="list-none">
+        <NavigationMenuItem>
           <NavigationMenuTrigger className="text-sm font-medium transition-colors hover:text-primary dark:text-foreground dark:hover:text-foreground dark:active:text-foreground">PC Components</NavigationMenuTrigger>
-          <NavigationMenuContent  className="dark:bg-slate-950 rounded-lg ">
+          <NavigationMenuContent className="dark:bg-slate-950 rounded-lg ">
             <ul className="grid bg-white  dark:bg-slate-950 grid-cols-1  min-w-[800px] ml-[380px] list-none gap-3 p-4  md:grid-cols-2 w-96 ">
               {components.map((component) => (
                 <ListItem className="hover:bg-slate-100 min-w-[300px] dark:bg-slate-900"
@@ -223,36 +223,36 @@ export function MainNav({
                   title={component.label}
                   href={component.href}
                 >
-                Manage your {component.label} list 
+                  Manage your {component.label} list
                 </ListItem>
               ))}
             </ul>
           </NavigationMenuContent>
-        </NavigationMenuItem> 
-        </NavigationMenu>
-       
-     <NavigationMenu className="list-none">
-            <NavigationMenuItem>
+        </NavigationMenuItem>
+      </NavigationMenu>
+
+      <NavigationMenu className="list-none">
+        <NavigationMenuItem>
           <NavigationMenuTrigger className="text-sm font-medium transition-colors hover:text-primary dark:text-foreground dark:hover:text-foreground dark:active:text-foreground">Peripherals</NavigationMenuTrigger>
-          <NavigationMenuContent  className="dark:bg-slate-950 rounded-lg ">
-          <ul className="grid bg-white  dark:bg-slate-950 grid-cols-1  min-w-[800px] ml-[60px] list-none gap-3 p-4  md:grid-cols-2 w-96 ">
+          <NavigationMenuContent className="dark:bg-slate-950 rounded-lg ">
+            <ul className="grid bg-white  dark:bg-slate-950 grid-cols-1  min-w-[800px] ml-[60px] list-none gap-3 p-4  md:grid-cols-2 w-96 ">
               {accessoriescomponents.map((component) => (
                 <ListItem className="hover:bg-slate-100 dark:bg-slate-900"
                   key={component.label}
                   title={component.label}
                   href={component.href}
                 >
-                 Manage your {component.label} list 
+                  Manage your {component.label} list
                 </ListItem>
               ))}
             </ul>
           </NavigationMenuContent>
-        </NavigationMenuItem> 
-        </NavigationMenu>
-        <NavigationMenu className="list-none">
-            <NavigationMenuItem>
+        </NavigationMenuItem>
+      </NavigationMenu>
+      <NavigationMenu className="list-none">
+        <NavigationMenuItem>
           <NavigationMenuTrigger className="text-sm font-medium transition-colors hover:text-primary dark:text-foreground dark:hover:text-foreground dark:active:text-foreground">Packs</NavigationMenuTrigger>
-          <NavigationMenuContent  className="bg-transparent ">
+          <NavigationMenuContent className="bg-transparent ">
             <ul className="grid bg-white  dark:bg-slate-950 grid-cols-1  min-w-[800px] list-none gap-3 p-4  md:grid-cols-2 w-96 ">
               {Packs.map((component) => (
                 <ListItem className="hover:bg-slate-100 min-w-[300px] dark:bg-slate-900"
@@ -260,13 +260,13 @@ export function MainNav({
                   title={component.label}
                   href={component.href}
                 >
-                Manage your {component.label} list 
+                  Manage your {component.label} list
                 </ListItem>
               ))}
             </ul>
           </NavigationMenuContent>
-        </NavigationMenuItem> 
-        </NavigationMenu>
+        </NavigationMenuItem>
+      </NavigationMenu>
       {routes.map((route) => (
         <Link
           key={route.href}

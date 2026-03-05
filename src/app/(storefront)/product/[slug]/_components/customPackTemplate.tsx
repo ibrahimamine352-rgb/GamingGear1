@@ -97,13 +97,13 @@ const CustomPackTemplate: React.FC<ProductFormProps> = ({ initialData }) => {
         description: initialData.description,
         additionalDetails: [] as Field[],   // avoid `never[]`
         category: {
-          id: '',
-          name: ''
+            id: '',
+            name: ''
         },
         // ✅ add the required flags (fallback to false if not present)
         comingSoon: Boolean((initialData as any)?.comingSoon),
         outOfStock: Boolean((initialData as any)?.outOfStock),
-      };
+    };
     const [TableData, setTableData] = useState<TableData[]>([]);
 
     const [keyboardList, setkeyboardList] = useState<ProdCol[]>(initialData && initialData.PackProduct && initialData.PackProduct[0].Clavier
@@ -231,7 +231,7 @@ const CustomPackTemplate: React.FC<ProductFormProps> = ({ initialData }) => {
             price: total,
             packId: initialData.id,
             packTitle: initialData.name,
-            packImage:initialData.images[0].url,
+            packImage: initialData.images[0].url,
             reduction: Number(initialData?.PackProduct[0].discountOnPack),
             defaultKeyboard: defaultKeyboard as unknown as Product,
             defaultMouse: defaultMouse as unknown as Product,

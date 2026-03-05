@@ -71,6 +71,7 @@ const formSchema = z.object({
   comingSoon: z.boolean().default(false).optional(),
   outOfStock: z.boolean().default(false).optional(),
   additionalDetails: z.object({ name: z.string(), value: z.string() }).array(),
+  packType: z.enum(["ACCESSORIES", "UNITY_SCREEN"]).optional(),
 });
 
 type ProductFormValues = z.infer<typeof formSchema>;
@@ -194,6 +195,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
         DefaultScreen,
         DefaultPack,
         DefaultUnity,
+        packType: "ACCESSORIES", // Explicitly sending packType
       };
 
       // ✅ no useParams in client component; rely on initialData.id for edit
@@ -449,7 +451,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                       // @ts-ignore
                       onCheckedChange={field.onChange}
                     />
-                    </FormControl>
+                  </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>Out of Stock</FormLabel>
                     <FormDescription>Mark this product as out of stock</FormDescription>

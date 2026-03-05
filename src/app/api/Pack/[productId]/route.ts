@@ -23,7 +23,7 @@ export async function GET(
         additionalDetails: true,
       }
     });
-  
+
     return NextResponse.json(product);
   } catch (error) {
     console.log('[PRODUCT_GET]', error);
@@ -44,18 +44,19 @@ export async function DELETE(
 
     const Product = await prismadb.product.delete({
       where: {
-        id:params.productId},
-        include:{
-          PackProduct:true
-        }
+        id: params.productId
+      },
+      include: {
+        PackProduct: true
+      }
     });
     const deletedProduct = await prismadb.accessoryPack.delete({
       where: {
-      id:Product.PackProduct[0].id
+        id: Product.PackProduct[0].id
       }
     });
 
-  
+
     return NextResponse.json(deletedProduct);
   } catch (error) {
     console.log('[PRODUCT_DELETE]', error);
@@ -66,15 +67,15 @@ export async function DELETE(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { productId: string} }
+  { params }: { params: { productId: string } }
 ) {
   try {
     const body = await req.json();
 
     // Extract necessary information from the request body
-    const {prodid,
+    const { prodid,
       packid,
-      
+
       name, price, categoryId, images, isFeatured, isArchived, comingSoon,
       outOfStock,
       description, stock,
@@ -104,21 +105,21 @@ export async function PATCH(
     } = body;
 
     await prismadb.image.deleteMany({
-      where:{
-        productId:prodid
+      where: {
+        productId: prodid
       }
     })
-     await prismadb.product.update({
-      where:{
-        id:prodid
+    await prismadb.product.update({
+      where: {
+        id: prodid
       },
-      data:{
+      data: {
         name,
         price: price,
         isFeatured: isFeatured,
         isArchived: isArchived,
         comingSoon,
-          outOfStock,
+        outOfStock,
         description: description,
         categoryId: categoryId,
         stock: stock,
@@ -139,13 +140,13 @@ export async function PATCH(
         },
 
       }
-     })
+    })
     const product = await prismadb.accessoryPack.update({
-      where:{
-        id:packid
+      where: {
+        id: packid
       },
       data: {
-       
+
         DefaultCamera,
         DefaultChair,
         DefaultClavier,
@@ -158,54 +159,55 @@ export async function PATCH(
         DefaultSpeaker,
         discountOnPack,
         Clavier: {
-          connect: Clavier.map((pcCase: any) => ({
+          set: Clavier.map((pcCase: any) => ({
             id: pcCase.id
           })),
         },
         Camera: {
-          connect: Camera.map((pcCase: any) => ({
+          set: Camera.map((pcCase: any) => ({
             id: pcCase.id
           })),
         },
         Chair: {
-          connect: Chair.map((pcCase: any) => ({
+          set: Chair.map((pcCase: any) => ({
             id: pcCase.id
           })),
         },
         Headset: {
-          connect: Headset.map((pcCase: any) => ({
+          set: Headset.map((pcCase: any) => ({
             id: pcCase.id
           })),
         },
         Manette: {
-          connect: Manette.map((pcCase: any) => ({
+          set: Manette.map((pcCase: any) => ({
             id: pcCase.id
           })),
         },
         Mouse: {
-          connect: Mouse.map((pcCase: any) => ({
+          set: Mouse.map((pcCase: any) => ({
             id: pcCase.id
           })),
         },
         MousePad: {
-          connect: MousePad.map((pcCase: any) => ({
+          set: MousePad.map((pcCase: any) => ({
             id: pcCase.id
           })),
         },
         Screen: {
-          connect: Screen.map((pcCase: any) => ({
+          set: Screen.map((pcCase: any) => ({
             id: pcCase.id
           })),
         },
         Mic: {
-          connect: Mic.map((pcCase: any) => ({
+          set: Mic.map((pcCase: any) => ({
             id: pcCase.id
           })),
         },
         Speaker: {
-          connect: Speaker.map((pcCase: any) => ({
-            id:pcCase.id
-          })),},
+          set: Speaker.map((pcCase: any) => ({
+            id: pcCase.id
+          })),
+        },
 
 
       }

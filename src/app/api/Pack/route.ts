@@ -4,7 +4,7 @@ import { slugify } from '@/lib/slugify';
 
 export async function POST(
   req: Request,
-  {}: {}
+  { }: {}
 ) {
   try {
     const body = await req.json();
@@ -64,6 +64,10 @@ export async function POST(
       return new NextResponse('Category id is required', { status: 400 });
     }
 
+    if (!body.packType) {
+      return new NextResponse('packType is required', { status: 400 });
+    }
+
     // ✅ SEO slug for Product
     const baseSlug = slugify(name);
     const slug = `${baseSlug}-${Date.now()}`;
@@ -88,10 +92,10 @@ export async function POST(
             },
             additionalDetails: additionalDetails.length
               ? {
-                  createMany: {
-                    data: [...additionalDetails],
-                  },
-                }
+                createMany: {
+                  data: [...additionalDetails],
+                },
+              }
               : undefined,
             images: {
               createMany: {
