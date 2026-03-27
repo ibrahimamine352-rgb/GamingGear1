@@ -2,29 +2,36 @@ import { format } from "date-fns";
 
 import prismadb from "@/lib/prismadb";
 import { formatter } from "@/lib/utils";
+import { buildProductFilters } from "@/lib/filters";
 
 import { ProductsClient } from "./components/client";
 import { ProductColumn } from "./components/columns";
 
 const ProductsPage = async ({
-  params
+  searchParams,
 }: {
-  params: { storeId: string }
+  searchParams: Record<string, string>;
 }) => {
+
+  const params = new URLSearchParams(searchParams);
+
+  // ✅ APPLY GLOBAL FILTERS
+  const { where, orderBy } = buildProductFilters(params);
+
   const products = await prismadb.product.findMany({
     where: {
+      ...where,
+
+      // 🔥 KEEP RELATION FILTER
       powersupplies: {
-        some:{},
-        
-      }
+        some: {},
+      },
     },
+    orderBy,
     include: {
       powersupplies: true,
       category: true,
     },
-    orderBy: {
-      createdAt: 'desc'
-    }
   });
 
   const formattedProducts: ProductColumn[] = products.map((item) => ({

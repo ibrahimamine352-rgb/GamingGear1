@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
 import { slugify } from '@/lib/slugify';
+import { buildProductFilters } from "@/lib/filters";
 
 export async function POST(
   req: Request,
@@ -89,33 +90,21 @@ export async function POST(
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const categoryId = searchParams.get('categoryId') || undefined;
-    const isFeatured = searchParams.get('isFeatured');
+
+    const { where, orderBy } = buildProductFilters(searchParams);
 
     const products = await prismadb.product.findMany({
-      where: {
-        ...(categoryId
-          ? {
-              category: {
-                id: categoryId,
-              },
-            }
-          : {}),
-        isFeatured: isFeatured ? true : undefined,
-        isArchived: false,
-      },
+      where,
+      orderBy,
       include: {
         images: true,
         category: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
       },
     });
 
     return NextResponse.json(products);
   } catch (error) {
-    console.log('[PRODUCTS_GET]', error);
-    return new NextResponse('Internal error', { status: 500 });
+    console.log("[PRODUCTS_GET]", error);
+    return new NextResponse("Internal error", { status: 500 });
   }
 }

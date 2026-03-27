@@ -2,30 +2,35 @@ import { format } from "date-fns";
 
 import prismadb from "@/lib/prismadb";
 import { formatter } from "@/lib/utils";
+import { buildProductFilters } from "@/lib/filters";
 
 import { ProductsClient } from "./components/client";
 import { ProductColumn } from "./components/columns";
 
 const ProductsPage = async ({
-  params
+  searchParams,
 }: {
-  params: { storeId: string }
+  searchParams: Record<string, string>;
 }) => {
+
+  // ✅ convert to URLSearchParams
+  const params = new URLSearchParams(searchParams);
+
+  // ✅ FIX: use categoryId (NOT category)
+  params.set("categoryId", "654cc805-9f61-42bb-8720-0844ea85f677");
+
+  // ✅ USE GLOBAL FILTER SYSTEM
+  const { where, orderBy } = buildProductFilters(params);
+
   const products = await prismadb.product.findMany({
-    where: { 
-      Laptop: {
-        some:{},
-      }
-    },
+    where,
+    orderBy,
     include: {
-      Laptop: true,
+      images: true,
       category: true,
     },
-    orderBy: {
-      createdAt: 'desc'
-    }
   });
-console.log(products)
+
   const formattedProducts: ProductColumn[] = products.map((item) => ({
     id: item.id,
     name: item.name,
